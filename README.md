@@ -46,4 +46,4 @@ func main() {
 - More default actions like help, test, ping, etc.
 - Documentation
 
-** Of course I accept pull-requests :smile: :thumbsup: **
+Of course I accept pull-requests! :smile: :thumbsup:
