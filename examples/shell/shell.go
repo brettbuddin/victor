@@ -9,13 +9,13 @@ func main() {
         "name": "henry",
     }
 
-    r := robot.NewRobot("shell", options)
+    r := victor.NewRobot("shell", options)
 
-    r.Hear("derp", func(msg *robot.TextMessage) {
+    r.Hear("derp", func(msg *victor.TextMessage) {
         msg.Send("Derp!")
     })
 
-    r.Respond("hello", func(msg *robot.TextMessage) {
+    r.Respond("hello", func(msg *victor.TextMessage) {
         msg.Reply("Hello!")
     })
 
