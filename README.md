@@ -2,7 +2,7 @@
 
 Here's a sample Victor executable:
 
-```
+```go
 package main
 
 import (
