@@ -1,7 +1,7 @@
-package robot
+package victor
 
 import (
-    "robot/campfire"
+    "victor/campfire"
     "strings"
     "strconv"
     "log"

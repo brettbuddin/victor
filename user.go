@@ -1,4 +1,4 @@
-package robot
+package victor
 
 type User struct {
     Id int

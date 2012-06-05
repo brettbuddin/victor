@@ -1,4 +1,4 @@
-**Gobias** is a 37Signals Campfire bot written in Go (http://golang.org); inspired by Github's Hubot (http://github.com/github/hubot).
+**Victor** is a 37Signals Campfire bot written in Go (http://golang.org); inspired by Github's Hubot (http://github.com/github/hubot).
 
 Here's a sample Gobias executable:
 
@@ -6,7 +6,7 @@ Here's a sample Gobias executable:
 package main
 
 import (
-    "robot"
+    "victor"
 )
 
 func main() {
@@ -16,13 +16,13 @@ func main() {
         "rooms": "",            // comma seperated list
     }
 
-    r := robot.NewRobot("campfire", options)
+    r := victor.NewRobot("campfire", options)
 
-    r.Hear("derp", func(msg *robot.TextMessage) {
+    r.Hear("derp", func(msg *victor.TextMessage) {
         msg.Send("Derp!")
     })
 
-    r.Respond("hello", func(msg *robot.TextMessage) {
+    r.Respond("hello", func(msg *victor.TextMessage) {
         msg.Reply("Hello!")
     })
 
