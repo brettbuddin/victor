@@ -1,6 +1,6 @@
 **Victor** is a 37Signals Campfire bot written in Go (http://golang.org); inspired by Github's Hubot (http://github.com/github/hubot).
 
-Here's a sample Gobias executable:
+Here's a sample Victor executable:
 
 ```
 package main
