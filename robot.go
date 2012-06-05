@@ -23,13 +23,13 @@ func NewRobot(adapter string, options map[string]string) RobotAdapter {
     name := "robot"
 
     if _, exists := options["name"]; exists {
-       name = options["name"]
+        name = options["name"]
     }
 
     robot := &Robot{
-       name: name,
-       options: options,
-       listeners: make([]*Listener, 0, 1),
+        name: name,
+        options: options,
+        listeners: make([]*Listener, 0, 1),
     }
 
     var aRobot RobotAdapter
@@ -58,12 +58,12 @@ func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
 }
 
 func (self *Robot) Receive(msg *TextMessage) {
-   for _, listener := range self.listeners {
-     if listener.Test(msg) {
-        log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
-        listener.Callback(msg)
-     }
-   }
+    for _, listener := range self.listeners {
+            if listener.Test(msg) {
+                log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
+                listener.Callback(msg)
+            }
+    }
 }
 
 func (self *Robot) RememberUser(user *User) {
