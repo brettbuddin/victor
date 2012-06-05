@@ -40,6 +40,10 @@ func main() {
 - `Send`: Send a bit of text to the channel.
 - `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Here's the diff:")
 
-### About
+### TODO Stuff
 
-I'd been interested in Go for some time now so this was written an exercise to play with the language a bit. What I found while writing this is that I really like Go. A lot.
+- *TESTS* plz.
+- More default actions like help, test, ping, etc.
+- Documentation
+
+** Of course I accept pull-requests :smile: :thumbsup: **
