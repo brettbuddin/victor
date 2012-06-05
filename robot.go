@@ -23,7 +23,7 @@ func NewRobot(adapter string, options map[string]string) RobotAdapter {
     name := "robot"
 
     if _, exists := options["name"]; exists {
-        name = options["name"]
+       name = options["name"]
     }
 
     robot := &Robot{

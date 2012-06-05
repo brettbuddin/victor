@@ -10,9 +10,9 @@ import (
 type Room struct {
     Client *Client
 
-    Id int `json:"id"`
-    Name string `json:"name"`
-    Users []*User `json:"users"`
+    Id     int     `json:"id"`
+    Name   string  `json:"name"`
+    Users  []*User `json:"users"`
 }
 
 func (self *Room) Show() (*Room, error) {

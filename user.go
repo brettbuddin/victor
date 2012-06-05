@@ -1,6 +1,6 @@
 package victor
 
 type User struct {
-    Id int
+    Id   int
     Name string
 }

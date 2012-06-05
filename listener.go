@@ -5,7 +5,7 @@ import (
 )
 
 type Listener struct {
-    Exp *regexp.Regexp
+    Exp      *regexp.Regexp
     Callback func(*TextMessage)
 }
 
