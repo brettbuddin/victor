@@ -11,7 +11,6 @@ type Client struct {
     stream  *Stream
     account string
     token   string
-    room    int
 }
 
 func NewClient(account, token string) *Client {
@@ -34,7 +33,7 @@ func (self *Client) Post(path string, body string) (*http.Response, error) {
 }
 
 func (self *Client) Stream(roomId int, channel chan *Message) {
-    self.stream = NewStream(self.token, roomId)
+    self.stream = NewStream(self.token, self.Room(roomId))
     self.stream.Connect()
 
     resp, _ := self.stream.Connect()

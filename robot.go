@@ -51,7 +51,7 @@ func (self *Robot) Hear(expStr string, callback func(*TextMessage)) {
 }
 
 func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
-    expWithNameStr := "(" + self.name + "[:,i]?)\\s*(?:" + expStr + ")" 
+    expWithNameStr := "(" + self.name + "[:,]?)\\s*(?:" + expStr + ")" 
     exp, _         := regexp.Compile(expWithNameStr)
 
     self.listeners = append(self.listeners, NewListener(exp, callback))
@@ -60,6 +60,7 @@ func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
 func (self *Robot) Receive(msg *TextMessage) {
    for _, listener := range self.listeners {
      if listener.Test(msg) {
+        log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
         listener.Callback(msg)
      }
    }

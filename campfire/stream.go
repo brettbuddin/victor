@@ -10,24 +10,25 @@ import (
     "bufio"
     "strconv"
     "log"
+    "time"
 )
 
 type Stream struct {
     connection *httputil.ClientConn
     token      string
-    roomId     int
+    room       *Room
     chatStream chan *Message
 }
 
-func NewStream(token string, roomId int) *Stream {
-    return &Stream{ token: token, roomId: roomId }
+func NewStream(token string, room *Room) *Stream {
+    return &Stream{ token: token, room: room }
 }
 
 func (self *Stream) Connect() (*http.Response, error) {
     url        := new(url.URL) 
     url.Scheme = "https"
     url.Host   = "streaming.campfirenow.com"
-    url.Path   = "/room/" + strconv.Itoa(self.roomId) + "/live.json"
+    url.Path   = "/room/" + strconv.Itoa(self.room.Id) + "/live.json"
 
     conn, err := net.Dial("tcp", url.Host + ":443")
 
@@ -59,7 +60,17 @@ func (self *Stream) Read(resp *http.Response) {
         line, err := reader.ReadBytes('\r')
 
         if err != nil {
-            log.Print(err)
+            time.Sleep(6)
+            self.room.Join()
+            resp, err = self.Connect()
+
+            if err != nil || resp.StatusCode != 200 {
+                panic("Could not reconnect.")
+                continue
+            }
+
+            reader = bufio.NewReader(resp.Body)
+            continue
         }
 
         var msg Message
