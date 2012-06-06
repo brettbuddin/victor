@@ -59,10 +59,10 @@ func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
 
 func (self *Robot) Receive(msg *TextMessage) {
     for _, listener := range self.listeners {
-            if listener.Test(msg) {
-                log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
-                listener.Callback(msg)
-            }
+        if listener.Test(msg) {
+            log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
+            listener.Callback(msg)
+        }
     }
 }
 
