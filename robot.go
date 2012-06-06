@@ -51,7 +51,7 @@ func (self *Robot) Hear(expStr string, callback func(*TextMessage)) {
 }
 
 func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
-    expWithNameStr := "(" + self.name + "[:,]?)\\s*(?:" + expStr + ")" 
+    expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")" 
     exp, _         := regexp.Compile(expWithNameStr)
 
     self.listeners = append(self.listeners, NewListener(exp, callback))
