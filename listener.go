@@ -17,5 +17,12 @@ func NewListener(exp *regexp.Regexp, callback func(*TextMessage)) *Listener {
 }
 
 func (self *Listener) Test(msg *TextMessage) bool {
-    return self.Exp.Match([]byte(msg.Body))
+    results := self.Exp.FindAllStringSubmatch(msg.Body, -1)
+
+    if len(results) > 0 {
+        msg.SetMatches(results[0])
+        return true
+    }
+
+    return false
 }

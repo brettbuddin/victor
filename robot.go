@@ -3,6 +3,8 @@ package victor
 import (
     "regexp"
     "log"
+
+    "victor/google"
 )
 
 type RobotAdapter interface {
@@ -31,6 +33,8 @@ func NewRobot(adapter string, options map[string]string) RobotAdapter {
         options: options,
         listeners: make([]*Listener, 0, 1),
     }
+
+    robot.registerDefaultAbilities()
 
     var aRobot RobotAdapter
 
@@ -82,4 +86,26 @@ func (self *Robot) UserForId(id int) *User {
 
 func (self *Robot) Shutdown() {
     log.Print("See ya!")
+}
+
+func (self *Robot) registerDefaultAbilities() {
+    self.Respond("ping", func(msg *TextMessage) {
+        msg.Send("Pong!")
+    })
+
+    self.Respond("(image|img) (.*)", func(msg *TextMessage) {
+        result, err := google.ImageSearch(msg.Matches()[3])
+
+        if err != nil {
+            log.Print(err)
+            return
+        }
+
+        if result == "" {
+            msg.Send("I didn't find anything.")
+            return
+        }
+        
+        msg.Send(result)    
+    })
 }
