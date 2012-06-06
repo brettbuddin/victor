@@ -4,7 +4,7 @@ import (
     "regexp"
     "log"
 
-    "victor/google"
+    "victor/utils/google"
 )
 
 type RobotAdapter interface {
