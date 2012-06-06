@@ -61,6 +61,8 @@ func (self *Stream) Read(resp *http.Response) {
 
         if err != nil {
             time.Sleep(6)
+
+            log.Print("Reconnecting...")
             self.room.Join()
             resp, err = self.Connect()
 
