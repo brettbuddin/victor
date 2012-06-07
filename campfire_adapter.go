@@ -63,6 +63,7 @@ func (self *Campfire) Run() {
         details, err := client.Room(rooms[i]).Show()
 
         if err != nil {
+            log.Printf("Error fetching room info %i: %s", rooms[i], err)
             continue
         }
         log.Print("Fetched room info.")
@@ -76,6 +77,7 @@ func (self *Campfire) Run() {
         err   = room.Join()
 
         if err != nil {
+            log.Printf("Error joining room %i: %s", rooms[i], err)
             continue
         }
         log.Print("Joined room.")
