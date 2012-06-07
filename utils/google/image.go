@@ -5,9 +5,20 @@ import (
     "net/url"
     "io/ioutil"
     "math/rand"
-
-    "victor/json"
+    "encoding/json"
 )
+
+type ImageResult struct {
+    UnescapedUrl string
+}
+
+type ImageResults struct {
+    Results []ImageResult
+}
+
+type ImageResponseDate struct {
+    ResponseData ImageResults
+}
 
 func ImageSearch(term string) (string, error) {
     search, err := url.Parse("http://ajax.googleapis.com/ajax/services/search/images")
@@ -35,23 +46,18 @@ func ImageSearch(term string) (string, error) {
         return "", err
     }
 
-    result, err := json.Unmarshal(buf)
+    var result ImageResponseDate
+
+    err = json.Unmarshal(buf, &result)
 
     if err != nil {
         return "", err
     }
 
-    images, err := result.Get("responseData").Get("results").Array()
-
-    if err != nil {
-        return "", err
-    }
+    images := result.ResponseData.Results
 
     if len(images) > 0 {
-        image    := images[rand.Intn(len(images))]
-        imageMap := &json.Json{image}
-
-        return imageMap.Get("unescapedUrl").MustString(), nil
+        return images[rand.Intn(len(images))].UnescapedUrl, nil
     }
 
     return "", nil
