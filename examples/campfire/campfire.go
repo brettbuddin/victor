@@ -1,7 +1,7 @@
 package main
 
 import (
-    "victor"
+    "github.com/brettbuddin/victor"
 )
 
 func main() {

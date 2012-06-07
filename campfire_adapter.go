@@ -1,7 +1,7 @@
 package victor
 
 import (
-    "victor/campfire"
+    "github.com/brettbuddin/victor/campfire"
     "strings"
     "strconv"
     "log"
