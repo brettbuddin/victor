@@ -127,8 +127,8 @@ func (self *Campfire) Reply(roomId int, userId int) func(string) {
 func (self *Campfire) Client() *campfire.Client {
     if self.client == nil {
         client := campfire.NewClient(
-            self.Robot.options["account"], 
-            self.Robot.options["token"],
+            self.account, 
+            self.token,
         )
     
         self.client = client
