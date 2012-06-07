@@ -6,21 +6,11 @@ Here's a sample Victor executable:
 package main
 
 import (
-    "victor"
+    "github.com/brettbuddin/victor"
 )
 
 func main() {
-    options := map[string]string{
-        "account": "",          // name of the account (subdomain of *.campfirenow.com)
-        "token": "",            // token for the user
-        "rooms": "",            // comma seperated list
-    }
-
-    r := victor.NewRobot("campfire", options)
-
-    r.Hear("derp", func(msg *victor.TextMessage) {
-        msg.Send("Derp!")
-    })
+    r := victor.NewRobot("campfire", "victor")
 
     r.Respond("hello", func(msg *victor.TextMessage) {
         msg.Reply("Hello!")
@@ -39,11 +29,3 @@ func main() {
 
 - `Send`: Send a bit of text to the channel.
 - `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Here's the diff:")
-
-### TODO Stuff
-
-- *TESTS* plz.
-- More default actions like help, test, ping, etc.
-- Documentation
-
-Of course I accept pull-requests! :smile: :thumbsup:
