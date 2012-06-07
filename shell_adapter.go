@@ -11,6 +11,10 @@ type Shell struct {
     options map[string]string
 }
 
+func NewShell(robot *Robot) *Shell {
+    return &Shell{Robot: robot}
+}
+
 func (self *Shell) Run() {
     reader := bufio.NewReader(os.Stdin)
 

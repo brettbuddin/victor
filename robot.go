@@ -21,32 +21,33 @@ type Robot struct {
     users     []*User
 }
 
-func NewRobot(adapter string, options map[string]string) RobotAdapter {
-    name := "robot"
-
-    if _, exists := options["name"]; exists {
-        name = options["name"]
+func NewRobot(adapter string, name string) RobotAdapter {
+    if name == "" {
+        name = "victor"
     }
 
     robot := &Robot{
         name: name,
-        options: options,
         listeners: make([]*Listener, 0, 1),
     }
 
     robot.registerDefaultAbilities()
 
-    var aRobot RobotAdapter
+    return robot.LoadAdapter(adapter)
+}
 
-    if adapter == "shell" {
-        aRobot = &Shell{Robot: robot}
-    } else if adapter == "campfire" {
-        aRobot = &Campfire{Robot: robot}
+func (self *Robot) LoadAdapter(name string) RobotAdapter {
+    var adapter RobotAdapter
+
+    if name == "shell" || name == "" {
+        adapter = NewShell(self)
+    } else if name == "campfire" {
+        adapter = NewCampfire(self)
     } else {
-        panic("Unknown adapter.")
+        log.Panic("Unkown adapter.")
     }
 
-    return aRobot
+    return adapter
 }
 
 func (self *Robot) Hear(expStr string, callback func(*TextMessage)) {

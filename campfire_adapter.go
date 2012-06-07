@@ -5,17 +5,56 @@ import (
     "strings"
     "strconv"
     "log"
+    "os"
 )
 
 type Campfire struct {
     *Robot
+    account string
+    token   string
+    rooms   []int
     client *campfire.Client
+}
+
+func NewCampfire(robot *Robot) *Campfire {
+    campfire := &Campfire{Robot: robot}
+
+    account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
+    token   := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
+    rooms   := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
+
+    if account == "" {
+        log.Panic("No account set.")
+    }
+
+    if token == "" {
+        log.Panic("No token set.")
+    }
+
+    if rooms == "" {
+        log.Panic("No rooms set.")
+    }
+
+    campfire.account = account
+    campfire.token   = token
+
+    roomIdStrings := strings.Split(rooms, ",")
+    roomsArr      := make([]int, 0)
+
+    for _, id := range roomIdStrings {
+        j, _ := strconv.Atoi(id)
+        roomsArr = append(roomsArr, j) 
+    }
+
+    campfire.rooms = roomsArr
+
+    return campfire
 }
 
 func (self *Campfire) Run() {
     log.Print("Starting up...")
 
-    rooms  := self.RoomList()
+    rooms  := self.rooms
     client := self.Client() 
 
     channel := make(chan *campfire.Message)
@@ -96,20 +135,4 @@ func (self *Campfire) Client() *campfire.Client {
     }
     
     return self.client
-}
-
-func (self *Campfire) RoomList() []int {
-    if _, exists := self.Robot.options["rooms"]; !exists {
-        panic("No rooms defined.")
-    }
-
-    roomIdStrings := strings.Split(self.Robot.options["rooms"], ",")
-    rooms := make([]int, 0)
-
-    for _, id := range roomIdStrings {
-        j, _ := strconv.Atoi(id)
-        rooms = append(rooms, j) 
-    }
-
-    return rooms
 }
