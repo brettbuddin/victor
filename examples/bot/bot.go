@@ -1,16 +1,18 @@
+/*
+*   Usage:
+*
+*    $ export VICTOR_CAMPFIRE_ACCOUNT=
+*    $ export VICTOR_CAMPFIRE_TOKEN=
+*    $ export VICTOR_CAMPFIRE_ROOMS=
+*    $ bot -adapter campfire -name ralph
+*/
+
 package main
 
 import (
     "flag"
     "github.com/brettbuddin/victor"
 )
-
-/*
-    $ export VICTOR_CAMPFIRE_ACCOUNT=
-    $ export VICTOR_CAMPFIRE_TOKEN=
-    $ export VICTOR_CAMPFIRE_ROOMS=
-    $ bot -adapter campfire -name ralph
-*/
 
 func main() {
     adapter := flag.String("adapter", "", "victor adapter (campfire or shell)")
