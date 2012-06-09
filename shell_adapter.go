@@ -8,7 +8,6 @@ import (
 
 type Shell struct {
     *Robot
-    options map[string]string
 }
 
 func NewShell(robot *Robot) *Shell {
