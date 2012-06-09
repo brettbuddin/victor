@@ -18,7 +18,13 @@ type Campfire struct {
 
 func NewCampfire(robot *Robot) *Campfire {
     c := &Campfire{Robot: robot}
+    
+    c = loadEnv(c)
 
+    return c
+}
+
+func loadEnv(c *Campfire) *Campfire {
     account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
     token   := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
     rooms   := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
@@ -51,6 +57,7 @@ func NewCampfire(robot *Robot) *Campfire {
 
     return c
 }
+
 
 func (self *Campfire) Run() {
     log.Print("Starting up...")
