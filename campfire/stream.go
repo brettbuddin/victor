@@ -17,11 +17,10 @@ type Stream struct {
     connection *httputil.ClientConn
     token      string
     room       *Room
-    chatStream chan *Message
 }
 
 func NewStream(token string, room *Room) *Stream {
-    return &Stream{ token: token, room: room }
+    return &Stream{token: token, room: room}
 }
 
 func (self *Stream) Connect() (*http.Response, error) {
@@ -83,6 +82,6 @@ func (self *Stream) Read(resp *http.Response, channel chan *Message) {
             continue
         }
 
-        self.chatStream <- &msg
+        channel <- &msg
     }
 }
