@@ -8,7 +8,7 @@ import (
 )
 
 type Room struct {
-    Client *Client
+    client *Client
 
     Id     int     `json:"id"`
     Name   string  `json:"name"`
@@ -16,7 +16,7 @@ type Room struct {
 }
 
 func (self *Room) Show() (*Room, error) {
-    resp, err := self.Client.Get("/room/" + strconv.Itoa(self.Id) + ".json")
+    resp, err := self.client.Get("/room/" + strconv.Itoa(self.Id) + ".json")
 
     if err != nil {
         return nil, err
@@ -42,7 +42,7 @@ func (self *Room) Show() (*Room, error) {
 }
 
 func (self *Room) Join() error {
-    resp, err := self.Client.Post("/room/" + strconv.Itoa(self.Id) + "/join", "")
+    resp, err := self.client.Post("/room/" + strconv.Itoa(self.Id) + "/join", "")
 
     if err == nil && resp.StatusCode == 200 {
         return nil
@@ -52,12 +52,12 @@ func (self *Room) Join() error {
 }
 
 func (self *Room) Stream(channel chan *Message) {
-    self.Client.Stream(self.Id, channel)
+    self.client.Stream(self.Id, channel)
 }
 
 func (self *Room) Say(message string) {
     msg    := &MessageWrapper{Message: &Message{Type: "TextMessage", Body: message}}
     buf, _ := json.Marshal(msg)
 
-    self.Client.Post("/room/" + strconv.Itoa(self.Id) + "/speak", string(buf))
+    self.client.Post("/room/" + strconv.Itoa(self.Id) + "/speak", string(buf))
 }

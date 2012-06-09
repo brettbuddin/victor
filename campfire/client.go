@@ -21,7 +21,7 @@ func NewClient(account, token string) *Client {
 }
 
 func (self *Client) Room(id int) *Room {
-    return &Room{Client: self, Id: id}
+    return &Room{client: self, Id: id}
 }
 
 func (self *Client) Get(path string) (*http.Response, error) {
