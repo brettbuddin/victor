@@ -42,9 +42,7 @@ func (self *Client) Stream(roomId int, channel chan *Message) {
         log.Fatal(resp.Status)
     }
 
-    self.stream.SetChannel(channel)
-
-    go self.stream.Read(resp)
+    go self.stream.Read(resp, channel)
 }
 
 func (self *Client) request(method string, path string, body string) (*http.Response, error) {

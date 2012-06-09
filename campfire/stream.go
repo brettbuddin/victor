@@ -53,7 +53,7 @@ func (self *Stream) Connect() (*http.Response, error) {
     return resp, nil
 }
 
-func (self *Stream) Read(resp *http.Response) {
+func (self *Stream) Read(resp *http.Response, channel chan *Message) {
     reader := bufio.NewReader(resp.Body)
 
     for {
@@ -85,8 +85,4 @@ func (self *Stream) Read(resp *http.Response) {
 
         self.chatStream <- &msg
     }
-}
-
-func (self *Stream) SetChannel(channel chan *Message) {
-    self.chatStream = channel
 }
