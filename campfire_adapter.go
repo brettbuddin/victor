@@ -17,7 +17,7 @@ type Campfire struct {
 }
 
 func NewCampfire(robot *Robot) *Campfire {
-    campfire := &Campfire{Robot: robot}
+    c := &Campfire{Robot: robot}
 
     account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
     token   := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
@@ -35,8 +35,9 @@ func NewCampfire(robot *Robot) *Campfire {
         log.Panic("No rooms set.")
     }
 
-    campfire.account = account
-    campfire.token   = token
+    c.account = account
+    c.token   = token
+    c.client  = campfire.NewClient(account, token)
 
     roomIdStrings := strings.Split(rooms, ",")
     roomsArr      := make([]int, 0)
@@ -46,21 +47,20 @@ func NewCampfire(robot *Robot) *Campfire {
         roomsArr = append(roomsArr, j) 
     }
 
-    campfire.rooms = roomsArr
+    c.rooms  = roomsArr
 
-    return campfire
+    return c
 }
 
 func (self *Campfire) Run() {
     log.Print("Starting up...")
 
     rooms  := self.rooms
-    client := self.Client() 
 
     channel := make(chan *campfire.Message)
 
     for i := range rooms {
-        details, err := client.Room(rooms[i]).Show()
+        details, err := self.client.Room(rooms[i]).Show()
 
         if err != nil {
             log.Printf("Error fetching room info %i: %s", rooms[i], err)
@@ -73,7 +73,7 @@ func (self *Campfire) Run() {
             log.Print("Remembering: " + user.Name)
         }
 
-        room := client.Room(rooms[i])
+        room := self.client.Room(rooms[i])
         err   = room.Join()
 
         if err != nil {
@@ -87,7 +87,7 @@ func (self *Campfire) Run() {
     }
 
     for {
-        in   := <-channel
+        in := <-channel
 
         if in.Type == "TextMessage" {
             msg := &TextMessage{
@@ -99,13 +99,13 @@ func (self *Campfire) Run() {
                 Reply: self.Reply(in.RoomId, in.UserId),
             }
 
-            self.Receive(msg)
+            go self.Receive(msg)
         }
     }
 }
 
 func (self *Campfire) Send(roomId int) func(string) {
-    room := self.Client().Room(roomId)
+    room := self.client.Room(roomId)
 
     return func(text string) { 
         room.Say(text)
@@ -113,7 +113,7 @@ func (self *Campfire) Send(roomId int) func(string) {
 }
 
 func (self *Campfire) Reply(roomId int, userId int) func(string) {
-    room   := self.Client().Room(roomId)
+    room   := self.client.Room(roomId)
     user   := self.UserForId(userId)
     prefix := ""
 
@@ -124,17 +124,4 @@ func (self *Campfire) Reply(roomId int, userId int) func(string) {
     return func(text string) { 
         room.Say(prefix + text)
     }
-}
-
-func (self *Campfire) Client() *campfire.Client {
-    if self.client == nil {
-        client := campfire.NewClient(
-            self.account, 
-            self.token,
-        )
-    
-        self.client = client
-    }
-    
-    return self.client
 }
