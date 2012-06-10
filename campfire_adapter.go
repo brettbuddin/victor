@@ -102,21 +102,17 @@ func (self *Campfire) Run() {
                 Body: in.Body,
                 CreatedAt: in.CreatedAt,
 
-                Send: self.Send(in.RoomId),
                 Reply: self.Reply(in.RoomId, in.UserId),
-                Paste: self.Paste(in.RoomId),
+                Send: func(text string) {
+                    return self.client.Room(in.RoomID).Say(text)
+                },
+                Paste: func(text string) {
+                    return self.client.Room(in.RoomID).Paste(text)
+                },
             }
 
             go self.Receive(msg)
         }
-    }
-}
-
-func (self *Campfire) Send(roomId int) func(string) {
-    room := self.client.Room(roomId)
-
-    return func(text string) { 
-        room.Say(text)
     }
 }
 
@@ -131,13 +127,5 @@ func (self *Campfire) Reply(roomId int, userId int) func(string) {
 
     return func(text string) { 
         room.Say(prefix + text)
-    }
-}
-
-func (self *Campfire) Paste(roomId int) func(string) {
-    room := self.client.Room(roomId)
-
-    return func(text string) { 
-        room.Paste(text)
     }
 }

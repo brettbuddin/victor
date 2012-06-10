@@ -9,3 +9,4 @@
 
 - `Send`: Send a bit of text to the channel.
 - `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Here's the diff:")
+- `Paste`: Paste text to the channel.
