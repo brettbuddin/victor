@@ -109,4 +109,13 @@ func (self *Robot) registerDefaultAbilities() {
         
         msg.Send(result)    
     })
+
+    self.Respond("(list|show) users", func(msg *TextMessage) {
+        list := ""
+        for _, user := range self.users {
+            list += user.Name + "\n" 
+        }
+
+        msg.Paste(list)
+    })
 }

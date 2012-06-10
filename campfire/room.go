@@ -61,3 +61,10 @@ func (self *Room) Say(message string) {
 
     self.client.Post("/room/" + strconv.Itoa(self.Id) + "/speak", string(buf))
 }
+
+func (self *Room) Paste(message string) {
+    msg    := &MessageWrapper{Message: &Message{Type: "PasteMessage", Body: message}}
+    buf, _ := json.Marshal(msg)
+
+    self.client.Post("/room/" + strconv.Itoa(self.Id) + "/speak", string(buf))
+}

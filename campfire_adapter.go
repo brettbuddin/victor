@@ -104,6 +104,7 @@ func (self *Campfire) Run() {
 
                 Send: self.Send(in.RoomId),
                 Reply: self.Reply(in.RoomId, in.UserId),
+                Paste: self.Paste(in.RoomId),
             }
 
             go self.Receive(msg)
@@ -130,5 +131,13 @@ func (self *Campfire) Reply(roomId int, userId int) func(string) {
 
     return func(text string) { 
         room.Say(prefix + text)
+    }
+}
+
+func (self *Campfire) Paste(roomId int) func(string) {
+    room := self.client.Room(roomId)
+
+    return func(text string) { 
+        room.Paste(text)
     }
 }
