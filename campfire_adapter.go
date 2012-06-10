@@ -104,10 +104,10 @@ func (self *Campfire) Run() {
 
                 Reply: self.Reply(in.RoomId, in.UserId),
                 Send: func(text string) {
-                    return self.client.Room(in.RoomID).Say(text)
+                    self.client.Room(in.RoomId).Say(text)
                 },
                 Paste: func(text string) {
-                    return self.client.Room(in.RoomID).Paste(text)
+                    self.client.Room(in.RoomId).Paste(text)
                 },
             }
 
