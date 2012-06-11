@@ -25,10 +25,10 @@ Victor is more of a framework for constructing your own Campfire bot so he doesn
 #### Listening for Actions
 
 - `Hear`: Trigger an action based on some criteria heard anywhere in the channel.
-- `Respond`: Respond to a direct statement at the robot (e.g. "gobias show me the diff")
+- `Respond`: Respond to a direct statement at the robot (e.g. "victor diff live")
 
 #### Responding
 
 - `Send`: Send a bit of text to the channel.
-- `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Here's the diff:")
+- `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Howdy?")
 - `Paste`: Paste text to the channel.
