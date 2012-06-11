@@ -20,7 +20,7 @@
 
 Victor is more of a framework for constructing your own Campfire bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses, but you might want him to do something specific to your team's needs. You can use the programs located in `examples/` as starting points to create your own executable.
 
-At Virb (http://virb.com) we have a separate repo for our robot, Virbot, that is based around one of the examples; its own outside dependancy is Victor.
+At Virb (http://virb.com) we have a separate repo for our robot, Virbot, that is based around one of the examples; its only outside dependancy is Victor.
 
 ### Function Overview
 
