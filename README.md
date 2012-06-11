@@ -2,19 +2,9 @@
 
 ### Playing with Victor
 
-#### 1. Get the code
-
-Use the `go get` command to fetch the latest build of the project:
-
-    $ go get github.com/brettbuddin/victor
-
-#### 2. Install the Sample Program
-
-To quickly start 
-
-    $ go install github.com/brettbuddin/victor/examples/bot
-
-#### 3. Connect to Your Campfire Room
+1. $ go get github.com/brettbuddin/victor
+2. $ go install github.com/brettbuddin/victor/examples/bot
+3. Connect him to your campfire room:
 
     # Set some important environment variables
     $ export VICTOR_CAMPFIRE_ACCOUNT=
