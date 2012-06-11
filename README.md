@@ -6,13 +6,13 @@
 2. $ go install github.com/brettbuddin/victor/examples/bot
 3. Connect him to your campfire room:
 
-    # Set some important environment variables
-    $ export VICTOR_CAMPFIRE_ACCOUNT=
-    $ export VICTOR_CAMPFIRE_TOKEN=
-    $ export VICTOR_CAMPFIRE_ROOMS=
-    
-    # Make him join the party
-    $ bot -adapter campfire
+      # Set some important environment variables
+      $ export VICTOR_CAMPFIRE_ACCOUNT=
+      $ export VICTOR_CAMPFIRE_TOKEN=
+      $ export VICTOR_CAMPFIRE_ROOMS=
+      
+      # Make him join the party
+      $ bot -adapter campfire
 
 ### Making Him Your Own
 
