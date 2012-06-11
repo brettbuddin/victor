@@ -4,6 +4,8 @@ import (
     "net/url"
     "net/http"
     "bytes"
+    "io/ioutil"
+    "encoding/json"
     "log"
 )
 
@@ -22,6 +24,32 @@ func NewClient(account, token string) *Client {
 
 func (self *Client) Room(id int) *Room {
     return &Room{client: self, Id: id}
+}
+
+func (self *Client) Me() (*User, error) {
+    resp, err := self.Get("/users/me")
+
+    if err != nil {
+        return nil, err
+    }
+
+    out, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        return nil, err
+    }
+
+    var fetch struct {
+        User *User `json:"user"`
+    }
+
+    err = json.Unmarshal(out, &fetch)
+
+    if err != nil {
+        return nil, err
+    }
+
+    return fetch.User, nil
 }
 
 func (self *Client) Get(path string) (*http.Response, error) {

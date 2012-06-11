@@ -13,7 +13,8 @@ type Campfire struct {
     account string
     token   string
     rooms   []int
-    client *campfire.Client
+    client  *campfire.Client
+    me      *campfire.User
 }
 
 func NewCampfire(robot *Robot) *Campfire {
@@ -58,7 +59,6 @@ func loadEnv(c *Campfire) *Campfire {
     return c
 }
 
-
 func (self *Campfire) Run() {
     log.Print("Starting up...")
 
@@ -67,6 +67,16 @@ func (self *Campfire) Run() {
     channel := make(chan *campfire.Message)
 
     for i := range rooms {
+        me, err := self.client.Me()
+
+        if err != nil {
+            log.Printf("Error fetching self: %s",  err)
+            continue
+        }
+        log.Print("Fetched info about self.")
+
+        self.me = me
+
         details, err := self.client.Room(rooms[i]).Show()
 
         if err != nil {
@@ -95,6 +105,10 @@ func (self *Campfire) Run() {
 
     for {
         in := <-channel
+
+        if in.UserId == self.me.Id {
+            continue
+        }
 
         if in.Type == "TextMessage" {
             msg := &TextMessage{
