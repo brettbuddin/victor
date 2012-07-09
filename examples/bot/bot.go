@@ -1,9 +1,5 @@
 /*
 *   Usage:
-*
-*    $ export VICTOR_CAMPFIRE_ACCOUNT=
-*    $ export VICTOR_CAMPFIRE_TOKEN=
-*    $ export VICTOR_CAMPFIRE_ROOMS=
 *    $ bot -adapter campfire -name ralph
 */
 
@@ -15,12 +11,9 @@ import (
 )
 
 func main() {
-    adapter := flag.String("adapter", "", "victor adapter (campfire or shell)")
-    name    := flag.String("name", "", "victor's new name in chat")
-
-    flag.Parse()
-
-    r := victor.NewRobot(*adapter, *name)
+    brain := victor.NewBrain("victor")
+    r     := victor.NewCampfire(brain, "account", "token", [12345])
+    //r   := victor.NewShell(brain)
 
     r.Hear("derp", func(msg *victor.TextMessage) {
         msg.Send("Derp!")

@@ -13,7 +13,7 @@ type RobotAdapter interface {
     Run()
 }
 
-type Robot struct {
+type Brain struct {
     name      string
     options   map[string]string
     adapter   RobotAdapter
@@ -21,48 +21,34 @@ type Robot struct {
     users     []*User
 }
 
-func NewRobot(adapter string, name string) RobotAdapter {
+func NewBrain(name string) *Brain {
     if name == "" {
         name = "victor"
     }
 
-    robot := &Robot{
+    robot := &Brain{
         name: name,
         listeners: make([]*Listener, 0, 1),
     }
 
     robot.registerDefaultAbilities()
 
-    return robot.LoadAdapter(adapter)
+    return robot
 }
 
-func (self *Robot) LoadAdapter(name string) RobotAdapter {
-    var adapter RobotAdapter
-
-    if name == "shell" || name == "" {
-        adapter = NewShell(self)
-    } else if name == "campfire" {
-        adapter = NewCampfire(self)
-    } else {
-        log.Panic("Unkown adapter.")
-    }
-
-    return adapter
-}
-
-func (self *Robot) Hear(expStr string, callback func(*TextMessage)) {
+func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
     exp, _ := regexp.Compile(expStr)
     self.listeners = append(self.listeners, NewListener(exp, callback))
 }
 
-func (self *Robot) Respond(expStr string, callback func(*TextMessage)) {
+func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")" 
     exp, _         := regexp.Compile(expWithNameStr)
 
     self.listeners = append(self.listeners, NewListener(exp, callback))
 }
 
-func (self *Robot) Receive(msg *TextMessage) {
+func (self *Brain) Receive(msg *TextMessage) {
     for _, listener := range self.listeners {
         if listener.Test(msg) {
             log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
@@ -71,11 +57,11 @@ func (self *Robot) Receive(msg *TextMessage) {
     }
 }
 
-func (self *Robot) RememberUser(user *User) {
+func (self *Brain) RememberUser(user *User) {
     self.users = append(self.users, user)
 }
 
-func (self *Robot) UserForId(id int) *User {
+func (self *Brain) UserForId(id int) *User {
     for _, user := range self.users {
         if user.Id == id {
             return user
@@ -85,11 +71,11 @@ func (self *Robot) UserForId(id int) *User {
     return nil
 }
 
-func (self *Robot) Shutdown() {
+func (self *Brain) Shutdown() {
     log.Print("See ya!")
 }
 
-func (self *Robot) registerDefaultAbilities() {
+func (self *Brain) registerDefaultAbilities() {
     self.Respond("ping", func(msg *TextMessage) {
         msg.Send("Pong!")
     })

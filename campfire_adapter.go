@@ -2,14 +2,11 @@ package victor
 
 import (
     "github.com/brettbuddin/victor/campfire"
-    "strings"
-    "strconv"
     "log"
-    "os"
 )
 
 type Campfire struct {
-    *Robot
+    brain   *Brain
     account string
     token   string
     rooms   []int
@@ -17,46 +14,14 @@ type Campfire struct {
     me      *campfire.User
 }
 
-func NewCampfire(robot *Robot) *Campfire {
-    c := &Campfire{Robot: robot}
-    
-    c = loadEnv(c)
-
-    return c
-}
-
-func loadEnv(c *Campfire) *Campfire {
-    account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
-    token   := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
-    rooms   := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
-
-    if account == "" {
-        log.Panic("No account set.")
+func NewCampfire(brain *Brain, account string, token string, rooms []int) *Campfire {
+    return &Campfire{
+        brain: brain,
+        account: account,
+        token: token,
+        rooms: rooms,
+        client: campfire.NewClient(account, token),
     }
-
-    if token == "" {
-        log.Panic("No token set.")
-    }
-
-    if rooms == "" {
-        log.Panic("No rooms set.")
-    }
-
-    c.account = account
-    c.token   = token
-    c.client  = campfire.NewClient(account, token)
-
-    roomIdStrings := strings.Split(rooms, ",")
-    roomsArr      := make([]int, 0)
-
-    for _, id := range roomIdStrings {
-        j, _ := strconv.Atoi(id)
-        roomsArr = append(roomsArr, j) 
-    }
-
-    c.rooms  = roomsArr
-
-    return c
 }
 
 func (self *Campfire) Run() {
@@ -86,7 +51,7 @@ func (self *Campfire) Run() {
         log.Print("Fetched room info.")
 
         for _, user := range details.Users {
-            self.RememberUser(&User{Id: user.Id, Name: user.Name})
+            self.brain.RememberUser(&User{Id: user.Id, Name: user.Name})
             log.Print("Remembering: " + user.Name)
         }
 
@@ -125,14 +90,14 @@ func (self *Campfire) Run() {
                 },
             }
 
-            go self.Receive(msg)
+            go self.brain.Receive(msg)
         }
     }
 }
 
 func (self *Campfire) Reply(roomId int, userId int) func(string) {
     room   := self.client.Room(roomId)
-    user   := self.UserForId(userId)
+    user   := self.brain.UserForId(userId)
     prefix := ""
 
     if user != nil {

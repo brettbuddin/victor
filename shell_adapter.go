@@ -7,11 +7,11 @@ import (
 )
 
 type Shell struct {
-    *Robot
+    brain *Brain
 }
 
-func NewShell(robot *Robot) *Shell {
-    return &Shell{Robot: robot}
+func NewShell(brain *Brain) *Shell {
+    return &Shell{brain: brain}
 }
 
 func (self *Shell) Run() {
@@ -40,9 +40,9 @@ func (self *Shell) Run() {
 
         switch command {
             default:
-                self.Receive(msg)
+                self.brain.Receive(msg)
             case "close", "exit":
-                self.Shutdown()
+                self.brain.Shutdown()
                 return
         }
 
