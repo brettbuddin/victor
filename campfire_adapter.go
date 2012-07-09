@@ -14,9 +14,9 @@ type Campfire struct {
     me      *campfire.User
 }
 
-func NewCampfire(brain *Brain, account string, token string, rooms []int) *Campfire {
+func NewCampfire(name string, account string, token string, rooms []int) *Campfire {
     return &Campfire{
-        brain: brain,
+        brain: NewBrain(name),
         account: account,
         token: token,
         rooms: rooms,

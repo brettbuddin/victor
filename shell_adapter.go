@@ -11,8 +11,8 @@ type Shell struct {
     brain *Brain
 }
 
-func NewShell(brain *Brain) *Shell {
-    return &Shell{brain: brain}
+func NewShell(name string) *Shell {
+    return &Shell{brain: NewBrain(name)}
 }
 
 func (self *Shell) Run() {

@@ -10,9 +10,8 @@ import (
 )
 
 func main() {
-    brain := victor.NewBrain("victor")
-    //r     := victor.NewCampfire(brain, "account", "token", [12345])
-    r   := victor.NewShell(brain)
+    //r := victor.NewShell("victor")
+    r := victor.NewCampfire("victor", "account", "token", []int{12345})
 
     r.Hear("derp", func(msg *victor.TextMessage) {
         msg.Send("Derp!")

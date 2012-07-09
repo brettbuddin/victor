@@ -16,7 +16,6 @@ type RobotAdapter interface {
 type Brain struct {
     name      string
     options   map[string]string
-    adapter   RobotAdapter
     listeners []*Listener
     users     []*User
 }
@@ -26,14 +25,14 @@ func NewBrain(name string) *Brain {
         name = "victor"
     }
 
-    robot := &Brain{
+    brain := &Brain{
         name: name,
         listeners: make([]*Listener, 0, 1),
     }
 
-    robot.registerDefaultAbilities()
+    brain.registerDefaultAbilities()
 
-    return robot
+    return brain
 }
 
 func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
