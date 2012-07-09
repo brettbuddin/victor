@@ -1,64 +1,64 @@
 package google
 
 import (
-    "net/http"
-    "net/url"
-    "io/ioutil"
-    "math/rand"
-    "encoding/json"
+	"encoding/json"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"net/url"
 )
 
 type ImageResult struct {
-    UnescapedUrl string
+	UnescapedUrl string
 }
 
 type ImageResults struct {
-    Results []ImageResult
+	Results []ImageResult
 }
 
 type ImageResponseDate struct {
-    ResponseData ImageResults
+	ResponseData ImageResults
 }
 
 func ImageSearch(term string) (string, error) {
-    search, err := url.Parse("http://ajax.googleapis.com/ajax/services/search/images")
+	search, err := url.Parse("http://ajax.googleapis.com/ajax/services/search/images")
 
-    if err != nil {
-        return "", err
-    }
-    
-    q := search.Query()
-    q.Add("v", "1.0")
-    q.Add("rsz", "8")
-    q.Add("q", term)
-    q.Add("safe", "active")
-    search.RawQuery = q.Encode()
+	if err != nil {
+		return "", err
+	}
 
-    resp, err := http.Get(search.String())
+	q := search.Query()
+	q.Add("v", "1.0")
+	q.Add("rsz", "8")
+	q.Add("q", term)
+	q.Add("safe", "active")
+	search.RawQuery = q.Encode()
 
-    if err != nil {
-        return "", err
-    }
+	resp, err := http.Get(search.String())
 
-    buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
 
-    if err != nil {
-        return "", err
-    }
+	buf, err := ioutil.ReadAll(resp.Body)
 
-    var result ImageResponseDate
+	if err != nil {
+		return "", err
+	}
 
-    err = json.Unmarshal(buf, &result)
+	var result ImageResponseDate
 
-    if err != nil {
-        return "", err
-    }
+	err = json.Unmarshal(buf, &result)
 
-    images := result.ResponseData.Results
+	if err != nil {
+		return "", err
+	}
 
-    if len(images) > 0 {
-        return images[rand.Intn(len(images))].UnescapedUrl, nil
-    }
+	images := result.ResponseData.Results
 
-    return "", nil
+	if len(images) > 0 {
+		return images[rand.Intn(len(images))].UnescapedUrl, nil
+	}
+
+	return "", nil
 }

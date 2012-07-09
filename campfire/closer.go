@@ -3,9 +3,9 @@ package campfire
 import "io"
 
 type closer struct {
-    io.Reader
+	io.Reader
 }
 
 func (closer) Close() error {
-    return nil
+	return nil
 }
