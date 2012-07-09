@@ -21,7 +21,7 @@ func (self *Shell) Run() {
     for {
         command, err := reader.Read()
 
-		command = strings.TrimRight(command, "\n")
+        command = strings.TrimRight(command, "\n")
 
         if err != nil {
             break
