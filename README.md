@@ -1,5 +1,7 @@
 **Victor** is a 37Signals Campfire bot written in Go (http://golang.org); inspired by Github's Hubot (http://github.com/github/hubot).
 
+We run Victor within our team Campfire at Virb (http://virb.com).
+
 ### Playing with Victor
 
 1. Get the code: `go get github.com/brettbuddin/victor`
@@ -18,7 +20,7 @@
 
 ### Making Him Your Own
 
-Victor is more of a framework for constructing your own Campfire bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses, but you might want him to do something specific to your team's needs. You can use the programs located in `examples/` as starting points to create your own executable.
+Victor is more of a framework for constructing your own Campfire bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses, but you might want him to do something specific to your team's needs. You can use the programs located in `examples/` as starting points to create your own robot executable.
 
 ### Function Overview
 

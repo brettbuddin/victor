@@ -2,8 +2,9 @@ package victor
 
 import (
     "fmt"
-    "os"
-    "bufio"
+	"strings"
+
+	"github.com/edsrzf/fineline"
 )
 
 type Shell struct {
@@ -15,17 +16,16 @@ func NewShell(brain *Brain) *Shell {
 }
 
 func (self *Shell) Run() {
-    reader := bufio.NewReader(os.Stdin)
+    reader := fineline.NewLineReader(nil)
 
     for {
-        fmt.Printf(">> ");
-        part, _, err := reader.ReadLine()
+        command, err := reader.Read()
+
+		command = strings.TrimRight(command, "\n")
 
         if err != nil {
             break
         }
-
-        command := string(part[0:])
 
         msg  := &TextMessage{
             Body: command,
