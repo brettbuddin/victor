@@ -6,14 +6,13 @@
 package main
 
 import (
-    "flag"
     "github.com/brettbuddin/victor"
 )
 
 func main() {
     brain := victor.NewBrain("victor")
-    r     := victor.NewCampfire(brain, "account", "token", [12345])
-    //r   := victor.NewShell(brain)
+    //r     := victor.NewCampfire(brain, "account", "token", [12345])
+    r   := victor.NewShell(brain)
 
     r.Hear("derp", func(msg *victor.TextMessage) {
         msg.Send("Derp!")

@@ -48,3 +48,11 @@ func (self *Shell) Run() {
 
     }
 }
+
+func (self *Shell) Hear(expStr string, callback func(*TextMessage)) {
+    self.brain.Hear(expStr, callback)
+}
+
+func (self *Shell) Respond(expStr string, callback func(*TextMessage)) {
+    self.brain.Respond(expStr, callback)
+}

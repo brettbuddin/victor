@@ -81,7 +81,7 @@ func (self *Campfire) Run() {
                 Body: in.Body,
                 CreatedAt: in.CreatedAt,
 
-                Reply: self.Reply(in.RoomId, in.UserId),
+                Reply: self.reply(in.RoomId, in.UserId),
                 Send: func(text string) {
                     self.client.Room(in.RoomId).Say(text)
                 },
@@ -95,7 +95,15 @@ func (self *Campfire) Run() {
     }
 }
 
-func (self *Campfire) Reply(roomId int, userId int) func(string) {
+func (self *Campfire) Hear(expStr string, callback func(*TextMessage)) {
+    self.brain.Hear(expStr, callback)
+}
+
+func (self *Campfire) Respond(expStr string, callback func(*TextMessage)) {
+    self.brain.Respond(expStr, callback)
+}
+
+func (self *Campfire) reply(roomId int, userId int) func(string) {
     room   := self.client.Room(roomId)
     user   := self.brain.UserForId(userId)
     prefix := ""
