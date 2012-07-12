@@ -1,8 +1,3 @@
-/*
-*   Usage:
-*    $ bot -adapter campfire -name ralph
- */
-
 package main
 
 import (
