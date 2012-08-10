@@ -39,7 +39,6 @@ func (self *Campfire) Run() {
             log.Printf("Error fetching self: %s", err)
             continue
         }
-        log.Print("Fetched info about self.")
 
         self.me = me
 
@@ -52,7 +51,6 @@ func (self *Campfire) Run() {
             log.Printf("Error joining room %i: %s", rooms[i], err)
             continue
         }
-        log.Print("Joined room.")
 
         room.Stream(channel)
         log.Print("Listening...")
