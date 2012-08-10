@@ -2,6 +2,7 @@ package victor
 
 import (
     "regexp"
+    "strings"
 )
 
 type Listener struct {
@@ -17,7 +18,7 @@ func NewListener(exp *regexp.Regexp, callback func(*TextMessage)) *Listener {
 }
 
 func (self *Listener) Test(msg *TextMessage) bool {
-    results := self.Exp.FindAllStringSubmatch(msg.Body, -1)
+    results := self.Exp.FindAllStringSubmatch(strings.ToLower(msg.Body), -1)
 
     if len(results) > 0 {
         msg.SetMatches(results[0])

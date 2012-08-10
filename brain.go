@@ -3,6 +3,7 @@ package victor
 import (
     "log"
     "regexp"
+    "strings"
 
     "github.com/brettbuddin/victor/utils/google"
 )
@@ -21,10 +22,6 @@ type Brain struct {
 }
 
 func NewBrain(name string) *Brain {
-    if name == "" {
-        name = "victor"
-    }
-
     brain := &Brain{
         name:      name,
         listeners: make([]*Listener, 0, 1),
@@ -42,7 +39,7 @@ func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
 
 func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
-    exp, _ := regexp.Compile(expWithNameStr)
+    exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
 
     self.listeners = append(self.listeners, NewListener(exp, callback))
 }
@@ -58,6 +55,10 @@ func (self *Brain) Receive(msg *TextMessage) {
 
 func (self *Brain) RememberUser(user *User) {
     self.users = append(self.users, user)
+}
+
+func (self *Brain) KnownUsers() []*User {
+    return self.users
 }
 
 func (self *Brain) UserForId(id int) *User {
