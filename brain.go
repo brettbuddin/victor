@@ -71,10 +71,6 @@ func (self *Brain) RememberUser(user *User) {
     self.users = append(self.users, user)
 }
 
-func (self *Brain) KnownUsers() []*User {
-    return self.users
-}
-
 func (self *Brain) UserForId(id int) *User {
     for _, user := range self.users {
         if user.Id == id {
