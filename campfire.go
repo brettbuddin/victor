@@ -30,7 +30,7 @@ func (self *Campfire) Run() {
 
     rooms := self.rooms
 
-    channel := make(chan *campfire.Message)
+    messages := make(chan *campfire.Message)
 
     for i := range rooms {
         me, err := self.client.Me()
@@ -52,11 +52,11 @@ func (self *Campfire) Run() {
             continue
         }
 
-        room.Stream(channel)
+        room.Stream(messages)
         log.Print("Listening...")
     }
 
-    for in := range channel {
+    for in := range messages {
         if in.UserId == self.me.Id {
             continue
         }
