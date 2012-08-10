@@ -3,6 +3,7 @@ package victor
 import (
     "github.com/brettbuddin/victor/campfire"
     "log"
+    "time"
 )
 
 type Campfire struct {
@@ -42,18 +43,7 @@ func (self *Campfire) Run() {
 
         self.me = me
 
-        details, err := self.client.Room(rooms[i]).Show()
-
-        if err != nil {
-            log.Printf("Error fetching room info %i: %s", rooms[i], err)
-            continue
-        }
-        log.Print("Fetched room info.")
-
-        for _, user := range details.Users {
-            self.brain.RememberUser(&User{Id: user.Id, Name: user.Name})
-            log.Print("Remembering: " + user.Name)
-        }
+        go self.pollRoomDetails(rooms[i])
 
         room := self.client.Room(rooms[i])
         err = room.Join()
@@ -102,6 +92,23 @@ func (self *Campfire) Hear(expStr string, callback func(*TextMessage)) {
 func (self *Campfire) Respond(expStr string, callback func(*TextMessage)) {
     self.brain.Respond(expStr, callback)
 }
+
+func (self *Campfire) pollRoomDetails(roomId int) {
+    for {
+        details, err := self.client.Room(roomId).Show()
+
+        if err != nil {
+            continue
+        }
+
+        for _, user := range details.Users {
+            self.brain.RememberUser(&User{Id: user.Id, Name: user.Name})
+        }
+
+        time.Sleep(600 * time.Second)
+    }
+}
+
 
 func (self *Campfire) reply(roomId int, userId int) func(string) {
     room := self.client.Room(roomId)

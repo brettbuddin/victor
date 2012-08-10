@@ -36,6 +36,9 @@ func (self *Shell) Run() {
             Reply: func(text string) {
                 fmt.Println("You: " + text)
             },
+            Paste: func(text string) {
+                fmt.Println("You: " + text)
+            },
         }
 
         switch command {

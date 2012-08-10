@@ -54,6 +54,17 @@ func (self *Brain) Receive(msg *TextMessage) {
 }
 
 func (self *Brain) RememberUser(user *User) {
+    for i, u := range self.users {
+        if u.Id == user.Id {
+            // update the name if its different
+            if (u.Name != user.Name) {
+                self.users[i].Name = user.Name
+            }
+
+            return
+        }
+    }
+
     self.users = append(self.users, user)
 }
 
@@ -98,6 +109,7 @@ func (self *Brain) registerDefaultAbilities() {
 
     self.Respond("(list|show) users", func(msg *TextMessage) {
         list := ""
+
         for _, user := range self.users {
             list += user.Name + "\n"
         }
