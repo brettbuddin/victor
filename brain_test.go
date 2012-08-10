@@ -22,16 +22,16 @@ func TestRespond(t *testing.T) {
 }
 
 func TestRememberUser(t *testing.T) {
-    brain  := victor.NewBrain("robot")
-    user   := &victor.User{Id: 1, Name: "brett"}
+    brain := victor.NewBrain("robot")
+    user := &victor.User{Id: 1, Name: "brett"}
 
     brain.RememberUser(user)
 
-    users  := brain.KnownUsers()
+    users := brain.KnownUsers()
 
-    found  := false
-    
-    for _, u := range(users) {
+    found := false
+
+    for _, u := range users {
         if u == user {
             found = true
         }
@@ -67,15 +67,15 @@ func doesNotHear(t *testing.T, pattern, messageText string) {
 }
 
 func testRespond(pattern, messageText string) bool {
-    brain     := victor.NewBrain("robot")
+    brain := victor.NewBrain("robot")
     triggered := false
 
     brain.Respond(pattern, func(msg *victor.TextMessage) {
-        triggered = true 
+        triggered = true
     })
 
     msg := &victor.TextMessage{
-        Id: 1,
+        Id:   1,
         Body: messageText,
     }
 
@@ -85,15 +85,15 @@ func testRespond(pattern, messageText string) bool {
 }
 
 func testHear(pattern, messageText string) bool {
-    brain     := victor.NewBrain("robot")
+    brain := victor.NewBrain("robot")
     triggered := false
 
     brain.Hear(pattern, func(msg *victor.TextMessage) {
-        triggered = true 
+        triggered = true
     })
 
     msg := &victor.TextMessage{
-        Id: 1,
+        Id:   1,
         Body: messageText,
     }
 

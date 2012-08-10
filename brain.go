@@ -57,7 +57,7 @@ func (self *Brain) RememberUser(user *User) {
     for i, u := range self.users {
         if u.Id == user.Id {
             // update the name if its different
-            if (u.Name != user.Name) {
+            if u.Name != user.Name {
                 self.users[i].Name = user.Name
             }
 
