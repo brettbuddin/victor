@@ -58,9 +58,7 @@ func (self *Campfire) Run() {
         log.Print("Listening...")
     }
 
-    for {
-        in := <-channel
-
+    for in := range channel {
         if in.UserId == self.me.Id {
             continue
         }
@@ -105,10 +103,9 @@ func (self *Campfire) pollRoomDetails(roomId int) {
             self.brain.RememberUser(&User{Id: user.Id, Name: user.Name})
         }
 
-        time.Sleep(600 * time.Second)
+        time.Sleep(300 * time.Second)
     }
 }
-
 
 func (self *Campfire) reply(roomId int, userId int) func(string) {
     room := self.client.Room(roomId)
