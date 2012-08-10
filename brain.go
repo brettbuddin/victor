@@ -35,6 +35,8 @@ func NewBrain(name string) *Brain {
 func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
     exp, _ := regexp.Compile(expStr)
     self.listeners = append(self.listeners, NewListener(exp, callback))
+
+    log.Printf("Pattern: /%s/", exp.String())
 }
 
 func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
@@ -42,12 +44,13 @@ func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
 
     self.listeners = append(self.listeners, NewListener(exp, callback))
+
+    log.Printf("Pattern: /%s/", exp.String())
 }
 
 func (self *Brain) Receive(msg *TextMessage) {
     for _, listener := range self.listeners {
         if listener.Test(msg) {
-            log.Printf("Listener /%s/ triggered by '%s'", listener.Exp.String(), msg.Body)
             listener.Callback(msg)
         }
     }
