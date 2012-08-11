@@ -26,10 +26,7 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
 }
 
 func (self *Campfire) Run() {
-    log.Print("Starting up...")
-
-    rooms := self.rooms
-
+    rooms    := self.rooms
     messages := make(chan *campfire.Message)
 
     for i := range rooms {
