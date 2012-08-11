@@ -21,27 +21,6 @@ func TestRespond(t *testing.T) {
     doesRespond(t, "d[eu]rp$", "Robot, durp")
 }
 
-func TestRememberUser(t *testing.T) {
-    brain := victor.NewBrain("robot")
-    user := &victor.User{Id: 1, Name: "brett"}
-
-    brain.RememberUser(user)
-
-    users := brain.KnownUsers()
-
-    found := false
-
-    for _, u := range users {
-        if u == user {
-            found = true
-        }
-    }
-
-    if found == false {
-        t.Error("did not remember user")
-    }
-}
-
 func doesRespond(t *testing.T, pattern, messageText string) {
     if testRespond(pattern, messageText) == false {
         t.Errorf("%s not triggered by %s", pattern, messageText)
