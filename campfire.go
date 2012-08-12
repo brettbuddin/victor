@@ -26,31 +26,34 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
 }
 
 func (self *Campfire) Run() {
-    rooms := self.rooms
-    messages := make(chan *campfire.Message)
+    rooms     := self.rooms
+    messages  := make(chan *campfire.Message)
+    connected := 0
 
     for i := range rooms {
         me, err := self.client.Me()
 
         if err != nil {
-            log.Printf("Error fetching self: %s", err)
+            log.Printf("Error fetching info about self: %s", err)
             continue
         }
 
         self.me = me
 
-        go self.pollRoomDetails(rooms[i])
-
         room := self.client.Room(rooms[i])
-        err = room.Join()
 
-        if err != nil {
+        if room.Join() != nil {
             log.Printf("Error joining room %i: %s", rooms[i], err)
             continue
         }
+        connected++
 
+        go self.pollRoomDetails(room)
         room.Stream(messages)
-        log.Print("Listening...")
+    }
+
+    if connected == 0 {
+        log.Fatal("No rooms joined; nothing to stream from.")
     }
 
     for in := range messages {
@@ -86,9 +89,9 @@ func (self *Campfire) Respond(expStr string, callback func(*TextMessage)) {
     self.brain.Respond(expStr, callback)
 }
 
-func (self *Campfire) pollRoomDetails(roomId int) {
+func (self *Campfire) pollRoomDetails(room *campfire.Room) {
     for {
-        details, err := self.client.Room(roomId).Show()
+        details, err := room.Show()
 
         if err != nil {
             continue
