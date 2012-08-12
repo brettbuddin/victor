@@ -15,16 +15,16 @@ type RobotAdapter interface {
 }
 
 type Brain struct {
-    name      string
-    options   map[string]string
-    listeners []*Listener
-    users     []*User
+    name     string
+    options  map[string]string
+    matchers []*Matcher
+    users    []*User
 }
 
 func NewBrain(name string) *Brain {
     brain := &Brain{
-        name:      name,
-        listeners: make([]*Listener, 0, 1),
+        name:     name,
+        matchers: make([]*Matcher, 0, 1),
     }
 
     brain.registerDefaultAbilities()
@@ -34,7 +34,7 @@ func NewBrain(name string) *Brain {
 
 func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
     exp, _ := regexp.Compile(expStr)
-    self.listeners = append(self.listeners, NewListener(exp, callback))
+    self.matchers = append(self.matchers, NewMatcher(exp, callback))
 
     log.Printf("Pattern: /%s/", exp.String())
 }
@@ -43,15 +43,15 @@ func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
     exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
 
-    self.listeners = append(self.listeners, NewListener(exp, callback))
+    self.matchers = append(self.matchers, NewMatcher(exp, callback))
 
     log.Printf("Pattern: /%s/", exp.String())
 }
 
 func (self *Brain) Receive(msg *TextMessage) {
-    for _, listener := range self.listeners {
-        if listener.Test(msg) {
-            listener.Callback(msg)
+    for _, matcher := range self.matchers {
+        if matcher.Test(msg) {
+            matcher.Callback(msg)
         }
     }
 }
