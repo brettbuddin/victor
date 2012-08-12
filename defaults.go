@@ -6,7 +6,7 @@ import (
 
 func RegisterDefaultAbilities(brain *Brain) {
     brain.Respond("ping", func(msg *TextMessage) {
-        msg.Send("Pong!")
+        msg.Reply("pong!")
     })
 
     brain.Respond("(image|img) (.*)", func(msg *TextMessage) {
