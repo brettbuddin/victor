@@ -11,7 +11,7 @@ Victor is more of a framework for constructing your own Campfire bot so he doesn
 #### Listening for Actions
 
 - `Hear`: Trigger an action based on some criteria heard anywhere in the channel.
-- `Respond`: Respond to a direct statement at the robot (e.g. "victor diff live")
+- `Respond`: Respond to a direct statement at the robot (e.g. "victor show not shipped")
 
 #### Responding
 
