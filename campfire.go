@@ -28,7 +28,7 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
 func (self *Campfire) Run() {
     rooms     := self.rooms
     messages  := make(chan *campfire.Message)
-    connected := 0
+    joined    := 0
 
     for i := range rooms {
         me, err := self.client.Me()
@@ -46,13 +46,13 @@ func (self *Campfire) Run() {
             log.Printf("Error joining room %i: %s", rooms[i], err)
             continue
         }
-        connected++
+        joined++
 
         go self.pollRoomDetails(room)
         room.Stream(messages)
     }
 
-    if connected == 0 {
+    if joined == 0 {
         log.Fatal("No rooms joined; nothing to stream from.")
     }
 
