@@ -26,9 +26,9 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
 }
 
 func (self *Campfire) Run() {
-    rooms     := self.rooms
-    messages  := make(chan *campfire.Message)
-    joined    := 0
+    rooms := self.rooms
+    messages := make(chan *campfire.Message)
+    joined := 0
 
     for i := range rooms {
         me, err := self.client.Me()
