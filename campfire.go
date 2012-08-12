@@ -74,6 +74,9 @@ func (self *Campfire) Run() {
                 Paste: func(text string) {
                     self.client.Room(in.RoomId).Paste(text)
                 },
+                Sound: func(name string) {
+                    self.client.Room(in.RoomId).Sound(name)
+                },
             }
 
             go self.brain.Receive(msg)

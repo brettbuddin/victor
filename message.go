@@ -14,6 +14,7 @@ type TextMessage struct {
     Send  func(text string)
     Reply func(text string)
     Paste func(text string)
+    Sound func(text string)
 }
 
 func (self *TextMessage) SetMatches(matches []string) {
