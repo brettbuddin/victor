@@ -42,7 +42,7 @@ func (self *Room) Show() (*Room, error) {
 }
 
 func (self *Room) Join() error {
-    resp, err := self.client.Post("/room/"+strconv.Itoa(self.Id)+"/join", "")
+    resp, err := self.client.Post("/room/"+strconv.Itoa(self.Id)+"/join", []byte(""))
 
     if err == nil && resp.StatusCode == 200 {
         return nil
@@ -59,12 +59,19 @@ func (self *Room) Say(message string) {
     msg := &MessageWrapper{Message: &Message{Type: "TextMessage", Body: message}}
     buf, _ := json.Marshal(msg)
 
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", string(buf))
+    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
 }
 
 func (self *Room) Paste(message string) {
     msg := &MessageWrapper{Message: &Message{Type: "PasteMessage", Body: message}}
     buf, _ := json.Marshal(msg)
 
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", string(buf))
+    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+}
+
+func (self *Room) Sound(name string) {
+    msg := &MessageWrapper{Message: &Message{Type: "SoundMessage", Body: name}}
+    buf, _ := json.Marshal(msg)
+
+    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
 }

@@ -18,3 +18,4 @@ Victor is more of a framework for constructing your own Campfire bot so he doesn
 - `Send`: Send a bit of text to the channel.
 - `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Howdy?")
 - `Paste`: Paste text to the channel.
+- `Sound`: Plays a Campfire sound

@@ -1,7 +1,6 @@
 package campfire
 
 import (
-    "bytes"
     "encoding/json"
     "io/ioutil"
     "log"
@@ -53,10 +52,10 @@ func (self *Client) Me() (*User, error) {
 }
 
 func (self *Client) Get(path string) (*http.Response, error) {
-    return self.request("GET", path, "")
+    return self.request("GET", path, []byte(""))
 }
 
-func (self *Client) Post(path string, body string) (*http.Response, error) {
+func (self *Client) Post(path string, body []byte) (*http.Response, error) {
     return self.request("POST", path, body)
 }
 
@@ -73,7 +72,7 @@ func (self *Client) Stream(roomId int, channel chan *Message) {
     go self.stream.Read(resp, channel)
 }
 
-func (self *Client) request(method string, path string, body string) (*http.Response, error) {
+func (self *Client) request(method, path string, body []byte) (*http.Response, error) {
     url := new(url.URL)
     url.Scheme = "https"
     url.Host = self.account + ".campfirenow.com"
@@ -86,7 +85,6 @@ func (self *Client) request(method string, path string, body string) (*http.Resp
     req.SetBasicAuth(self.token, "X")
 
     if method == "POST" {
-        req.Body = closer{bytes.NewBufferString(body)}
         req.ContentLength = int64(len(body))
     }
 
