@@ -6,12 +6,6 @@ import (
     "strings"
 )
 
-type RobotAdapter interface {
-    Hear(string, func(*TextMessage))
-    Respond(string, func(*TextMessage))
-    Run()
-}
-
 type Brain struct {
     name     string
     options  map[string]string
