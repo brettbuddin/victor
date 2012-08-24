@@ -25,22 +25,27 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
     }
 }
 
+// Returns the Brain of this adapter.
 func (self *Campfire) Brain() *Brain {
     return self.brain
 }
 
+// Returns the Client used by this adapter.
 func (self *Campfire) Client() *campfire.Client {
     return self.client
 }
 
+// Hear registers a new Hear Matcher with the Brain.
 func (self *Campfire) Hear(expStr string, callback func(*TextMessage)) {
     self.Brain().Hear(expStr, callback)
 }
 
+// Respond registers a new Respond Matcher with the Brain.
 func (self *Campfire) Respond(expStr string, callback func(*TextMessage)) {
     self.Brain().Respond(expStr, callback)
 }
 
+// Run is where the business happens.
 func (self *Campfire) Run() {
     rooms := self.rooms
     messages := make(chan *campfire.Message)

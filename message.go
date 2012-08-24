@@ -9,6 +9,7 @@ type TextMessage struct {
     Body      string
     CreatedAt string
 
+    // Matches from the regexp match.
     matches []string
 
     Send  func(text string)

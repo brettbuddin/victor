@@ -19,23 +19,28 @@ func NewBrain(name string) *Brain {
         matchers: make([]*Matcher, 0, 1),
     }
 
-    RegisterDefaultAbilities(brain)
+    registerDefaultAbilities(brain)
 
     return brain
 }
 
+// AddMatcher adds a Matcher to the Brain's list of matching patterns.
 func (self *Brain) AddMatcher(m *Matcher) {
     self.matchers = append(self.matchers, m)
 
     log.Printf("Pattern: /%s/", m.Pattern.String())
 }
 
+// Hear creates and registers a new Matcher with the Brain that is triggered
+// when the pattern matches anything said in the room.
 func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
     exp, _ := regexp.Compile(expStr)
 
     self.AddMatcher(NewMatcher(exp, callback))
 }
 
+// Respond creates and registers a new Matcher with the Brain that is triggered
+// when the pattern matches a statement directed at the bot specifically.
 func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
     exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
@@ -43,6 +48,8 @@ func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
     self.AddMatcher(NewMatcher(exp, callback))
 }
 
+// Receive takes input from the service adapter and tests it against
+// all registered Matchers.
 func (self *Brain) Receive(msg *TextMessage) {
     for _, matcher := range self.matchers {
         if matcher.Test(msg) {
@@ -51,6 +58,9 @@ func (self *Brain) Receive(msg *TextMessage) {
     }
 }
 
+// Instructs the Brain to remember the information about a user.
+// Passing it a user that it has already seen will update the info
+// for the same user in memory.
 func (self *Brain) RememberUser(user *User) {
     for i, u := range self.users {
         if u.Id == user.Id {
@@ -66,10 +76,12 @@ func (self *Brain) RememberUser(user *User) {
     self.users = append(self.users, user)
 }
 
+// Returns a list of all known users.
 func (self *Brain) Users() []*User {
     return self.users
 }
 
+// Returns the User with the specified ID from memory.
 func (self *Brain) UserForId(id int) *User {
     for _, user := range self.users {
         if user.Id == id {
@@ -78,8 +90,4 @@ func (self *Brain) UserForId(id int) *User {
     }
 
     return nil
-}
-
-func (self *Brain) Shutdown() {
-    log.Print("See ya!")
 }

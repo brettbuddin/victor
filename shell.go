@@ -48,7 +48,7 @@ func (self *Shell) Run() {
         default:
             self.brain.Receive(msg)
         case "close", "exit":
-            self.brain.Shutdown()
+            fmt.Println("See ya!")
             return
         }
 

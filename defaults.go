@@ -4,7 +4,7 @@ import (
     "github.com/brettbuddin/victor/utils/google"
 )
 
-func RegisterDefaultAbilities(brain *Brain) {
+func registerDefaultAbilities(brain *Brain) {
     brain.Respond("ping", func(msg *TextMessage) {
         msg.Reply("pong!")
     })

@@ -17,6 +17,9 @@ func NewMatcher(exp *regexp.Regexp, callback func(*TextMessage)) *Matcher {
     }
 }
 
+// Test matches the regexp pattern it's been told to apply to the incoming
+// message and sets matches that result from it.
+// Returns true if it is a match and false if it is not
 func (self *Matcher) Test(msg *TextMessage) bool {
     results := self.Pattern.FindAllStringSubmatch(strings.ToLower(msg.Body), -1)
 
