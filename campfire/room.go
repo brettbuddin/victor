@@ -75,3 +75,10 @@ func (self *Room) Sound(name string) {
 
     self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
 }
+
+func (self *Room) Tweet(message string) {
+    msg := &MessageWrapper{Message: &Message{Type: "TweetMessage", Body: message}}
+    buf, _ := json.Marshal(msg)
+
+    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+}
