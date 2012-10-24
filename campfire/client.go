@@ -1,6 +1,7 @@
 package campfire
 
 import (
+    "bytes"
     "encoding/json"
     "io/ioutil"
     "log"
@@ -80,7 +81,7 @@ func (self *Client) request(method, path string, body []byte) (*http.Response, e
 
     client := &http.Client{}
 
-    req, err := http.NewRequest(method, url.String(), nil)
+    req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))
     req.Header.Add("Content-Type", "application/json")
     req.SetBasicAuth(self.token, "X")
 
