@@ -4,8 +4,8 @@ import (
     "github.com/brettbuddin/victor"
     "log"
     "os"
-    "strings"
     "strconv"
+    "strings"
 )
 
 func main() {
