@@ -33,7 +33,7 @@ func (self *Brain) AddMatcher(m *Matcher) {
 
 // Hear creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches anything said in the room.
-func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
+func (self *Brain) Hear(expStr string, callback func(*Context)) {
     exp, _ := regexp.Compile(expStr)
 
     self.AddMatcher(NewMatcher(exp, callback))
@@ -41,7 +41,7 @@ func (self *Brain) Hear(expStr string, callback func(*TextMessage)) {
 
 // Respond creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches a statement directed at the bot specifically.
-func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
+func (self *Brain) Respond(expStr string, callback func(*Context)) {
     expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
     exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
 
@@ -50,10 +50,10 @@ func (self *Brain) Respond(expStr string, callback func(*TextMessage)) {
 
 // Receive takes input from the service adapter and tests it against
 // all registered Matchers.
-func (self *Brain) Receive(msg *TextMessage) {
+func (self *Brain) Receive(ctx *Context) {
     for _, matcher := range self.matchers {
-        if matcher.Test(msg) {
-            matcher.Callback(msg)
+        if matcher.Test(ctx) {
+            matcher.Callback(ctx)
         }
     }
 }

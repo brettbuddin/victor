@@ -36,12 +36,12 @@ func (self *Campfire) Client() *campfire.Client {
 }
 
 // Hear registers a new Hear Matcher with the Brain.
-func (self *Campfire) Hear(expStr string, callback func(*TextMessage)) {
+func (self *Campfire) Hear(expStr string, callback func(*Context)) {
     self.Brain().Hear(expStr, callback)
 }
 
 // Respond registers a new Respond Matcher with the Brain.
-func (self *Campfire) Respond(expStr string, callback func(*TextMessage)) {
+func (self *Campfire) Respond(expStr string, callback func(*Context)) {
     self.Brain().Respond(expStr, callback)
 }
 
@@ -83,12 +83,18 @@ func (self *Campfire) Run() {
         }
 
         if in.Type == "TextMessage" {
-            msg := &TextMessage{
-                Id:        in.Id,
-                Body:      in.Body,
-                CreatedAt: in.CreatedAt,
+            ctx := &Context{
+                Reply: func(text string) {
+                    user := self.Brain().UserForId(in.UserId)
 
-                Reply: self.reply(in.RoomId, in.UserId),
+                    prefix := ""
+
+                    if user != nil {
+                        prefix = user.Name + ": "
+                    }
+
+                    self.Client().Room(in.RoomId).Say(prefix + text)
+                },
                 Send: func(text string) {
                     self.Client().Room(in.RoomId).Say(text)
                 },
@@ -100,7 +106,16 @@ func (self *Campfire) Run() {
                 },
             }
 
-            go self.brain.Receive(msg)
+            ctx.SetMessage(&Message{
+                Id:        in.Id,
+                Type:      in.Type,
+                Body:      in.Body,
+                CreatedAt: in.CreatedAt,
+                UserId:    in.UserId,
+                RoomId:    in.RoomId,
+            })
+
+            go self.brain.Receive(ctx)
         }
     }
 }
@@ -118,19 +133,5 @@ func (self *Campfire) pollRoomDetails(room *campfire.Room) {
         }
 
         time.Sleep(300 * time.Second)
-    }
-}
-
-func (self *Campfire) reply(roomId int, userId int) func(string) {
-    room := self.Client().Room(roomId)
-    user := self.Brain().UserForId(userId)
-    prefix := ""
-
-    if user != nil {
-        prefix = user.Name + ": "
-    }
-
-    return func(text string) {
-        room.Say(prefix + text)
     }
 }

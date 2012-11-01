@@ -15,6 +15,8 @@ Victor is more of a framework for constructing your own Campfire bot so he doesn
 
 #### Responding
 
+Each listener that's triggered will provide a Context object. The Contex object contains information about the original message, matches from the regex that triggered the listener and a few helper methods for responding to the context from which the message originated. These methods include:
+
 - `Send`: Send a bit of text to the channel.
 - `Reply`: Reply directly to the person that triggered the action (e.g. "Brett: Yo yo yo. Howdy?")
 - `Paste`: Paste text to the channel.

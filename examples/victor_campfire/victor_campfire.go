@@ -5,6 +5,7 @@ import (
     "log"
     "os"
     "strings"
+    "strconv"
 )
 
 func main() {
@@ -26,8 +27,8 @@ func main() {
 
     r := victor.NewCampfire("victor", account, token, roomsArr)
 
-    r.Hear("derp", func(msg *victor.TextMessage) {
-        msg.Send("Derp!")
+    r.Hear("derp", func(ctx *victor.Context) {
+        ctx.Send("Derp!")
     })
 
     r.Run()

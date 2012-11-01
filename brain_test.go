@@ -49,16 +49,15 @@ func testRespond(pattern, messageText string) bool {
     brain := victor.NewBrain("robot")
     triggered := false
 
-    brain.Respond(pattern, func(msg *victor.TextMessage) {
+    brain.Respond(pattern, func(ctx *victor.Context) {
         triggered = true
     })
 
-    msg := &victor.TextMessage{
-        Id:   1,
-        Body: messageText,
-    }
+    ctx := new(victor.Context)
 
-    brain.Receive(msg)
+    ctx.SetMessage(&victor.Message{Id: 1, Body: messageText})
+
+    brain.Receive(ctx)
 
     return triggered
 }
@@ -67,16 +66,15 @@ func testHear(pattern, messageText string) bool {
     brain := victor.NewBrain("robot")
     triggered := false
 
-    brain.Hear(pattern, func(msg *victor.TextMessage) {
+    brain.Hear(pattern, func(msg *victor.Context) {
         triggered = true
     })
 
-    msg := &victor.TextMessage{
-        Id:   1,
-        Body: messageText,
-    }
+    ctx := new(victor.Context)
 
-    brain.Receive(msg)
+    ctx.SetMessage(&victor.Message{Id: 1, Body: messageText})
+
+    brain.Receive(ctx)
 
     return triggered
 }

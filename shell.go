@@ -27,9 +27,7 @@ func (self *Shell) Run() {
             break
         }
 
-        msg := &TextMessage{
-            Body: command,
-
+        ctx := &Context{
             Send: func(text string) {
                 fmt.Println(text)
             },
@@ -44,9 +42,11 @@ func (self *Shell) Run() {
             },
         }
 
+        ctx.SetMessage(&Message{Body: command})
+
         switch command {
         default:
-            self.brain.Receive(msg)
+            self.brain.Receive(ctx)
         case "close", "exit":
             fmt.Println("See ya!")
             return
@@ -55,10 +55,10 @@ func (self *Shell) Run() {
     }
 }
 
-func (self *Shell) Hear(expStr string, callback func(*TextMessage)) {
+func (self *Shell) Hear(expStr string, callback func(*Context)) {
     self.brain.Hear(expStr, callback)
 }
 
-func (self *Shell) Respond(expStr string, callback func(*TextMessage)) {
+func (self *Shell) Respond(expStr string, callback func(*Context)) {
     self.brain.Respond(expStr, callback)
 }
