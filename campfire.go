@@ -82,41 +82,39 @@ func (self *Campfire) Run() {
             continue
         }
 
-        if in.Type == "TextMessage" {
-            ctx := &Context{
-                Reply: func(text string) {
-                    user := self.Brain().UserForId(in.UserId)
-
-                    prefix := ""
-
-                    if user != nil {
-                        prefix = user.Name + ": "
-                    }
-
-                    self.Client().Room(in.RoomId).Say(prefix + text)
-                },
-                Send: func(text string) {
-                    self.Client().Room(in.RoomId).Say(text)
-                },
-                Paste: func(text string) {
-                    self.Client().Room(in.RoomId).Paste(text)
-                },
-                Sound: func(name string) {
-                    self.Client().Room(in.RoomId).Sound(name)
-                },
-            }
-
-            ctx.SetMessage(&Message{
-                Id:        in.Id,
-                Type:      in.Type,
-                Body:      in.Body,
-                CreatedAt: in.CreatedAt,
-                UserId:    in.UserId,
-                RoomId:    in.RoomId,
-            })
-
-            go self.brain.Receive(ctx)
+        msg := &Message{
+            Id:        in.Id,
+            Type:      in.Type,
+            CreatedAt: in.CreatedAt,
+            UserId:    in.UserId,
+            RoomId:    in.RoomId,
+            Body:      in.Body,
         }
+
+        ctx := &Context{
+            Reply: func(text string) {
+                user := self.Brain().UserForId(in.UserId)
+
+                prefix := ""
+
+                if user != nil {
+                    prefix = user.Name + ": "
+                }
+
+                self.Client().Room(in.RoomId).Say(prefix + text)
+            },
+            Send: func(text string) {
+                self.Client().Room(in.RoomId).Say(text)
+            },
+            Paste: func(text string) {
+                self.Client().Room(in.RoomId).Paste(text)
+            },
+            Sound: func(name string) {
+                self.Client().Room(in.RoomId).Sound(name)
+            },
+        }
+
+        go self.brain.Receive(ctx.SetMessage(msg))
     }
 }
 
