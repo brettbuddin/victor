@@ -2,9 +2,16 @@ package victor
 
 import (
     "github.com/brettbuddin/victor/utils/google"
+    "strconv"
 )
 
 func registerDefaultAbilities(brain *Brain) {
+    brain.Respond("what('s| is) my campfire id", func(ctx *Context) {
+        id := strconv.Itoa(ctx.Message().Id)
+
+        ctx.Reply(id)
+    })
+
     brain.Respond("ping", func(ctx *Context) {
         ctx.Reply("pong!")
     })
