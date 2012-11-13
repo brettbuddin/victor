@@ -3,7 +3,6 @@ package victor
 import (
     "log"
     "regexp"
-    "strings"
 )
 
 type Brain struct {
@@ -42,8 +41,8 @@ func (self *Brain) Hear(expStr string, callback func(*Context)) {
 // Respond creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches a statement directed at the bot specifically.
 func (self *Brain) Respond(expStr string, callback func(*Context)) {
-    expWithNameStr := "^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
-    exp, _ := regexp.Compile(strings.ToLower(expWithNameStr))
+    expWithNameStr := "(?i)^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
+    exp, _ := regexp.Compile(expWithNameStr)
 
     self.AddMatcher(NewMatcher(exp, callback))
 }
