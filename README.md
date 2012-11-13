@@ -1,6 +1,6 @@
-**Victor** is a 37Signals Campfire bot written in Go (http://golang.org); inspired by Github's Hubot (http://github.com/github/hubot).
+**Victor** is a library for creating your own chat bot for 37Signals' Campfire.
 
-We run Victor within our team Campfire at Virb (http://virb.com).
+We use Victor as the backbone of our bot, Virbot, within our team Campfire at Virb (http://virb.com).
 
 ### Making Him Your Own
 
