@@ -17,7 +17,22 @@ func registerDefaultAbilities(brain *Brain) {
     })
 
     brain.Respond("(image|img) (.*)", func(ctx *Context) {
-        result, err := google.ImageSearch(ctx.Matches()[3])
+        result, err := google.ImageSearch(ctx.Matches()[3], false)
+
+        if err != nil {
+            return
+        }
+
+        if result == "" {
+            ctx.Send("I didn't find anything.")
+            return
+        }
+
+        ctx.Send(result)
+    })
+
+    brain.Respond("(gif) (.*)", func(ctx *Context) {
+        result, err := google.ImageSearch(ctx.Matches()[3], true)
 
         if err != nil {
             return
