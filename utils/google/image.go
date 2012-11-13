@@ -20,7 +20,7 @@ type ImageResponseDate struct {
     ResponseData ImageResults
 }
 
-func ImageSearch(term string, gif_only bool) (string, error) {
+func ImageSearch(term string, gifOnly bool) (string, error) {
     search, err := url.Parse("http://ajax.googleapis.com/ajax/services/search/images")
 
     if err != nil {
@@ -33,7 +33,7 @@ func ImageSearch(term string, gif_only bool) (string, error) {
     q.Add("q", term)
     q.Add("safe", "active")
 
-    if gif_only {
+    if gifOnly {
         q.Add("as_filetype", "gif")
     }
 

@@ -16,23 +16,10 @@ func registerDefaultAbilities(brain *Brain) {
         ctx.Reply("pong!")
     })
 
-    brain.Respond("(image|img) (.*)", func(ctx *Context) {
-        result, err := google.ImageSearch(ctx.Matches()[3], false)
+    brain.Respond("(image|img|gif|animate) (.*)", func(ctx *Context) {
+        gifOnly := (ctx.Matches()[2] == "gif" || ctx.Matches()[2] == "animate")
 
-        if err != nil {
-            return
-        }
-
-        if result == "" {
-            ctx.Send("I didn't find anything.")
-            return
-        }
-
-        ctx.Send(result)
-    })
-
-    brain.Respond("(gif) (.*)", func(ctx *Context) {
-        result, err := google.ImageSearch(ctx.Matches()[3], true)
+        result, err := google.ImageSearch(ctx.Matches()[3], gifOnly)
 
         if err != nil {
             return
