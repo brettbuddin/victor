@@ -5,6 +5,12 @@ import (
     "regexp"
 )
 
+type Adapter interface {
+    Hear(string, func(*Context))
+    Respond(string, func(*Context))
+    Run()
+}
+
 type Brain struct {
     name     string
     options  map[string]string
