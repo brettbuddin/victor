@@ -36,6 +36,11 @@ func (self *Brain) AddMatcher(m *Matcher) {
     log.Printf("Pattern: /%s/", m.Pattern.String())
 }
 
+// Matchers returns the list of known matching patterns.
+func (self *Brain) Matchers() []*Matcher {
+    return self.matchers
+}
+
 // Hear creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches anything said in the room.
 func (self *Brain) Hear(expStr string, callback func(*Context)) {
