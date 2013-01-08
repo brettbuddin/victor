@@ -93,7 +93,7 @@ func (self *Campfire) Run() {
 
         ctx := &Context{
             Reply: func(text string) {
-                user := self.Brain().UserForId(in.UserId)
+                user := self.Brain().UserForId(msg.UserId)
 
                 prefix := ""
 
@@ -101,16 +101,16 @@ func (self *Campfire) Run() {
                     prefix = user.Name + ": "
                 }
 
-                self.Client().Room(in.RoomId).Say(prefix + text)
+                self.Client().Room(msg.RoomId).Say(prefix + text)
             },
             Send: func(text string) {
-                self.Client().Room(in.RoomId).Say(text)
+                self.Client().Room(msg.RoomId).Say(text)
             },
             Paste: func(text string) {
-                self.Client().Room(in.RoomId).Paste(text)
+                self.Client().Room(msg.RoomId).Paste(text)
             },
             Sound: func(name string) {
-                self.Client().Room(in.RoomId).Sound(name)
+                self.Client().Room(msg.RoomId).Sound(name)
             },
         }
 
