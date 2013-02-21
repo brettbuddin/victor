@@ -15,6 +15,10 @@ func NewShell(name string) *Shell {
     return &Shell{brain: NewBrain(name)}
 }
 
+func (self *Shell) Brain() *Brain {
+    return self.brain
+}
+
 func (self *Shell) Run() {
     reader := fineline.NewLineReader(nil)
 

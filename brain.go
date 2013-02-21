@@ -6,6 +6,7 @@ import (
 )
 
 type Adapter interface {
+    Brain() *Brain
     Hear(string, func(*Context))
     Respond(string, func(*Context))
     Run()
