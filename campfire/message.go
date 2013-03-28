@@ -14,7 +14,53 @@ type Message struct {
     userId int
 }
 
-// INTERFACE FULFILLMENT
+type MessageWrapper struct {
+    Message *Message
+}
+
+func (m *Message) Id() int {
+    return m.id
+}
+
+func (m *Message) SetId(val int) {
+    m.id = val
+}
+
+func (m *Message) Type() string {
+    return m.typ
+}
+
+func (m *Message) SetType(val string) {
+    m.typ = val
+}
+
+func (m *Message) Body() string {
+    return m.body
+}
+
+func (m *Message) SetBody(val string) {
+    m.body = val
+}
+
+func (m *Message) RoomId() int {
+    return m.roomId
+}
+
+func (m *Message) SetRoomId(val int) {
+    m.roomId = val
+}
+
+func (m *Message) UserId() int {
+    return m.userId
+}
+
+func (m *Message) SetUserId(val int) {
+    m.userId = val
+}
+
+//
+// JSON interface fulfillment
+//
 
 type messageData struct {
     Id int      `json:"id"`
@@ -52,36 +98,4 @@ func (m *Message) UnmarshalJSON(data []byte) error {
     m.userId = actual.UserId
 
     return nil
-}
-
-type MessageWrapper struct {
-    Message *Message
-}
-
-func (m *Message) Id() int {
-    return m.id
-}
-
-func (m *Message) SetId(val int) {
-    m.id = val
-}
-
-func (m *Message) Type() string {
-    return m.typ
-}
-
-func (m *Message) Body() string {
-    return m.body
-}
-
-func (m *Message) SetBody(val string) {
-    m.body = val
-}
-
-func (m *Message) RoomId() int {
-    return m.roomId
-}
-
-func (m *Message) UserId() int {
-    return m.userId
 }

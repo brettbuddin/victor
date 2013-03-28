@@ -15,6 +15,46 @@ type User struct {
     avatarUrl string
 }
 
+func (u *User) Id() int {
+    return u.id
+}
+
+func (u *User) SetId(val int) {
+    u.id = val
+}
+
+func (u *User) Type() string {
+    return u.typ
+}
+
+func (u *User) SetType(val string) {
+    u.typ = val
+}
+
+func (u *User) Name() string {
+    return u.name
+}
+
+func (u *User) SetName(val string) {
+    u.name = val
+}
+
+func (u *User) EmailAddress() string {
+    return u.emailAddress
+}
+
+func (u *User) SetEmailAddress(val string) {
+    u.emailAddress = val
+}
+
+func (u *User) AvatarUrl() string {
+    return u.avatarUrl
+}
+
+func (u *User) SetAvatarUrl(val string) {
+    u.avatarUrl = val
+}
+
 func (u *User) Show() (*User, error) {
     resp, err := u.Client.Get(fmt.Sprintf("/user/%d.json", u.Id()))
 
@@ -34,6 +74,10 @@ func (u *User) Show() (*User, error) {
 
     return fetch.User, nil
 }
+
+//
+// JSON interface fulfillment
+//
 
 type userData struct {
     Id int      `json:"id"`
@@ -64,31 +108,11 @@ func (u *User) UnmarshalJSON(data []byte) error {
         return err
     }
 
-    u.id     = actual.Id
-    u.typ    = actual.Type
-    u.name   = actual.Name
-    u.emailAddress = actual.EmailAddress
-    u.avatarUrl    = actual.AvatarUrl
+    u.SetId(actual.Id)
+    u.SetType(actual.Type)
+    u.SetName(actual.Name)
+    u.SetEmailAddress(actual.EmailAddress)
+    u.SetAvatarUrl(actual.AvatarUrl)
 
     return nil
-}
-
-func (u *User) Id() int {
-    return u.id
-}
-
-func (u *User) Type() string {
-    return u.typ
-}
-
-func (u *User) Name() string {
-    return u.name
-}
-
-func (u *User) EmailAddress() string {
-    return u.emailAddress
-}
-
-func (u *User) AvatarUrl() string {
-    return u.avatarUrl
 }
