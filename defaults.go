@@ -8,7 +8,6 @@ import (
 func registerDefaultAbilities(brain *Brain) {
     brain.Respond("what('s| is) my campfire id", func(ctx *Context) {
         id := strconv.Itoa(ctx.Message().Id())
-
         ctx.Reply(id)
     })
 
@@ -17,9 +16,9 @@ func registerDefaultAbilities(brain *Brain) {
     })
 
     brain.Respond("(image|img|gif|animate) (.*)", func(ctx *Context) {
-        gifOnly := (ctx.Matches()[2] == "gif" || ctx.Matches()[2] == "animate")
+        gifOnly := (ctx.Matches()[0] == "gif" || ctx.Matches()[0] == "animate")
 
-        result, err := google.ImageSearch(ctx.Matches()[3], gifOnly)
+        result, err := google.ImageSearch(ctx.Matches()[1], gifOnly)
 
         if err != nil {
             return

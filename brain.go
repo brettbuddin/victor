@@ -53,7 +53,7 @@ func (b *Brain) Hear(expStr string, callback func(*Context)) {
 // Respond creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches a statement directed at the bot specifically.
 func (b *Brain) Respond(expStr string, callback func(*Context)) {
-    expWithNameStr := "(?i)^(" + b.name + "[:,]?)\\s*(?:" + expStr + ")"
+    expWithNameStr := "(?i)\\A(?:" + b.name + "[:,]?\\s*|/)(?:" + expStr + ")\\z"
     exp, _ := regexp.Compile(expWithNameStr)
 
     b.AddMatcher(NewMatcher(exp, callback))
