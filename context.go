@@ -4,6 +4,11 @@ import (
     "math/rand"
 )
 
+type User interface {
+    Id() int
+    Name() string
+}
+
 type Message interface {
     Id() int
     Type() string

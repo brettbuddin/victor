@@ -16,11 +16,11 @@ func NewShell(name string) *Shell {
     return &Shell{brain: NewBrain(name)}
 }
 
-func (self *Shell) Brain() *Brain {
-    return self.brain
+func (s *Shell) Brain() *Brain {
+    return s.brain
 }
 
-func (self *Shell) Run() {
+func (s *Shell) Run() {
     reader := fineline.NewLineReader(nil)
 
     for {
@@ -54,7 +54,7 @@ func (self *Shell) Run() {
 
         switch command {
         default:
-            self.brain.Receive(ctx)
+            s.brain.Receive(ctx)
         case "close", "exit":
             fmt.Println("See ya!")
             return
@@ -63,10 +63,10 @@ func (self *Shell) Run() {
     }
 }
 
-func (self *Shell) Hear(expStr string, callback func(*Context)) {
-    self.brain.Hear(expStr, callback)
+func (s *Shell) Hear(expStr string, callback func(*Context)) {
+    s.brain.Hear(expStr, callback)
 }
 
-func (self *Shell) Respond(expStr string, callback func(*Context)) {
-    self.brain.Respond(expStr, callback)
+func (s *Shell) Respond(expStr string, callback func(*Context)) {
+    s.brain.Respond(expStr, callback)
 }
