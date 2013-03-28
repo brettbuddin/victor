@@ -128,9 +128,9 @@ func (r *Room) UnmarshalJSON(data []byte) error {
         return err
     }
 
-    r.id     = actual.Id
-    r.name   = actual.Name
-    r.users  = actual.Users
+    r.SetId(actual.Id)
+    r.SetName(actual.Name)
+    r.SetUsers(actual.Users)
 
     return nil
 }

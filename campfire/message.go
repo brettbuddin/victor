@@ -91,11 +91,11 @@ func (m *Message) UnmarshalJSON(data []byte) error {
         return err
     }
 
-    m.id     = actual.Id
-    m.typ    = actual.Type
-    m.body   = actual.Body
-    m.roomId = actual.RoomId
-    m.userId = actual.UserId
+    m.SetId(actual.Id)
+    m.SetType(actual.Type)
+    m.SetBody(actual.Body)
+    m.SetRoomId(actual.RoomId)
+    m.SetUserId(actual.UserId)
 
     return nil
 }
