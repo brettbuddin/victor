@@ -2,6 +2,7 @@ package victor
 
 import (
     "log"
+    "sync"
     "regexp"
 )
 
@@ -16,6 +17,8 @@ type Brain struct {
     name     string
     options  map[string]string
     matchers []*Matcher
+
+    userLock *sync.Mutex
     users    []User
 }
 
@@ -60,11 +63,12 @@ func (b *Brain) Respond(expStr string, callback func(*Context)) {
 }
 
 // Receive takes input from the service adapter and tests it against
-// all registered Matchers.
+// all registered Matchers. Breaks on the first match.
 func (b *Brain) Receive(ctx *Context) {
     for _, matcher := range b.matchers {
         if matcher.Test(ctx) {
             matcher.Callback(ctx)
+            return
         }
     }
 }
@@ -73,6 +77,9 @@ func (b *Brain) Receive(ctx *Context) {
 // Passing it a user that it has already seen will update the info
 // for the same user in memory.
 func (b *Brain) RememberUser(user User) {
+    b.userLock.Lock()
+    defer b.userLock.Unlock()
+
     for i, u := range b.users {
         if u.Id() == user.Id() {
             // update the name if its different
@@ -94,6 +101,9 @@ func (b *Brain) Users() []User {
 
 // Returns the User with the specified ID from memory.
 func (b *Brain) UserForId(id int) User {
+    b.userLock.Lock()
+    defer b.userLock.Unlock()
+
     for _, user := range b.users {
         if user.Id() == id {
             return user

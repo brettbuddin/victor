@@ -6,7 +6,7 @@ import (
 )
 
 func registerDefaultAbilities(brain *Brain) {
-    brain.Respond("what('s| is) my campfire id", func(ctx *Context) {
+    brain.Respond("campfire id", func(ctx *Context) {
         id := strconv.Itoa(ctx.Message().Id())
         ctx.Reply(id)
     })
@@ -21,6 +21,7 @@ func registerDefaultAbilities(brain *Brain) {
         result, err := google.ImageSearch(ctx.Matches()[1], gifOnly)
 
         if err != nil {
+            ctx.Send("There was error making the request.")
             return
         }
 
@@ -32,7 +33,7 @@ func registerDefaultAbilities(brain *Brain) {
         ctx.Send(result)
     })
 
-    brain.Respond("(list|show) users", func(ctx *Context) {
+    brain.Respond("users (list|show)", func(ctx *Context) {
         list := ""
 
         for _, user := range brain.Users() {
