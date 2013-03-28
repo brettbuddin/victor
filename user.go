@@ -1,6 +1,6 @@
 package victor
 
 type User interface {
-    Id()   int
+    Id() int
     Name() string
 }

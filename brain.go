@@ -2,8 +2,8 @@ package victor
 
 import (
     "log"
-    "sync"
     "regexp"
+    "sync"
 )
 
 type Adapter interface {

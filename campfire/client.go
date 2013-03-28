@@ -2,24 +2,24 @@ package campfire
 
 import (
     "bytes"
+    "crypto/tls"
     "encoding/json"
     "io/ioutil"
     "net"
     "net/http"
     "net/http/httputil"
     "net/url"
-    "crypto/tls"
 )
 
 type Client struct {
-    host    string
-    token   string
+    host  string
+    token string
 }
 
 func NewClient(subdomain, token string) *Client {
     return &Client{
-        host:   subdomain + ".campfirenow.com",
-        token:  token,
+        host:  subdomain + ".campfirenow.com",
+        token: token,
     }
 }
 
@@ -66,13 +66,13 @@ func (c *Client) request(method, path string, body []byte) (*http.Response, erro
         Path:   path,
     }
 
-    conn, err := net.Dial("tcp", url.Host + ":443")
+    conn, err := net.Dial("tcp", url.Host+":443")
 
     if err != nil {
         return nil, err
     }
 
-    ssl        := tls.Client(conn, nil)
+    ssl := tls.Client(conn, nil)
     httpClient := httputil.NewClientConn(ssl, nil)
 
     req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))

@@ -7,9 +7,9 @@ import (
 type Message struct {
     *Client
 
-    id int
-    typ string
-    body string
+    id     int
+    typ    string
+    body   string
     roomId int
     userId int
 }
@@ -63,17 +63,17 @@ func (m *Message) SetUserId(val int) {
 //
 
 type messageData struct {
-    Id int      `json:"id,omitempty"`
-    Type string `json:"type"`
-    Body string `json:"body"`
-    RoomId  int `json:"room_id,omitempty"`
-    UserId  int `json:"user_id,omitempty"`
+    Id     int    `json:"id,omitempty"`
+    Type   string `json:"type"`
+    Body   string `json:"body"`
+    RoomId int    `json:"room_id,omitempty"`
+    UserId int    `json:"user_id,omitempty"`
 }
 
 func (m *Message) MarshalJSON() ([]byte, error) {
     var data messageData
 
-    data.Id   = m.Id()
+    data.Id = m.Id()
     data.Type = m.Type()
     data.Body = m.Body()
 

@@ -3,8 +3,8 @@ package campfire
 import (
     "bufio"
     "encoding/json"
-    "net/http"
     "fmt"
+    "net/http"
     "time"
 )
 
@@ -75,4 +75,3 @@ func (s *Stream) consume(resp *http.Response, channel chan *Message) {
         channel <- &msg
     }
 }
-

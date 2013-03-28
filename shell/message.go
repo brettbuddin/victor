@@ -1,9 +1,9 @@
 package shell
 
 type Message struct {
-    id int
-    typ string
-    body string
+    id     int
+    typ    string
+    body   string
     roomId int
     userId int
 }

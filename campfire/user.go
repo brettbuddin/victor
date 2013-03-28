@@ -1,18 +1,18 @@
 package campfire
 
 import (
-    "fmt"
     "encoding/json"
+    "fmt"
 )
 
 type User struct {
     *Client
 
-    id int
-    typ string
-    name string
+    id           int
+    typ          string
+    name         string
     emailAddress string
-    avatarUrl string
+    avatarUrl    string
 }
 
 func (u *User) Id() int {
@@ -80,21 +80,21 @@ func (u *User) Show() (*User, error) {
 //
 
 type userData struct {
-    Id int      `json:"id"`
-    Type string `json:"type"`
-    Name string `json:"name"`
+    Id           int    `json:"id"`
+    Type         string `json:"type"`
+    Name         string `json:"name"`
     EmailAddress string `json:"email_address"`
-    AvatarUrl string `json:"avatar_url"`
+    AvatarUrl    string `json:"avatar_url"`
 }
 
 func (u *User) MarshalJSON() ([]byte, error) {
     var data userData
 
-    data.Id     = u.Id()
-    data.Type   = u.Type()
-    data.Name   = u.Name()
+    data.Id = u.Id()
+    data.Type = u.Type()
+    data.Name = u.Name()
     data.EmailAddress = u.EmailAddress()
-    data.AvatarUrl    = u.AvatarUrl()
+    data.AvatarUrl = u.AvatarUrl()
 
     out, err := json.Marshal(data)
 

@@ -4,8 +4,8 @@ import (
     "fmt"
     "strings"
 
-    "github.com/edsrzf/fineline"
     "github.com/brettbuddin/victor/shell"
+    "github.com/edsrzf/fineline"
 )
 
 type Shell struct {

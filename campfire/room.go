@@ -110,8 +110,8 @@ type roomData struct {
 func (r *Room) MarshalJSON() ([]byte, error) {
     var data roomData
 
-    data.Id    = r.Id()
-    data.Name  = r.Name()
+    data.Id = r.Id()
+    data.Name = r.Name()
     data.Users = r.Users()
 
     out, err := json.Marshal(data)
@@ -138,4 +138,3 @@ func (r *Room) UnmarshalJSON(data []byte) error {
 
     return nil
 }
-
