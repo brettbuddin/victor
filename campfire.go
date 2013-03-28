@@ -77,7 +77,9 @@ func (c *Campfire) Run() {
         log.Fatal("No rooms joined; nothing to stream from.")
     }
 
-    for msg := range messages {
+    for {
+        msg := <-messages
+
         if msg.UserId() == c.me.Id() {
             continue
         }
@@ -104,8 +106,8 @@ func (c *Campfire) Run() {
                 c.Client().Room(msg.RoomId()).Sound(name)
             },
         }
-
         ctx.SetMessage(msg)
+
         go c.brain.Receive(ctx)
     }
 }
