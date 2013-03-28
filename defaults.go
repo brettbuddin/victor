@@ -6,8 +6,8 @@ import (
 )
 
 func registerDefaultAbilities(brain *Brain) {
-    brain.Respond("campfire id", func(ctx *Context) {
-        id := strconv.Itoa(ctx.Message().Id())
+    brain.Respond("me id", func(ctx *Context) {
+        id := strconv.Itoa(ctx.Message().UserId())
         ctx.Reply(id)
     })
 
