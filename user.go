@@ -1,6 +1,6 @@
 package victor
 
-type User struct {
-    Id   int
-    Name string
+type User interface {
+    Id()   int
+    Name() string
 }

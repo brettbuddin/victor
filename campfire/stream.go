@@ -2,68 +2,56 @@ package campfire
 
 import (
     "bufio"
-    "crypto/tls"
     "encoding/json"
-    "log"
-    "net"
     "net/http"
-    "net/http/httputil"
-    "net/url"
-    "strconv"
+    "fmt"
     "time"
 )
 
 type Stream struct {
-    connection *httputil.ClientConn
-    token      string
-    room       *Room
+    parentClient *Client
+    room         *Room
+    exit         bool
 }
 
-func NewStream(token string, room *Room) *Stream {
-    return &Stream{token: token, room: room}
+func NewStream(parent *Client, room *Room) *Stream {
+    return &Stream{parentClient: parent, room: room}
 }
 
-func (self *Stream) Connect() (*http.Response, error) {
-    url := new(url.URL)
-    url.Scheme = "https"
-    url.Host = "streaming.campfirenow.com"
-    url.Path = "/room/" + strconv.Itoa(self.room.Id) + "/live.json"
+func (s *Stream) Start(incoming chan *Message) {
+    resp, err := s.connect()
 
-    conn, err := net.Dial("tcp", url.Host+":443")
-
-    if err != nil {
-        return nil, err
+    if err != nil || resp.StatusCode != 200 {
+        return
     }
 
-    ssl := tls.Client(conn, nil)
-    client := httputil.NewClientConn(ssl, nil)
-
-    req, err := http.NewRequest("GET", url.String(), nil)
-
-    req.SetBasicAuth(self.token, "X")
-
-    resp, err := client.Do(req)
-
-    if err != nil {
-        log.Print("Couldn't initiate stream.")
-        return nil, err
-    }
-
-    return resp, nil
+    go s.consume(resp, incoming)
 }
 
-func (self *Stream) Read(resp *http.Response, channel chan *Message) {
+func (s *Stream) Stop() {
+    s.exit = true
+}
+
+func (s *Stream) connect() (*http.Response, error) {
+    client := NewClient("streaming", s.parentClient.token)
+    return client.Get(fmt.Sprintf("/room/%d/live.json", s.room.Id()))
+}
+
+func (s *Stream) consume(resp *http.Response, channel chan *Message) {
     reader := bufio.NewReader(resp.Body)
 
     for {
         line, err := reader.ReadBytes('\r')
 
+        if s.exit {
+            return
+        }
+
         if err != nil {
             time.Sleep(6)
 
-            log.Print("Reconnecting...")
-            self.room.Join()
-            resp, err = self.Connect()
+            s.room.Join()
+            resp, err = s.connect()
 
             if err != nil || resp.StatusCode != 200 {
                 panic("Could not reconnect.")
@@ -74,14 +62,17 @@ func (self *Stream) Read(resp *http.Response, channel chan *Message) {
             continue
         }
 
-        var msg Message
+        var msg *Message
 
-        err = json.Unmarshal(line, &msg)
+        err = json.Unmarshal(line, msg)
 
         if err != nil {
             continue
         }
 
-        channel <- &msg
+        msg.Client = s.parentClient
+
+        channel <- msg
     }
 }
+

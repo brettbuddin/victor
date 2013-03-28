@@ -4,30 +4,39 @@ import (
     "bytes"
     "encoding/json"
     "io/ioutil"
-    "log"
+    "net"
     "net/http"
+    "net/http/httputil"
     "net/url"
+    "crypto/tls"
 )
 
 type Client struct {
-    stream  *Stream
-    account string
+    host    string
     token   string
 }
 
-func NewClient(account, token string) *Client {
+func NewClient(subdomain, token string) *Client {
     return &Client{
-        account: account,
-        token:   token,
+        host:   subdomain + ".campfirenow.com",
+        token:  token,
     }
 }
 
-func (self *Client) Room(id int) *Room {
-    return &Room{client: self, Id: id}
+func (c *Client) Room(id int) *Room {
+    return &Room{Client: c, id: id}
 }
 
-func (self *Client) Me() (*User, error) {
-    resp, err := self.Get("/users/me")
+func (c *Client) User(id int) *User {
+    return &User{Client: c, id: id}
+}
+
+func (c *Client) Account(id int) *Account {
+    return &Account{Client: c, Id: id}
+}
+
+func (c *Client) Me() (*User, error) {
+    resp, err := c.Get("/users/me")
 
     if err != nil {
         return nil, err
@@ -52,38 +61,33 @@ func (self *Client) Me() (*User, error) {
     return fetch.User, nil
 }
 
-func (self *Client) Get(path string) (*http.Response, error) {
-    return self.request("GET", path, []byte(""))
+func (c *Client) Get(path string) (*http.Response, error) {
+    return c.request("GET", path, []byte(""))
 }
 
-func (self *Client) Post(path string, body []byte) (*http.Response, error) {
-    return self.request("POST", path, body)
+func (c *Client) Post(path string, body []byte) (*http.Response, error) {
+    return c.request("POST", path, body)
 }
 
-func (self *Client) Stream(roomId int, channel chan *Message) {
-    self.stream = NewStream(self.token, self.Room(roomId))
-    self.stream.Connect()
-
-    resp, _ := self.stream.Connect()
-
-    if resp.StatusCode != 200 {
-        log.Fatal(resp.Status)
+func (c *Client) request(method, path string, body []byte) (*http.Response, error) {
+    url := &url.URL{
+        Scheme: "https",
+        Host:   c.host,
+        Path:   path,
     }
 
-    go self.stream.Read(resp, channel)
-}
+    conn, err := net.Dial("tcp", url.Host + ":443")
 
-func (self *Client) request(method, path string, body []byte) (*http.Response, error) {
-    url := new(url.URL)
-    url.Scheme = "https"
-    url.Host = self.account + ".campfirenow.com"
-    url.Path = path
+    if err != nil {
+        return nil, err
+    }
 
-    client := &http.Client{}
+    ssl        := tls.Client(conn, nil)
+    httpClient := httputil.NewClientConn(ssl, nil)
 
     req, err := http.NewRequest(method, url.String(), bytes.NewBuffer(body))
     req.Header.Add("Content-Type", "application/json")
-    req.SetBasicAuth(self.token, "X")
+    req.SetBasicAuth(c.token, "X")
 
     if method == "POST" {
         req.ContentLength = int64(len(body))
@@ -93,5 +97,15 @@ func (self *Client) request(method, path string, body []byte) (*http.Response, e
         return nil, err
     }
 
-    return client.Do(req)
+    return httpClient.Do(req)
+}
+
+func body(resp *http.Response) []byte {
+    out, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        return []byte{}
+    }
+
+    return out
 }

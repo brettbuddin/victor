@@ -16,7 +16,7 @@ type Brain struct {
     name     string
     options  map[string]string
     matchers []*Matcher
-    users    []*User
+    users    []User
 }
 
 func NewBrain(name string) *Brain {
@@ -31,38 +31,38 @@ func NewBrain(name string) *Brain {
 }
 
 // AddMatcher adds a Matcher to the Brain's list of matching patterns.
-func (self *Brain) AddMatcher(m *Matcher) {
-    self.matchers = append(self.matchers, m)
+func (b *Brain) AddMatcher(m *Matcher) {
+    b.matchers = append(b.matchers, m)
 
     log.Printf("Pattern: /%s/", m.Pattern.String())
 }
 
 // Matchers returns the list of known matching patterns.
-func (self *Brain) Matchers() []*Matcher {
-    return self.matchers
+func (b *Brain) Matchers() []*Matcher {
+    return b.matchers
 }
 
 // Hear creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches anything said in the room.
-func (self *Brain) Hear(expStr string, callback func(*Context)) {
+func (b *Brain) Hear(expStr string, callback func(*Context)) {
     exp, _ := regexp.Compile(expStr)
 
-    self.AddMatcher(NewMatcher(exp, callback))
+    b.AddMatcher(NewMatcher(exp, callback))
 }
 
 // Respond creates and registers a new Matcher with the Brain that is triggered
 // when the pattern matches a statement directed at the bot specifically.
-func (self *Brain) Respond(expStr string, callback func(*Context)) {
-    expWithNameStr := "(?i)^(" + self.name + "[:,]?)\\s*(?:" + expStr + ")"
+func (b *Brain) Respond(expStr string, callback func(*Context)) {
+    expWithNameStr := "(?i)^(" + b.name + "[:,]?)\\s*(?:" + expStr + ")"
     exp, _ := regexp.Compile(expWithNameStr)
 
-    self.AddMatcher(NewMatcher(exp, callback))
+    b.AddMatcher(NewMatcher(exp, callback))
 }
 
 // Receive takes input from the service adapter and tests it against
 // all registered Matchers.
-func (self *Brain) Receive(ctx *Context) {
-    for _, matcher := range self.matchers {
+func (b *Brain) Receive(ctx *Context) {
+    for _, matcher := range b.matchers {
         if matcher.Test(ctx) {
             matcher.Callback(ctx)
         }
@@ -72,30 +72,30 @@ func (self *Brain) Receive(ctx *Context) {
 // Instructs the Brain to remember the information about a user.
 // Passing it a user that it has already seen will update the info
 // for the same user in memory.
-func (self *Brain) RememberUser(user *User) {
-    for i, u := range self.users {
-        if u.Id == user.Id {
+func (b *Brain) RememberUser(user User) {
+    for i, u := range b.users {
+        if u.Id() == user.Id() {
             // update the name if its different
-            if u.Name != user.Name {
-                self.users[i].Name = user.Name
+            if u.Name() != user.Name() {
+                b.users[i] = user
             }
 
             return
         }
     }
 
-    self.users = append(self.users, user)
+    b.users = append(b.users, user)
 }
 
 // Returns a list of all known users.
-func (self *Brain) Users() []*User {
-    return self.users
+func (b *Brain) Users() []User {
+    return b.users
 }
 
 // Returns the User with the specified ID from memory.
-func (self *Brain) UserForId(id int) *User {
-    for _, user := range self.users {
-        if user.Id == id {
+func (b *Brain) UserForId(id int) User {
+    for _, user := range b.users {
+        if user.Id() == id {
             return user
         }
     }

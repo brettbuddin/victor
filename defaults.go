@@ -7,7 +7,7 @@ import (
 
 func registerDefaultAbilities(brain *Brain) {
     brain.Respond("what('s| is) my campfire id", func(ctx *Context) {
-        id := strconv.Itoa(ctx.Message().Id)
+        id := strconv.Itoa(ctx.Message().Id())
 
         ctx.Reply(id)
     })
@@ -37,7 +37,7 @@ func registerDefaultAbilities(brain *Brain) {
         list := ""
 
         for _, user := range brain.Users() {
-            list += user.Name + "\n"
+            list += user.Name() + "\n"
         }
 
         ctx.Paste(list)

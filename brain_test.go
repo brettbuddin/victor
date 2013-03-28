@@ -2,6 +2,7 @@ package victor_test
 
 import (
     "github.com/brettbuddin/victor"
+    "github.com/brettbuddin/victor/campfire"
     "testing"
 )
 
@@ -55,7 +56,11 @@ func testRespond(pattern, messageText string) bool {
 
     ctx := new(victor.Context)
 
-    ctx.SetMessage(&victor.Message{Id: 1, Body: messageText})
+    msg := &campfire.Message{}
+    msg.SetId(1)
+    msg.SetBody(messageText)
+
+    ctx.SetMessage(msg)
 
     brain.Receive(ctx)
 
@@ -72,7 +77,11 @@ func testHear(pattern, messageText string) bool {
 
     ctx := new(victor.Context)
 
-    ctx.SetMessage(&victor.Message{Id: 1, Body: messageText})
+    msg := &campfire.Message{}
+    msg.SetId(1)
+    msg.SetBody(messageText)
+
+    ctx.SetMessage(msg)
 
     brain.Receive(ctx)
 

@@ -26,42 +26,42 @@ func NewCampfire(name string, account string, token string, rooms []int) *Campfi
 }
 
 // Returns the Brain of this adapter.
-func (self *Campfire) Brain() *Brain {
-    return self.brain
+func (c *Campfire) Brain() *Brain {
+    return c.brain
 }
 
 // Returns the Client used by this adapter.
-func (self *Campfire) Client() *campfire.Client {
-    return self.client
+func (c *Campfire) Client() *campfire.Client {
+    return c.client
 }
 
 // Hear registers a new Hear Matcher with the Brain.
-func (self *Campfire) Hear(expStr string, callback func(*Context)) {
-    self.Brain().Hear(expStr, callback)
+func (c *Campfire) Hear(expStr string, callback func(*Context)) {
+    c.Brain().Hear(expStr, callback)
 }
 
 // Respond registers a new Respond Matcher with the Brain.
-func (self *Campfire) Respond(expStr string, callback func(*Context)) {
-    self.Brain().Respond(expStr, callback)
+func (c *Campfire) Respond(expStr string, callback func(*Context)) {
+    c.Brain().Respond(expStr, callback)
 }
 
 // Run is where the business happens.
-func (self *Campfire) Run() {
-    rooms := self.rooms
+func (c *Campfire) Run() {
+    rooms := c.rooms
     messages := make(chan *campfire.Message)
     joined := 0
 
     for i := range rooms {
-        me, err := self.Client().Me()
+        me, err := c.Client().Me()
 
         if err != nil {
-            log.Printf("Error fetching info about self: %s", err)
+            log.Printf("Error fetching info about c: %s", err)
             continue
         }
 
-        self.me = me
+        c.me = me
 
-        room := self.Client().Room(rooms[i])
+        room := c.Client().Room(rooms[i])
 
         if room.Join() != nil {
             log.Printf("Error joining room %i: %s", rooms[i], err)
@@ -69,7 +69,7 @@ func (self *Campfire) Run() {
         }
         joined++
 
-        go self.pollRoomDetails(room)
+        go c.pollRoomDetails(room)
         room.Stream(messages)
     }
 
@@ -77,48 +77,39 @@ func (self *Campfire) Run() {
         log.Fatal("No rooms joined; nothing to stream from.")
     }
 
-    for in := range messages {
-        if in.UserId == self.me.Id {
+    for msg := range messages {
+        if msg.UserId() == c.me.Id() {
             continue
-        }
-
-        msg := &Message{
-            Id:        in.Id,
-            Type:      in.Type,
-            CreatedAt: in.CreatedAt,
-            UserId:    in.UserId,
-            RoomId:    in.RoomId,
-            Body:      in.Body,
         }
 
         ctx := &Context{
             Reply: func(text string) {
-                user := self.Brain().UserForId(msg.UserId)
+                user := c.Brain().UserForId(msg.UserId())
 
                 prefix := ""
 
                 if user != nil {
-                    prefix = user.Name + ": "
+                    prefix = user.Name() + ": "
                 }
 
-                self.Client().Room(msg.RoomId).Say(prefix + text)
+                c.Client().Room(msg.RoomId()).Say(prefix + text)
             },
             Send: func(text string) {
-                self.Client().Room(msg.RoomId).Say(text)
+                c.Client().Room(msg.RoomId()).Say(text)
             },
             Paste: func(text string) {
-                self.Client().Room(msg.RoomId).Paste(text)
+                c.Client().Room(msg.RoomId()).Paste(text)
             },
             Sound: func(name string) {
-                self.Client().Room(msg.RoomId).Sound(name)
+                c.Client().Room(msg.RoomId()).Sound(name)
             },
         }
 
-        go self.brain.Receive(ctx.SetMessage(msg))
+        go c.brain.Receive(ctx.SetMessage(msg))
     }
 }
 
-func (self *Campfire) pollRoomDetails(room *campfire.Room) {
+func (c *Campfire) pollRoomDetails(room *campfire.Room) {
     for {
         details, err := room.Show()
 
@@ -126,8 +117,8 @@ func (self *Campfire) pollRoomDetails(room *campfire.Room) {
             continue
         }
 
-        for _, user := range details.Users {
-            self.Brain().RememberUser(&User{Id: user.Id, Name: user.Name})
+        for _, user := range details.Users() {
+            c.Brain().RememberUser(user)
         }
 
         time.Sleep(300 * time.Second)

@@ -5,6 +5,7 @@ import (
     "strings"
 
     "github.com/edsrzf/fineline"
+    "github.com/brettbuddin/victor/shell"
 )
 
 type Shell struct {
@@ -46,7 +47,10 @@ func (self *Shell) Run() {
             },
         }
 
-        ctx.SetMessage(&Message{Body: command})
+        msg := &shell.Message{}
+        msg.SetBody(command)
+
+        ctx.SetMessage(msg)
 
         switch command {
         default:

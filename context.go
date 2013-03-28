@@ -4,17 +4,16 @@ import (
     "math/rand"
 )
 
-type Message struct {
-    Id        int
-    Type      string
-    UserId    int
-    RoomId    int
-    Body      string
-    CreatedAt string
+type Message interface {
+    Id() int
+    Type() string
+    UserId() int
+    RoomId() int
+    Body() string
 }
 
 type Context struct {
-    message *Message
+    message Message
 
     Send  func(text string)
     Reply func(text string)
@@ -24,26 +23,26 @@ type Context struct {
     matches []string
 }
 
-func (self *Context) SetMessage(msg *Message) *Context {
-    self.message = msg
+func (c *Context) SetMessage(msg Message) *Context {
+    c.message = msg
 
-    return self
+    return c
 }
 
-func (self *Context) Message() *Message {
-    return self.message
+func (c *Context) Message() Message {
+    return c.message
 }
 
-func (self *Context) SetMatches(matches []string) *Context {
-    self.matches = matches
+func (c *Context) SetMatches(matches []string) *Context {
+    c.matches = matches
 
-    return self
+    return c
 }
 
-func (self *Context) Matches() []string {
-    return self.matches
+func (c *Context) Matches() []string {
+    return c.matches
 }
 
-func (self *Context) RandomString(strings []string) string {
+func (c *Context) RandomString(strings []string) string {
     return strings[rand.Intn(len(strings))]
 }

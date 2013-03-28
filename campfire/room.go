@@ -3,26 +3,19 @@ package campfire
 import (
     "encoding/json"
     "errors"
-    "io/ioutil"
-    "strconv"
+    "fmt"
 )
 
 type Room struct {
-    client *Client
+    *Client
 
-    Id    int     `json:"id"`
-    Name  string  `json:"name"`
-    Users []*User `json:"users"`
+    id    int
+    name  string
+    users []*User
 }
 
-func (self *Room) Show() (*Room, error) {
-    resp, err := self.client.Get("/room/" + strconv.Itoa(self.Id) + ".json")
-
-    if err != nil {
-        return nil, err
-    }
-
-    out, err := ioutil.ReadAll(resp.Body)
+func (r *Room) Show() (*Room, error) {
+    resp, err := r.Client.Get(fmt.Sprintf("/room/%d.json", r.Id()))
 
     if err != nil {
         return nil, err
@@ -32,7 +25,7 @@ func (self *Room) Show() (*Room, error) {
         Room *Room `json:"room"`
     }
 
-    err = json.Unmarshal(out, &fetch)
+    err = json.Unmarshal(body(resp), &fetch)
 
     if err != nil {
         return nil, err
@@ -41,8 +34,8 @@ func (self *Room) Show() (*Room, error) {
     return fetch.Room, nil
 }
 
-func (self *Room) Join() error {
-    resp, err := self.client.Post("/room/"+strconv.Itoa(self.Id)+"/join", []byte(""))
+func (r *Room) Join() error {
+    resp, err := r.Client.Post(fmt.Sprintf("/room/%d/join", r.Id()), []byte(""))
 
     if err == nil && resp.StatusCode == 200 {
         return nil
@@ -51,34 +44,79 @@ func (self *Room) Join() error {
     return errors.New("Could not join room.")
 }
 
-func (self *Room) Stream(channel chan *Message) {
-    self.client.Stream(self.Id, channel)
+func (r *Room) Say(message string) {
+    r.sendMessage(message, "TextMessage")
 }
 
-func (self *Room) Say(message string) {
-    msg := &MessageWrapper{Message: &Message{Type: "TextMessage", Body: message}}
+func (r *Room) Paste(message string) {
+    r.sendMessage(message, "PasteMessage")
+}
+
+func (r *Room) Sound(name string) {
+    r.sendMessage(name, "SoundMessage")
+}
+
+func (r *Room) Tweet(message string) {
+    r.sendMessage(message, "TweetMessage")
+}
+
+func (r *Room) sendMessage(message, typ string) {
+    msg := &MessageWrapper{Message: &Message{typ: typ, body: message}}
     buf, _ := json.Marshal(msg)
 
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+    r.Client.Post(fmt.Sprintf("/room/%d/speak", r.Id()), buf)
 }
 
-func (self *Room) Paste(message string) {
-    msg := &MessageWrapper{Message: &Message{Type: "PasteMessage", Body: message}}
-    buf, _ := json.Marshal(msg)
-
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+func (r *Room) Stream(incoming chan *Message) {
+    stream := NewStream(r.Client, r)
+    stream.Start(incoming)
 }
 
-func (self *Room) Sound(name string) {
-    msg := &MessageWrapper{Message: &Message{Type: "SoundMessage", Body: name}}
-    buf, _ := json.Marshal(msg)
+// INTERFACE FULFILLMENT
 
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+type roomData struct {
+    Id    int     `json:"id"`
+    Name  string  `json:"name"`
+    Users []*User `json:"users"`
 }
 
-func (self *Room) Tweet(message string) {
-    msg := &MessageWrapper{Message: &Message{Type: "TweetMessage", Body: message}}
-    buf, _ := json.Marshal(msg)
+func (r *Room) MarshalJSON() ([]byte, error) {
+    var data roomData
 
-    self.client.Post("/room/"+strconv.Itoa(self.Id)+"/speak", buf)
+    out, err := json.Marshal(data)
+
+    if err != nil {
+        return nil, err
+    }
+
+    return out, nil
 }
+
+func (r *Room) UnmarshalJSON(data []byte) error {
+    var actual roomData
+
+    err := json.Unmarshal(data, &actual)
+
+    if err != nil {
+        return err
+    }
+
+    r.id     = actual.Id
+    r.name   = actual.Name
+    r.users  = actual.Users
+
+    return nil
+}
+
+func (r *Room) Id() int {
+    return r.id
+}
+
+func (r *Room) Name() string {
+    return r.name
+}
+
+func (r *Room) Users() []*User {
+    return r.users
+}
+
