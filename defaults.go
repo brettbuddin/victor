@@ -16,9 +16,9 @@ func registerDefaultAbilities(brain *Brain) {
     })
 
     brain.Respond("(image|img|gif|animate) (.*)", func(ctx *Context) {
-        gifOnly := (ctx.Matches()[0] == "gif" || ctx.Matches()[0] == "animate")
+        gifOnly := (ctx.Matches()[1] == "gif" || ctx.Matches()[1] == "animate")
 
-        result, err := google.ImageSearch(ctx.Matches()[1], gifOnly)
+        result, err := google.ImageSearch(ctx.Matches()[2], gifOnly)
 
         if err != nil {
             ctx.Send("There was error making the request.")
