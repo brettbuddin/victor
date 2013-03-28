@@ -26,6 +26,7 @@ func NewBrain(name string) *Brain {
     brain := &Brain{
         name:     name,
         matchers: make([]*Matcher, 0, 1),
+        userLock: &sync.Mutex{},
     }
 
     registerDefaultAbilities(brain)
