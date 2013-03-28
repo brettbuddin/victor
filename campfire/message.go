@@ -15,7 +15,7 @@ type Message struct {
 }
 
 type MessageWrapper struct {
-    Message *Message
+    Message *Message `json:"message"`
 }
 
 func (m *Message) Id() int {
@@ -63,15 +63,18 @@ func (m *Message) SetUserId(val int) {
 //
 
 type messageData struct {
-    Id int      `json:"id"`
+    Id int      `json:"id,omitempty"`
     Type string `json:"type"`
     Body string `json:"body"`
-    RoomId  int `json:"room_id"`
-    UserId  int `json:"user_id"`
+    RoomId  int `json:"room_id,omitempty"`
+    UserId  int `json:"user_id,omitempty"`
 }
 
 func (m *Message) MarshalJSON() ([]byte, error) {
     var data messageData
+
+    data.Type   = m.Type()
+    data.Body   = m.Body()
 
     out, err := json.Marshal(data)
 

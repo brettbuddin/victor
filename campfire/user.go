@@ -90,6 +90,12 @@ type userData struct {
 func (u *User) MarshalJSON() ([]byte, error) {
     var data userData
 
+    data.Id     = u.Id()
+    data.Type   = u.Type()
+    data.Name   = u.Name()
+    data.EmailAddress = u.EmailAddress()
+    data.AvatarUrl    = u.AvatarUrl()
+
     out, err := json.Marshal(data)
 
     if err != nil {

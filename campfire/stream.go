@@ -62,9 +62,9 @@ func (s *Stream) consume(resp *http.Response, channel chan *Message) {
             continue
         }
 
-        var msg *Message
+        var msg Message
 
-        err = json.Unmarshal(line, msg)
+        err = json.Unmarshal(line, &msg)
 
         if err != nil {
             continue
@@ -72,7 +72,7 @@ func (s *Stream) consume(resp *http.Response, channel chan *Message) {
 
         msg.Client = s.parentClient
 
-        channel <- msg
+        channel <- &msg
     }
 }
 

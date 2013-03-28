@@ -105,7 +105,8 @@ func (c *Campfire) Run() {
             },
         }
 
-        go c.brain.Receive(ctx.SetMessage(msg))
+        ctx.SetMessage(msg)
+        go c.brain.Receive(ctx)
     }
 }
 

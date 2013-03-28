@@ -23,20 +23,16 @@ type Context struct {
     matches []string
 }
 
-func (c *Context) SetMessage(msg Message) *Context {
+func (c *Context) SetMessage(msg Message) {
     c.message = msg
-
-    return c
 }
 
 func (c *Context) Message() Message {
     return c.message
 }
 
-func (c *Context) SetMatches(matches []string) *Context {
+func (c *Context) SetMatches(matches []string) {
     c.matches = matches
-
-    return c
 }
 
 func (c *Context) Matches() []string {
