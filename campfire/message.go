@@ -73,8 +73,9 @@ type messageData struct {
 func (m *Message) MarshalJSON() ([]byte, error) {
     var data messageData
 
-    data.Type   = m.Type()
-    data.Body   = m.Body()
+    data.Id   = m.Id()
+    data.Type = m.Type()
+    data.Body = m.Body()
 
     out, err := json.Marshal(data)
 
