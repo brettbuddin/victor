@@ -31,18 +31,8 @@ func (c *Client) User(id int) *User {
     return &User{Client: c, id: id}
 }
 
-func (c *Client) Account(id int) *Account {
-    return &Account{Client: c, Id: id}
-}
-
 func (c *Client) Me() (*User, error) {
     resp, err := c.Get("/users/me")
-
-    if err != nil {
-        return nil, err
-    }
-
-    out, err := ioutil.ReadAll(resp.Body)
 
     if err != nil {
         return nil, err
@@ -52,7 +42,7 @@ func (c *Client) Me() (*User, error) {
         User *User `json:"user"`
     }
 
-    err = json.Unmarshal(out, &fetch)
+    err = json.Unmarshal(body(resp), &fetch)
 
     if err != nil {
         return nil, err
