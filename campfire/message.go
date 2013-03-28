@@ -5,7 +5,7 @@ import (
 )
 
 type Message struct {
-    *Client `json:"-"`
+    *Client
 
     id int
     typ string

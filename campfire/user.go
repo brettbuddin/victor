@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-    *Client `json:"-"`
+    *Client
 
     id int
     typ string
