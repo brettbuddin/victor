@@ -3,6 +3,9 @@ package victor
 import (
     "github.com/brettbuddin/victor/utils/google"
     "strconv"
+    "fmt"
+    "time"
+    "math/rand"
 )
 
 func registerDefaultAbilities(brain *Brain) {
@@ -13,6 +16,26 @@ func registerDefaultAbilities(brain *Brain) {
 
     brain.Respond("ping", func(ctx *Context) {
         ctx.Reply("pong!")
+    })
+
+    brain.Respond("roll( (\\d+))?", func(ctx *Context) {
+        defer recover()
+
+        bound      := 100
+        val        := ctx.Matches()[2]
+
+        if val != "" {
+            var err error
+            bound, err = strconv.Atoi(val)
+
+            if err != nil {
+                return
+            }
+        }
+
+        rand.Seed(time.Now().UTC().UnixNano())
+        random := rand.Intn(bound)
+        ctx.Reply(fmt.Sprintf("rolled a %d of %d", random, bound))
     })
 
     brain.Respond("(image|img|gif|animate) (.*)", func(ctx *Context) {

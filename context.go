@@ -2,6 +2,7 @@ package victor
 
 import (
     "math/rand"
+    "time"
 )
 
 type User interface {
@@ -45,5 +46,6 @@ func (c *Context) Matches() []string {
 }
 
 func (c *Context) RandomString(strings []string) string {
+    rand.Seed(time.Now().UTC().UnixNano())
     return strings[rand.Intn(len(strings))]
 }
