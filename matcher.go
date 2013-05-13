@@ -2,7 +2,6 @@ package victor
 
 import (
     "regexp"
-    "strings"
 )
 
 type Matcher struct {
