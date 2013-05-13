@@ -21,7 +21,7 @@ func NewMatcher(exp *regexp.Regexp, callback func(*Context)) *Matcher {
 // message and sets matches that result from it.
 // Returns true if it is a match and false if it is not
 func (m *Matcher) Test(ctx *Context) bool {
-    results := m.Pattern.FindAllStringSubmatch(strings.ToLower(ctx.Message().Body()), -1)
+    results := m.Pattern.FindAllStringSubmatch(ctx.Message().Body(), -1)
 
     if len(results) > 0 {
         ctx.SetMatches(results[0])
