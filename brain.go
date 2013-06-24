@@ -91,7 +91,25 @@ func (b *Brain) Receive(m adapter.Message) {
     }
 }
 
-// AddUser caches a reference to the user for later lookup
+type ListenerFunc func(adapter.Message)
+
+func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
+    return func(m adapter.Message) {
+        results := pattern.FindAllStringSubmatch(m.Body(), -1)
+
+        if len(results) > 0 {
+            m.SetParams(results[0][1:])
+            log.Printf("TRIGGER: %s\n", pattern)
+            log.Printf("PARAMS: %s\n", m.Params())
+            f(m)
+        }
+    }
+}
+
+//
+// User and Room caching
+//
+
 func (b *Brain) AddUser(u adapter.User) {
     if b.UserExists(u) {
         return
@@ -102,7 +120,6 @@ func (b *Brain) AddUser(u adapter.User) {
     b.users = append(b.users, u)
 }
 
-// AddRoom caches a reference to the room for later lookup
 func (b *Brain) AddRoom(r adapter.Room) {
     if b.RoomExists(r) {
         return
@@ -139,7 +156,6 @@ func (b *Brain) RoomExists(r adapter.Room) bool {
     return false
 }
 
-// User returns the user with the specified ID
 func (b *Brain) User(id string) adapter.User {
     b.mutex.RLock()
     defer b.mutex.RUnlock()
@@ -153,7 +169,6 @@ func (b *Brain) User(id string) adapter.User {
     return nil
 }
 
-// Room returns the room with the specified ID
 func (b *Brain) Room(id string) adapter.Room {
     b.mutex.RLock()
     defer b.mutex.RUnlock()
@@ -165,19 +180,4 @@ func (b *Brain) Room(id string) adapter.Room {
     }
 
     return nil
-}
-
-type ListenerFunc func(adapter.Message)
-
-func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
-    return func(m adapter.Message) {
-        results := pattern.FindAllStringSubmatch(m.Body(), -1)
-
-        if len(results) > 0 {
-            m.SetParams(results[0][1:])
-            log.Printf("TRIGGER: %s\n", pattern)
-            log.Printf("PARAMS: %s\n", m.Params())
-            f(m)
-        }
-    }
 }
