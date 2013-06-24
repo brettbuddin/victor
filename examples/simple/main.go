@@ -1,20 +1,20 @@
 package main
 
 import (
-    "github.com/brettbuddin/victor"
-    "fmt"
+	"fmt"
+	"github.com/brettbuddin/victor"
 )
 
 func main() {
-    bot, err := victor.New("shell", "bot")
+	bot, err := victor.New("shell", "bot")
 
-    if err != nil {
-        fmt.Println(err)
-    }
+	if err != nil {
+		fmt.Println(err)
+	}
 
-    bot.Respond("hello|hi|howdy", func(m victor.Message) {
-        m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
-    })
+	bot.Respond("hello|hi|howdy", func(m victor.Message) {
+		m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
+	})
 
-    bot.Run()
+	bot.Run()
 }
