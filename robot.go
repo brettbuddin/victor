@@ -66,6 +66,10 @@ func (r *Robot) Run() error {
             close(messages)
             return nil
         case m := <-messages:
+            if !r.brain.UserExists(m.User()) {
+                r.brain.AddUser(m.User())
+            }
+
             if m.User().Id() != r.brain.Id() {
                 r.brain.Receive(m)
             }

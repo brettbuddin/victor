@@ -93,22 +93,57 @@ func (b *Brain) Receive(m adapter.Message) {
 
 // AddUser caches a reference to the user for later lookup
 func (b *Brain) AddUser(u adapter.User) {
+    if b.UserExists(u) {
+        return
+    }
+
     b.mutex.Lock()
     defer b.mutex.Unlock()
     b.users = append(b.users, u)
 }
 
 // AddRoom caches a reference to the room for later lookup
-func (b *Brain) AddRoom(ro adapter.Room) {
+func (b *Brain) AddRoom(r adapter.Room) {
+    if b.RoomExists(r) {
+        return
+    }
+
     b.mutex.Lock()
     defer b.mutex.Unlock()
-    b.rooms = append(b.rooms, ro)
+    b.rooms = append(b.rooms, r)
+}
+
+func (b *Brain) UserExists(u adapter.User) bool {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+
+    for _, o := range b.users {
+        if u.Id() == o.Id() {
+            return true
+        }
+    }
+
+    return false
+}
+
+func (b *Brain) RoomExists(r adapter.Room) bool {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+
+    for _, o := range b.rooms {
+        if r.Id() == o.Id() {
+            return true
+        }
+    }
+
+    return false
 }
 
 // User returns the user with the specified ID
 func (b *Brain) User(id string) adapter.User {
     b.mutex.RLock()
     defer b.mutex.RUnlock()
+
     for _, u := range b.users {
         if id == u.Id() {
             return u
@@ -122,9 +157,10 @@ func (b *Brain) User(id string) adapter.User {
 func (b *Brain) Room(id string) adapter.Room {
     b.mutex.RLock()
     defer b.mutex.RUnlock()
-    for _, ro := range b.rooms {
-        if id == ro.Id() {
-            return ro
+
+    for _, r := range b.rooms {
+        if id == r.Id() {
+            return r
         }
     }
 

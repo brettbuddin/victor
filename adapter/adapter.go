@@ -78,7 +78,10 @@ type Brain interface {
 
     // Memory (Users and Rooms)
     AddUser(User)
-    AddRoom(Room)
     User(string) User
+    UserExists(User) bool
+
+    AddRoom(Room)
     Room(string) Room
+    RoomExists(Room) bool
 }
