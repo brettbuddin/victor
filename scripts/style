@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-
-find . -name '*.go' | xargs gofmt -tabs=false -tabwidth=4 -w 

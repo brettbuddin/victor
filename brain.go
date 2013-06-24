@@ -1,115 +1,147 @@
 package victor
 
 import (
-    "log"
-    "regexp"
+    "github.com/brettbuddin/victor/adapter"
     "sync"
+    "regexp"
+    "strings"
+    "log"
 )
 
-type Adapter interface {
-    Brain() *Brain
-    Hear(string, func(*Context))
-    Respond(string, func(*Context))
-    Run()
-}
-
 type Brain struct {
-    name     string
-    options  map[string]string
-    matchers []*Matcher
-
-    userLock *sync.Mutex
-    users    []User
+    mutex *sync.RWMutex
+    name string
+    id string
+    users []adapter.User
+    rooms []adapter.Room
+    listeners []ListenerFunc
 }
 
 func NewBrain(name string) *Brain {
-    brain := &Brain{
-        name:     name,
-        matchers: make([]*Matcher, 0, 1),
-        userLock: &sync.Mutex{},
-    }
-
-    registerDefaultAbilities(brain)
-
-    return brain
-}
-
-// AddMatcher adds a Matcher to the Brain's list of matching patterns.
-func (b *Brain) AddMatcher(m *Matcher) {
-    b.matchers = append(b.matchers, m)
-
-    log.Printf("Pattern: /%s/", m.Pattern.String())
-}
-
-// Matchers returns the list of known matching patterns.
-func (b *Brain) Matchers() []*Matcher {
-    return b.matchers
-}
-
-// Hear creates and registers a new Matcher with the Brain that is triggered
-// when the pattern matches anything said in the room.
-func (b *Brain) Hear(expStr string, callback func(*Context)) {
-    exp, _ := regexp.Compile(expStr)
-
-    b.AddMatcher(NewMatcher(exp, callback))
-}
-
-// Respond creates and registers a new Matcher with the Brain that is triggered
-// when the pattern matches a statement directed at the bot specifically.
-func (b *Brain) Respond(expStr string, callback func(*Context)) {
-    expWithNameStr := "(?i)\\A(?:" + b.name + "[:,]?\\s*|/)(?:" + expStr + ")\\z"
-    exp, _ := regexp.Compile(expWithNameStr)
-
-    b.AddMatcher(NewMatcher(exp, callback))
-}
-
-// Receive takes input from the service adapter and tests it against
-// all registered Matchers. Breaks on the first match.
-func (b *Brain) Receive(ctx *Context) {
-    for _, matcher := range b.matchers {
-        if matcher.Test(ctx) {
-            matcher.Callback(ctx)
-            return
-        }
+    return &Brain{
+        mutex: &sync.RWMutex{},
+        name: name,
+        id: "",
+        users: []adapter.User{},
+        rooms: []adapter.Room{},
+        listeners: []ListenerFunc{},
     }
 }
 
-// Instructs the Brain to remember the information about a user.
-// Passing it a user that it has already seen will update the info
-// for the same user in memory.
-func (b *Brain) RememberUser(user User) {
-    b.userLock.Lock()
-    defer b.userLock.Unlock()
+func (b *Brain) Name() string {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+    return b.name
+}
 
-    for i, u := range b.users {
-        if u.Id() == user.Id() {
-            // update the name if its different
-            if u.Name() != user.Name() {
-                b.users[i] = user
-            }
+func (b *Brain) Id() string {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+    return b.id
+}
 
-            return
-        }
+func (b *Brain) SetId(v string) {
+    b.mutex.Lock()
+    defer b.mutex.Unlock()
+    b.id = v
+}
+
+// Respond registers a listener that matches a direct message to
+// the robot. This means "@botname command", "botname command" or
+// "/command" forms
+func (b *Brain) Respond(exp string, f func(adapter.Message)) (err error) {
+    exp = strings.Join([]string{
+        "(?i)",                                  // flags
+        "\\A",                                   // begin
+        "(?:(?:@)?" + b.Name() + "[:,]?\\s*|/)", // bot name
+        "(?:" + exp + ")",                       // expression
+        "\\z",                                   // end
+    }, "")
+
+    return b.Hear(exp, f)
+}
+
+// Hear registers a listener that matches any instance of the
+// phrase in the room. Excluding from itself.
+func (b *Brain) Hear(exp string, f func(adapter.Message)) (err error) {
+    pattern, err := regexp.Compile(exp)
+
+    if err != nil {
+        return err
     }
 
-    b.users = append(b.users, user)
+    log.Printf("LISTENER: %s\n", exp)
+    b.register(listenerFunc(pattern, f))
+    return
 }
 
-// Returns a list of all known users.
-func (b *Brain) Users() []User {
-    return b.users
+func (b *Brain) register(l ListenerFunc) {
+    b.mutex.Lock()
+    defer b.mutex.Unlock()
+    b.listeners = append(b.listeners, l)
 }
 
-// Returns the User with the specified ID from memory.
-func (b *Brain) UserForId(id int) User {
-    b.userLock.Lock()
-    defer b.userLock.Unlock()
+// Receive accepts an incoming message and applies
+// it to all listeners.
+func (b *Brain) Receive(m adapter.Message) {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+    for _, l := range b.listeners {
+        go l(m)
+    }
+}
 
-    for _, user := range b.users {
-        if user.Id() == id {
-            return user
+// AddUser caches a reference to the user for later lookup
+func (b *Brain) AddUser(u adapter.User) {
+    b.mutex.Lock()
+    defer b.mutex.Unlock()
+    b.users = append(b.users, u)
+}
+
+// AddRoom caches a reference to the room for later lookup
+func (b *Brain) AddRoom(ro adapter.Room) {
+    b.mutex.Lock()
+    defer b.mutex.Unlock()
+    b.rooms = append(b.rooms, ro)
+}
+
+// User returns the user with the specified ID
+func (b *Brain) User(id string) adapter.User {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+    for _, u := range b.users {
+        if id == u.Id() {
+            return u
         }
     }
 
     return nil
+}
+
+// Room returns the room with the specified ID
+func (b *Brain) Room(id string) adapter.Room {
+    b.mutex.RLock()
+    defer b.mutex.RUnlock()
+    for _, ro := range b.rooms {
+        if id == ro.Id() {
+            return ro
+        }
+    }
+
+    return nil
+}
+
+type ListenerFunc func(adapter.Message)
+
+func listenerFunc(pattern *regexp.Regexp, f func(adapter.Message)) ListenerFunc {
+    return func(m adapter.Message) {
+        results := pattern.FindAllStringSubmatch(m.Body(), -1)
+
+        if len(results) > 0 {
+            m.SetParams(results[0][1:])
+            log.Printf("TRIGGER: %s\n", pattern)
+            log.Printf("PARAMS: %s\n", m.Params())
+            f(m)
+        }
+    }
 }

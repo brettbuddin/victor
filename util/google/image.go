@@ -46,6 +46,7 @@ func ImageSearch(term string, gifOnly bool) (string, error) {
     }
 
     buf, err := ioutil.ReadAll(resp.Body)
+    defer resp.Body.Close()
 
     if err != nil {
         return "", err
