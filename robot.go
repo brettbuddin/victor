@@ -33,6 +33,11 @@ func New(adapterName, robotName string) (*Robot, error) {
     return bot, nil
 }
 
+// Brain returns the brain of the robot
+func (r *Robot) Brain() adapter.Brain {
+    return r.brain
+}
+
 // Respond proxies the registration of a respond
 // command to the brain.
 func (r *Robot) Respond(exp string, f func(Message)) (err error) {
@@ -66,11 +71,11 @@ func (r *Robot) Run() error {
             close(messages)
             return nil
         case m := <-messages:
-            if !r.brain.UserExists(m.User()) {
-                r.brain.AddUser(m.User())
-            }
-
             if m.User().Id() != r.brain.Id() {
+                if !r.brain.UserExists(m.User()) {
+                    r.brain.AddUser(m.User())
+                }
+
                 r.brain.Receive(m)
             }
         }
