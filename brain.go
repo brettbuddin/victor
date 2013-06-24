@@ -133,7 +133,7 @@ func (b *Brain) Room(id string) adapter.Room {
 
 type ListenerFunc func(adapter.Message)
 
-func listenerFunc(pattern *regexp.Regexp, f func(adapter.Message)) ListenerFunc {
+func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
     return func(m adapter.Message) {
         results := pattern.FindAllStringSubmatch(m.Body(), -1)
 
