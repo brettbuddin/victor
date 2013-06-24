@@ -32,17 +32,25 @@ func (f AdapterFunc) Produce(m chan Message) {
 }
 
 type Message interface {
+    // Identity
     Id()   string
     Body() string
     Room() Room
     User() User
+
+    // Sends
     Reply(string) error
+
+    // Params
     SetParams([]string)
     Params() []string
 }
 
 type Room interface {
+    // Identity
     Id() string
+
+    // Sends
     Say(string) error
     Paste(string) error
     Sound(string) error
@@ -50,18 +58,25 @@ type Room interface {
 }
 
 type User interface {
+    // Identity
     Id() string
     Name() string
 }
 
 type Brain interface {
-    Name() string
+    // Identity
     Id() string
     SetId(string)
-    Receive(Message)
+    Name() string
+
+    // Listener registration
     Respond(string, func(Message)) error
     Hear(string, func(Message)) error
 
+    // Input
+    Receive(Message)
+
+    // Memory (Users and Rooms)
     AddUser(User)
     AddRoom(Room)
     User(string) User
