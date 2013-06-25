@@ -65,6 +65,8 @@ type User interface {
 }
 
 type Brain interface {
+    UserRoomCacher
+
 	// Identity
 	Id() string
 	SetId(string)
@@ -76,12 +78,12 @@ type Brain interface {
 
 	// Input
 	Receive(Message)
+}
 
-	// Memory (Users and Rooms)
+type UserRoomCacher interface {
 	AddUser(User)
 	User(string) User
 	UserExists(string) bool
-
 	AddRoom(Room)
 	Room(string) Room
 	RoomExists(string) bool
