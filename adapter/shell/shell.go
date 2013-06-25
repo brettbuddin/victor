@@ -39,4 +39,6 @@ func (s *Shell) Listen(messages chan adapter.Message) error {
 			}
 		}
 	}
+
+	return nil
 }

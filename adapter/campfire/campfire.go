@@ -104,4 +104,6 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 			}
 		}
 	}
+
+	return nil
 }
