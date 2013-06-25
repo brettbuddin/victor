@@ -97,10 +97,23 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 	for {
 		select {
 		case m := <-rawMessages:
+		    roomIdStr := strconv.Itoa(m.RoomId)
+		    userIdStr := strconv.Itoa(m.UserId)
+
+            if !c.Brain.UserExists(userIdStr) {
+                user, err := c.client.UserForId(m.UserId)
+
+                if err != nil {
+                    break
+                }
+
+                c.Brain.AddUser(&User{user})
+            }
+
 			messages <- &Message{
 				Message: m,
-				room:    c.Brain.Room(strconv.Itoa(m.RoomId)),
-				user:    c.Brain.User(strconv.Itoa(m.UserId)),
+				room:    c.Brain.Room(roomIdStr),
+				user:    c.Brain.User(userIdStr),
 			}
 		}
 	}

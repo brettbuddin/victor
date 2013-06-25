@@ -111,7 +111,7 @@ func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 //
 
 func (b *Brain) AddUser(u adapter.User) {
-	if b.UserExists(u) {
+	if b.UserExists(u.Id()) {
 		return
 	}
 
@@ -121,7 +121,7 @@ func (b *Brain) AddUser(u adapter.User) {
 }
 
 func (b *Brain) AddRoom(r adapter.Room) {
-	if b.RoomExists(r) {
+	if b.RoomExists(r.Id()) {
 		return
 	}
 
@@ -130,12 +130,12 @@ func (b *Brain) AddRoom(r adapter.Room) {
 	b.rooms = append(b.rooms, r)
 }
 
-func (b *Brain) UserExists(u adapter.User) bool {
+func (b *Brain) UserExists(id string) bool {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
 	for _, o := range b.users {
-		if u.Id() == o.Id() {
+		if id == o.Id() {
 			return true
 		}
 	}
@@ -143,12 +143,12 @@ func (b *Brain) UserExists(u adapter.User) bool {
 	return false
 }
 
-func (b *Brain) RoomExists(r adapter.Room) bool {
+func (b *Brain) RoomExists(id string) bool {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 
 	for _, o := range b.rooms {
-		if r.Id() == o.Id() {
+		if id == o.Id() {
 			return true
 		}
 	}
