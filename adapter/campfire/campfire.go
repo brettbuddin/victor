@@ -53,7 +53,7 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 	me, err := c.client.Me()
 
 	if err != nil {
-		log.Fatalf("CAMPFIRE: could not fetch info about self", err)
+		log.Fatalf("CAMPFIRE: could not fetch info about self: %s", err)
 	}
 
 	c.Brain.SetId(strconv.Itoa(me.Id))
