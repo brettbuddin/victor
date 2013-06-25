@@ -80,4 +80,6 @@ func (r *Robot) Run() error {
 			}
 		}
 	}
+
+	return nil
 }
