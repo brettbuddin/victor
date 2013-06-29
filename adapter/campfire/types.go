@@ -50,6 +50,10 @@ func (r *Room) Id() string {
 	return strconv.Itoa(r.Room.Id)
 }
 
+func (r *Room) CacheKey() string {
+	return "room_" + r.Id()
+}
+
 func (r *Room) Name() string {
 	return r.Room.Name
 }
@@ -72,6 +76,10 @@ func (r *Room) Tweet(url string) error {
 
 type User struct {
 	*campfire.User
+}
+
+func (u *User) CacheKey() string {
+	return "user_" + u.Id()
 }
 
 func (u *User) Id() string {

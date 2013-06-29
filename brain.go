@@ -11,9 +11,7 @@ import (
 type Brain struct {
 	mutex     *sync.RWMutex
 	name      string
-	id        string
-	users     []adapter.User
-	rooms     []adapter.Room
+	identity  adapter.User
 	listeners []ListenerFunc
 }
 
@@ -21,9 +19,6 @@ func NewBrain(name string) *Brain {
 	return &Brain{
 		mutex:     &sync.RWMutex{},
 		name:      name,
-		id:        "",
-		users:     []adapter.User{},
-		rooms:     []adapter.Room{},
 		listeners: []ListenerFunc{},
 	}
 }
@@ -34,16 +29,16 @@ func (b *Brain) Name() string {
 	return b.name
 }
 
-func (b *Brain) Id() string {
+func (b *Brain) Identity() adapter.User {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
-	return b.id
+	return b.identity
 }
 
-func (b *Brain) SetId(v string) {
+func (b *Brain) SetIdentity(u adapter.User) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	b.id = v
+	b.identity = u
 }
 
 // Respond registers a listener that matches a direct message to
@@ -104,80 +99,4 @@ func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 			f(m)
 		}
 	}
-}
-
-//
-// User and Room caching
-//
-
-func (b *Brain) AddUser(u adapter.User) {
-	if b.UserExists(u.Id()) {
-		return
-	}
-
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
-	b.users = append(b.users, u)
-}
-
-func (b *Brain) AddRoom(r adapter.Room) {
-	if b.RoomExists(r.Id()) {
-		return
-	}
-
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
-	b.rooms = append(b.rooms, r)
-}
-
-func (b *Brain) UserExists(id string) bool {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
-
-	for _, o := range b.users {
-		if id == o.Id() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (b *Brain) RoomExists(id string) bool {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
-
-	for _, o := range b.rooms {
-		if id == o.Id() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (b *Brain) User(id string) adapter.User {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
-
-	for _, u := range b.users {
-		if id == u.Id() {
-			return u
-		}
-	}
-
-	return nil
-}
-
-func (b *Brain) Room(id string) adapter.Room {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
-
-	for _, r := range b.rooms {
-		if id == r.Id() {
-			return r
-		}
-	}
-
-	return nil
 }

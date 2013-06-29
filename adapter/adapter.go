@@ -20,20 +20,23 @@ func Load(name string) (InitFunc, error) {
 	return a, nil
 }
 
-type InitFunc func(Brain) Adapter
-
-type Adapter interface {
-	Listen(chan Message) error
-}
-
+type InitFunc func(Agent) Adapter
 type AdapterFunc func(chan Message)
 
 func (f AdapterFunc) Produce(m chan Message) {
 	f(m)
 }
 
+type Adapter interface {
+	Listen(chan Message) error
+}
+
+type Agent interface {
+	Identity() User
+	SetIdentity(User)
+}
+
 type Message interface {
-	// Identity
 	Id() string
 	Body() string
 	Room() Room
@@ -48,7 +51,6 @@ type Message interface {
 }
 
 type Room interface {
-	// Identity
 	Id() string
 
 	// Sends
@@ -59,32 +61,6 @@ type Room interface {
 }
 
 type User interface {
-	// Identity
 	Id() string
 	Name() string
-}
-
-type Brain interface {
-    UserRoomCacher
-
-	// Identity
-	Id() string
-	SetId(string)
-	Name() string
-
-	// Listener registration
-	Respond(string, func(Message)) error
-	Hear(string, func(Message)) error
-
-	// Input
-	Receive(Message)
-}
-
-type UserRoomCacher interface {
-	AddUser(User)
-	User(string) User
-	UserExists(string) bool
-	AddRoom(Room)
-	Room(string) Room
-	RoomExists(string) bool
 }

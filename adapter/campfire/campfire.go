@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	adapter.Register("campfire", func(b adapter.Brain) adapter.Adapter {
+	adapter.Register("campfire", func(a adapter.Agent) adapter.Adapter {
 		account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
 		token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
 		roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
@@ -36,16 +36,18 @@ func init() {
 		}
 
 		return &Campfire{
-			Brain:   b,
+			agent:   a,
 			client:  client,
 			roomIds: roomIds,
+			cache:   NewCache(),
 		}
 	})
 }
 
 type Campfire struct {
-	adapter.Brain
+	agent   adapter.Agent
 	client  *campfire.Client
+	cache   *Cache
 	roomIds []int
 }
 
@@ -56,7 +58,7 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 		log.Fatalf("CAMPFIRE: could not fetch info about self: %s", err)
 	}
 
-	c.Brain.SetId(strconv.Itoa(me.Id))
+	c.agent.SetIdentity(&User{me})
 
 	rooms := []*campfire.Room{}
 
@@ -75,9 +77,9 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 			continue
 		}
 
-		c.Brain.AddRoom(&Room{room})
+		c.cache.Add(&Room{room})
 		for _, u := range room.Users {
-			c.Brain.AddUser(&User{u})
+			c.cache.Add(&User{u})
 		}
 
 		log.Printf("ROOM[%d]: joined %s\n", id, room.Name)
@@ -100,20 +102,20 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 			roomIdStr := strconv.Itoa(m.RoomId)
 			userIdStr := strconv.Itoa(m.UserId)
 
-			if !c.Brain.UserExists(userIdStr) {
+			if !c.cache.Exists("user_" + userIdStr) {
 				user, err := c.client.UserForId(m.UserId)
 
 				if err != nil {
 					break
 				}
 
-				c.Brain.AddUser(&User{user})
+				c.cache.Add(&User{user})
 			}
 
 			messages <- &Message{
 				Message: m,
-				room:    c.Brain.Room(roomIdStr),
-				user:    c.Brain.User(userIdStr),
+				room:    c.cache.Get("room_" + roomIdStr).(*Room),
+				user:    c.cache.Get("user_" + userIdStr).(*User),
 			}
 		}
 	}
