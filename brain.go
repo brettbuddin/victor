@@ -44,7 +44,6 @@ func (b *Brain) Identity() adapter.User {
 func (b *Brain) SetIdentity(u adapter.User) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	log.Println("%s\n", b.identity)
 	b.identity = u
 }
 

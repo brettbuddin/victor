@@ -21,9 +21,9 @@ func init() {
 			os.Exit(1)
 		}
 
+		brain = b
 		client = campfire.NewClient(account, token)
 		roomIdStrings := strings.Split(roomList, ",")
-		roomIds := make([]int, 0)
 
 		for _, id := range roomIdStrings {
 			j, err := strconv.Atoi(id)
@@ -42,7 +42,7 @@ func init() {
 var (
 	brain   adapter.Brain
 	client  *campfire.Client
-	roomIds []int
+	roomIds = []int{}
 )
 
 func Listen(messages chan adapter.Message) (err error) {
