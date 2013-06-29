@@ -94,7 +94,6 @@ func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 		results := pattern.FindAllStringSubmatch(m.Body(), -1)
 
 		if len(results) > 0 {
-			log.Printf("PARAMS: %s\n", m.Params())
 			m.SetParams(results[0][1:])
 			log.Printf("TRIGGER: %s\n", pattern)
 			log.Printf("TRIGGER: %s\n", pattern)
