@@ -8,18 +8,18 @@ import (
 )
 
 type Message struct {
-	*campfire.Message
-	user   adapter.User
-	room   adapter.Room
-	params []string
+	message *campfire.Message
+	user    adapter.User
+	room    adapter.Room
+	params  []string
 }
 
 func (m *Message) Id() string {
-	return strconv.Itoa(m.Message.Id)
+	return itoa(m.message.Id)
 }
 
 func (m *Message) Body() string {
-	return m.Message.Body
+	return m.message.Body
 }
 
 func (m *Message) User() adapter.User {
@@ -43,41 +43,53 @@ func (m *Message) Params() []string {
 }
 
 type Room struct {
-	*campfire.Room
+	room *campfire.Room
 }
 
-func (r *Room) Id() string {
-	return strconv.Itoa(r.Room.Id)
+func (r Room) Id() string {
+	return itoa(r.room.Id)
 }
 
-func (r *Room) Name() string {
-	return r.Room.Name
+func (r Room) CacheKey() string {
+	return RoomKey(r.Id())
 }
 
-func (r *Room) Say(text string) error {
-	return r.Room.SendText(text)
+func (r Room) Name() string {
+	return r.room.Name
 }
 
-func (r *Room) Paste(text string) error {
-	return r.Room.SendPaste(text)
+func (r Room) Say(text string) error {
+	return r.room.SendText(text)
 }
 
-func (r *Room) Sound(name string) error {
-	return r.Room.SendSound(name)
+func (r Room) Paste(text string) error {
+	return r.room.SendPaste(text)
 }
 
-func (r *Room) Tweet(url string) error {
-	return r.Room.SendTweet(url)
+func (r Room) Sound(name string) error {
+	return r.room.SendSound(name)
+}
+
+func (r Room) Tweet(url string) error {
+	return r.room.SendTweet(url)
 }
 
 type User struct {
-	*campfire.User
+	user *campfire.User
 }
 
-func (u *User) Id() string {
-	return strconv.Itoa(u.User.Id)
+func (u User) CacheKey() string {
+	return UserKey(u.Id())
 }
 
-func (u *User) Name() string {
-	return u.User.Name
+func (u User) Id() string {
+	return itoa(u.user.Id)
+}
+
+func (u User) Name() string {
+	return u.user.Name
+}
+
+func itoa(i int) string {
+	return strconv.Itoa(i)
 }

@@ -8,14 +8,12 @@ import (
 )
 
 func init() {
-	adapter.Register("shell", func(b adapter.Brain) adapter.Adapter {
-		return &Shell{Brain: b}
+	adapter.Register("shell", func(adapter.Brain) adapter.Adapter {
+		return &Shell{}
 	})
 }
 
-type Shell struct {
-	adapter.Brain
-}
+type Shell struct{}
 
 func (s *Shell) Listen(messages chan adapter.Message) error {
 	reader := bufio.NewReader(os.Stdin)
@@ -33,9 +31,10 @@ func (s *Shell) Listen(messages chan adapter.Message) error {
 			return nil
 		default:
 			messages <- &Message{
-				body: string(line),
-				user: &User{0, "You"},
-				room: &Room{0, "Chat City"},
+				body:   string(line),
+				params: []string{},
+				user:   User{0, "You"},
+				room:   Room{0, "Chat City"},
 			}
 		}
 	}

@@ -8,7 +8,7 @@ import (
 
 type Robot struct {
 	adapter adapter.Adapter
-	brain   adapter.Brain
+	brain   *Brain
 }
 
 type Message interface {
@@ -31,11 +31,6 @@ func New(adapterName, robotName string) (*Robot, error) {
 
 	defaults(bot)
 	return bot, nil
-}
-
-// Brain returns the brain of the robot
-func (r *Robot) Brain() adapter.Brain {
-	return r.brain
 }
 
 // Respond proxies the registration of a respond
@@ -71,7 +66,7 @@ func (r *Robot) Run() error {
 			close(messages)
 			return nil
 		case m := <-messages:
-			if m.User().Id() != r.brain.Id() {
+			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
 				r.brain.Receive(m)
 			}
 		}
