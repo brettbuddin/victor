@@ -9,13 +9,11 @@ import (
 
 func init() {
 	adapter.Register("shell", func(adapter.Brain) adapter.Adapter {
-		return &Shell{}
+		return adapter.AdapterFunc(Listen)
 	})
 }
 
-type Shell struct{}
-
-func (s *Shell) Listen(messages chan adapter.Message) error {
+func Listen(messages chan adapter.Message) error {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Type your commands (type \"exit\" to exit):")
 

@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+var (
+	brain   adapter.Brain
+	client  *campfire.Client
+	roomIds = []int{}
+)
+
 func init() {
 	adapter.Register("campfire", func(b adapter.Brain) adapter.Adapter {
 		account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
@@ -38,12 +44,6 @@ func init() {
 		return adapter.AdapterFunc(Listen)
 	})
 }
-
-var (
-	brain   adapter.Brain
-	client  *campfire.Client
-	roomIds = []int{}
-)
 
 func Listen(messages chan adapter.Message) (err error) {
 	cache := brain.Cache()
