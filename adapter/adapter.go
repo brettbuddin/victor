@@ -20,7 +20,7 @@ func Load(name string) (InitFunc, error) {
 	return a, nil
 }
 
-type InitFunc func(Agent) Adapter
+type InitFunc func(Brain) Adapter
 type AdapterFunc func(chan Message)
 
 func (f AdapterFunc) Produce(m chan Message) {
@@ -31,7 +31,7 @@ type Adapter interface {
 	Listen(chan Message) error
 }
 
-type Agent interface {
+type Brain interface {
 	Identity() User
 	SetIdentity(User)
 }
@@ -64,3 +64,14 @@ type User interface {
 	Id() string
 	Name() string
 }
+
+type Cacheable interface {
+	CacheKey() string
+}
+
+type Cacher interface {
+	Add(Cacheable)
+	Get(string) Cacheable
+	Exists(string) bool
+}
+

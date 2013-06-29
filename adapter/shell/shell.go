@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	adapter.Register("shell", func(adapter.Agent) adapter.Adapter {
+	adapter.Register("shell", func(adapter.Brain) adapter.Adapter {
 		return &Shell{}
 	})
 }
@@ -32,8 +32,9 @@ func (s *Shell) Listen(messages chan adapter.Message) error {
 		default:
 			messages <- &Message{
 				body: string(line),
-				user: &User{0, "You"},
-				room: &Room{0, "Chat City"},
+				params: []string{},
+				user: User{0, "You"},
+				room: Room{0, "Chat City"},
 			}
 		}
 	}

@@ -1,33 +1,26 @@
 package campfire
 
-import "sync"
-
-type Cacheable interface {
-	CacheKey() string
-}
-
-type Cacher interface {
-	Add(Cacheable)
-	Get(string) Cacheable
-	Exists(string) bool
-}
+import (
+	"github.com/brettbuddin/victor/adapter"
+	"sync"
+)
 
 type Cache struct {
 	mutex *sync.RWMutex
-	cache map[string]Cacheable
+	cache map[string]adapter.Cacheable
 }
 
 func NewCache() *Cache {
-	return &Cache{&sync.RWMutex{}, map[string]Cacheable{}}
+	return &Cache{&sync.RWMutex{}, map[string]adapter.Cacheable{}}
 }
 
-func (c *Cache) Add(o Cacheable) {
+func (c *Cache) Add(o adapter.Cacheable) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.cache[o.CacheKey()] = o
 }
 
-func (c *Cache) Get(key string) Cacheable {
+func (c *Cache) Get(key string) adapter.Cacheable {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if result, ok := c.cache[key]; ok {

@@ -38,6 +38,7 @@ func (b *Brain) Identity() adapter.User {
 func (b *Brain) SetIdentity(u adapter.User) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
+	log.Println("%s\n", b.identity)
 	b.identity = u
 }
 
@@ -93,7 +94,9 @@ func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 		results := pattern.FindAllStringSubmatch(m.Body(), -1)
 
 		if len(results) > 0 {
+			log.Printf("PARAMS: %s\n", m.Params())
 			m.SetParams(results[0][1:])
+			log.Printf("TRIGGER: %s\n", pattern)
 			log.Printf("TRIGGER: %s\n", pattern)
 			log.Printf("PARAMS: %s\n", m.Params())
 			f(m)

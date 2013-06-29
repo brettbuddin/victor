@@ -48,30 +48,30 @@ type Room struct {
 	name string
 }
 
-func (r *Room) Id() string {
+func (r Room) Id() string {
 	return strconv.Itoa(r.id)
 }
 
-func (r *Room) Name() string {
+func (r Room) Name() string {
 	return r.name
 }
 
-func (r *Room) Say(text string) error {
+func (r Room) Say(text string) error {
 	log.Println("SHELL: Saying", text)
 	return nil
 }
 
-func (r *Room) Paste(text string) error {
+func (r Room) Paste(text string) error {
 	log.Println("SHELL: Pasting", text)
 	return nil
 }
 
-func (r *Room) Sound(name string) error {
+func (r Room) Sound(name string) error {
 	log.Println("SHELL: Playing", name)
 	return nil
 }
 
-func (r *Room) Tweet(url string) error {
+func (r Room) Tweet(url string) error {
 	log.Println("SHELL: Displaying", url)
 	return nil
 }
@@ -81,10 +81,10 @@ type User struct {
 	name string
 }
 
-func (u *User) Id() string {
+func (u User) Id() string {
 	return strconv.Itoa(u.id)
 }
 
-func (u *User) Name() string {
+func (u User) Name() string {
 	return u.name
 }
