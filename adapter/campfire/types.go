@@ -51,7 +51,7 @@ func (r Room) Id() string {
 }
 
 func (r Room) CacheKey() string {
-	return RoomKey(r.Id())
+	return adapter.RoomKey(r.Id())
 }
 
 func (r Room) Name() string {
@@ -79,7 +79,7 @@ type User struct {
 }
 
 func (u User) CacheKey() string {
-	return UserKey(u.Id())
+	return adapter.UserKey(u.Id())
 }
 
 func (u User) Id() string {

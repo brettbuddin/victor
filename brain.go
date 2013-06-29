@@ -13,6 +13,7 @@ type Brain struct {
 	name      string
 	identity  adapter.User
 	listeners []ListenerFunc
+	cache	  *Cache
 }
 
 func NewBrain(name string) *Brain {
@@ -20,7 +21,12 @@ func NewBrain(name string) *Brain {
 		mutex:     &sync.RWMutex{},
 		name:      name,
 		listeners: []ListenerFunc{},
+		cache:	   NewCache(),
 	}
+}
+
+func (b *Brain) Cache() adapter.Cacher {
+	return b.cache
 }
 
 func (b *Brain) Name() string {

@@ -21,7 +21,7 @@ func init() {
 			os.Exit(1)
 		}
 
-		client := campfire.NewClient(account, token)
+		client = campfire.NewClient(account, token)
 		roomIdStrings := strings.Split(roomList, ",")
 		roomIds := make([]int, 0)
 
@@ -35,35 +35,30 @@ func init() {
 			roomIds = append(roomIds, j)
 		}
 
-		return &Campfire{
-			brain:   b,
-			client:  client,
-			roomIds: roomIds,
-			cache:   NewCache(),
-		}
+		return adapter.AdapterFunc(Listen)
 	})
 }
 
-type Campfire struct {
+var (
 	brain   adapter.Brain
 	client  *campfire.Client
-	cache   *Cache
 	roomIds []int
-}
+)
 
-func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
-	me, err := c.client.Me()
+func Listen(messages chan adapter.Message) (err error) {
+	cache := brain.Cache()
+	me, err := client.Me()
 
 	if err != nil {
 		log.Fatalf("CAMPFIRE: could not fetch info about self: %s", err)
 	}
 
-	c.brain.SetIdentity(User{me})
+	brain.SetIdentity(User{me})
 
 	rooms := []*campfire.Room{}
 
-	for _, id := range c.roomIds {
-		room, err := c.client.RoomForId(id)
+	for _, id := range roomIds {
+		room, err := client.RoomForId(id)
 
 		if err != nil {
 			log.Printf("ROOM[%d]: unable to get info on room: %s\n", id, err)
@@ -77,9 +72,9 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 			continue
 		}
 
-		c.cache.Add(Room{room})
+		cache.Add(Room{room})
 		for _, u := range room.Users {
-			c.cache.Add(User{u})
+			cache.Add(User{u})
 		}
 
 		log.Printf("ROOM[%d]: joined %s\n", id, room.Name)
@@ -102,20 +97,20 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 			roomId := itoa(m.RoomId)
 			userId := itoa(m.UserId)
 
-			if !c.cache.Exists(UserKey(userId)) {
-				user, err := c.client.UserForId(m.UserId)
+			if !cache.Exists(adapter.UserKey(userId)) {
+				user, err := client.UserForId(m.UserId)
 
 				if err != nil {
 					break
 				}
 
-				c.cache.Add(User{user})
+				cache.Add(User{user})
 			}
 
 			messages <- &Message{
 				message: m,
-				room:    c.cache.Get(RoomKey(roomId)).(Room),
-				user:    c.cache.Get(UserKey(userId)).(User),
+				room:    cache.Get(adapter.RoomKey(roomId)).(Room),
+				user:    cache.Get(adapter.UserKey(userId)).(User),
 			}
 		}
 	}
