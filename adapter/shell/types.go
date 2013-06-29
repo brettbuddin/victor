@@ -31,7 +31,7 @@ func (m *Message) Room() adapter.Room {
 }
 
 func (m *Message) Reply(text string) error {
-	log.Println("SHELL: Replying", text)
+	log.Printf("REPLYING: %s: %s", m.User().Name(), text)
 	return nil
 }
 
@@ -57,22 +57,22 @@ func (r Room) Name() string {
 }
 
 func (r Room) Say(text string) error {
-	log.Println("SHELL: Saying", text)
+	log.Println("SAYING:", text)
 	return nil
 }
 
 func (r Room) Paste(text string) error {
-	log.Println("SHELL: Pasting", text)
+	log.Println("PASTING:", text)
 	return nil
 }
 
 func (r Room) Sound(name string) error {
-	log.Println("SHELL: Playing", name)
+	log.Println("PLAYING:", name)
 	return nil
 }
 
 func (r Room) Tweet(url string) error {
-	log.Println("SHELL: Displaying", url)
+	log.Println("DISPLAYING:", url)
 	return nil
 }
 
