@@ -74,4 +74,3 @@ type Cacher interface {
 	Get(string) Cacheable
 	Exists(string) bool
 }
-

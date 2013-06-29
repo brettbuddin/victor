@@ -9,9 +9,9 @@ import (
 
 type Message struct {
 	message *campfire.Message
-	user   adapter.User
-	room   adapter.Room
-	params []string
+	user    adapter.User
+	room    adapter.Room
+	params  []string
 }
 
 func (m *Message) Id() string {
