@@ -9,19 +9,19 @@ import (
 )
 
 type Brain struct {
-	mutex     *sync.RWMutex
+	*sync.RWMutex
 	name      string
 	identity  adapter.User
 	listeners []ListenerFunc
-	cache	  *Cache
+	cache     *Cache
 }
 
 func NewBrain(name string) *Brain {
 	return &Brain{
-		mutex:     &sync.RWMutex{},
+		RWMutex:   &sync.RWMutex{},
 		name:      name,
 		listeners: []ListenerFunc{},
-		cache:	   NewCache(),
+		cache:     NewCache(),
 	}
 }
 
@@ -30,20 +30,20 @@ func (b *Brain) Cache() adapter.Cacher {
 }
 
 func (b *Brain) Name() string {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
+	b.RLock()
+	defer b.RUnlock()
 	return b.name
 }
 
 func (b *Brain) Identity() adapter.User {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
+	b.RLock()
+	defer b.RUnlock()
 	return b.identity
 }
 
 func (b *Brain) SetIdentity(u adapter.User) {
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
+	b.Lock()
+	defer b.Unlock()
 	b.identity = u
 }
 
@@ -77,16 +77,16 @@ func (b *Brain) Hear(exp string, f func(adapter.Message)) (err error) {
 }
 
 func (b *Brain) register(l ListenerFunc) {
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
+	b.Lock()
+	defer b.Unlock()
 	b.listeners = append(b.listeners, l)
 }
 
 // Receive accepts an incoming message and applies
 // it to all listeners.
 func (b *Brain) Receive(m adapter.Message) {
-	b.mutex.RLock()
-	defer b.mutex.RUnlock()
+	b.RLock()
+	defer b.RUnlock()
 	for _, l := range b.listeners {
 		go l(m)
 	}

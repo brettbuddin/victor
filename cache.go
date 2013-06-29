@@ -6,7 +6,7 @@ import (
 )
 
 type Cache struct {
-	mutex *sync.RWMutex
+	*sync.RWMutex
 	cache map[string]adapter.Cacheable
 }
 
@@ -15,14 +15,14 @@ func NewCache() *Cache {
 }
 
 func (c *Cache) Add(o adapter.Cacheable) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	c.cache[o.CacheKey()] = o
 }
 
 func (c *Cache) Get(key string) adapter.Cacheable {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	if result, ok := c.cache[key]; ok {
 		return result
 	}
