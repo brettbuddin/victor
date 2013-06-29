@@ -99,10 +99,10 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 	for {
 		select {
 		case m := <-rawMessages:
-			roomIdStr := strconv.Itoa(m.RoomId)
-			userIdStr := strconv.Itoa(m.UserId)
+			roomId := itoa(m.RoomId)
+			userId := itoa(m.UserId)
 
-			if !c.cache.Exists("user_" + userIdStr) {
+			if !c.cache.Exists(UserKey(userId)) {
 				user, err := c.client.UserForId(m.UserId)
 
 				if err != nil {
@@ -114,8 +114,8 @@ func (c *Campfire) Listen(messages chan adapter.Message) (err error) {
 
 			messages <- &Message{
 				message: m,
-				room:    c.cache.Get("room_" + roomIdStr).(Room),
-				user:    c.cache.Get("user_" + userIdStr).(User),
+				room:    c.cache.Get(RoomKey(roomId)).(Room),
+				user:    c.cache.Get(UserKey(userId)).(User),
 			}
 		}
 	}

@@ -36,3 +36,11 @@ func (c *Cache) Exists(key string) bool {
 
 	return true
 }
+
+func RoomKey(id string) string {
+	return "room_" + id
+}
+
+func UserKey(id string) string {
+	return "user_" + id
+}

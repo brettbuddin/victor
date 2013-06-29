@@ -15,7 +15,7 @@ type Message struct {
 }
 
 func (m *Message) Id() string {
-	return strconv.Itoa(m.message.Id)
+	return itoa(m.message.Id)
 }
 
 func (m *Message) Body() string {
@@ -47,11 +47,11 @@ type Room struct {
 }
 
 func (r Room) Id() string {
-	return strconv.Itoa(r.room.Id)
+	return itoa(r.room.Id)
 }
 
 func (r Room) CacheKey() string {
-	return "room_" + r.Id()
+	return RoomKey(r.Id())
 }
 
 func (r Room) Name() string {
@@ -79,13 +79,17 @@ type User struct {
 }
 
 func (u User) CacheKey() string {
-	return "user_" + u.Id()
+	return UserKey(u.Id())
 }
 
 func (u User) Id() string {
-	return strconv.Itoa(u.user.Id)
+	return itoa(u.user.Id)
 }
 
 func (u User) Name() string {
 	return u.user.Name
+}
+
+func itoa(i int) string {
+	return strconv.Itoa(i)
 }
