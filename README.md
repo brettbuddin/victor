@@ -1,5 +1,7 @@
 ## Victor
 
+[![Build Status](https://travis-ci.org/brettbuddin/victor.png?branch=master)](https://travis-ci.org/brettbuddin/victor)
+
 **Victor** is a library for creating your own chat bot.
 
 We use Victor as the backbone of our bot, Virbot, within our team Campfire at Virb (http://virb.com).
