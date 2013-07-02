@@ -15,6 +15,12 @@ type Message interface {
 	adapter.Message
 }
 
+type ImmutableBrain interface {
+	Name() string
+	Identity() adapter.User
+	Cache() adapter.Cacher
+}
+
 // New returns a Robot
 func New(adapterName, robotName string) (*Robot, error) {
 	initFunc, err := adapter.Load(adapterName)
@@ -31,6 +37,10 @@ func New(adapterName, robotName string) (*Robot, error) {
 
 	defaults(bot)
 	return bot, nil
+}
+
+func (r *Robot) Brain() ImmutableBrain {
+	return ImmutableBrain(r.brain)
 }
 
 // Respond proxies the registration of a respond

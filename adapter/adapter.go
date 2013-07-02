@@ -75,6 +75,7 @@ type Cacher interface {
 	Add(Cacheable)
 	Get(string) Cacheable
 	Exists(string) bool
+	Delete(string)
 }
 
 func RoomKey(id string) string {

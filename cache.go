@@ -36,3 +36,15 @@ func (c *Cache) Exists(key string) bool {
 
 	return true
 }
+
+func (c *Cache) Delete(key string) {
+	o := c.Get(key)
+
+	if o == nil {
+		return
+	}
+
+	c.Lock()
+	defer c.Unlock()
+	delete(c.cache, o.CacheKey())
+}
