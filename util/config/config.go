@@ -96,7 +96,7 @@ func (o Object) intList(key string, required bool) []int {
 	el, ok := o[key]
 	if !ok {
 		if required {
-			o.pushError(fmt.Errorf("Missing required key %q (list of strings)", key))
+			o.pushError(fmt.Errorf("Missing required key %q (list of ints)", key))
 		}
 
 		return nil
@@ -104,7 +104,7 @@ func (o Object) intList(key string, required bool) []int {
 
 	l, ok := el.([]interface{})
 	if !ok {
-		o.pushError(fmt.Errorf("Expected key %q to be a list of strings, not %T", key, el))
+		o.pushError(fmt.Errorf("Expected key %q to be a list of ints, not %T", key, el))
 		return nil
 	}
 
@@ -112,7 +112,7 @@ func (o Object) intList(key string, required bool) []int {
 	for i, el := range l {
 		v, ok := el.(int)
 		if !ok {
-			o.pushError(fmt.Errorf("Expected key %q index %d to be a string, not %T", key, i, el))
+			o.pushError(fmt.Errorf("Expected key %q index %d to be a int, not %T", key, i, el))
 			return nil
 		}
 
