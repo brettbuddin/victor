@@ -77,7 +77,7 @@ func (r *Robot) Run() error {
 			return nil
 		case m := <-messages:
 			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
-				r.brain.Receive(m)
+				go r.brain.Receive(m)
 			}
 		}
 	}

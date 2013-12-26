@@ -88,7 +88,7 @@ func (b *Brain) Receive(m adapter.Message) {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
-		go l(m)
+		l(m)
 	}
 }
 
