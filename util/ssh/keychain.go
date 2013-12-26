@@ -21,12 +21,12 @@ func (k *Keychain) Add(privateKey []byte) error {
 	return nil
 }
 
-func (k *Keychain) Key(i int) ssh.PublicKey {
+func (k *Keychain) Key(i int) (ssh.PublicKey, error) {
 	if i < 0 || i >= len(k.keys) {
-		return nil
+		return nil, nil
 	}
 
-	return k.keys[i].PublicKey()
+	return k.keys[i].PublicKey(), nil
 }
 
 func (k *Keychain) Sign(i int, rand io.Reader, data []byte) ([]byte, error) {
