@@ -101,7 +101,6 @@ func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 		if len(results) > 0 {
 			m.SetParams(results[0][1:])
 			log.Printf("TRIGGER: %s\n", pattern)
-			log.Printf("TRIGGER: %s\n", pattern)
 			log.Printf("PARAMS: %s\n", m.Params())
 			f(m)
 		}
