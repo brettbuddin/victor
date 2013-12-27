@@ -88,3 +88,7 @@ func (u User) Id() string {
 func (u User) Name() string {
 	return u.name
 }
+
+func (u User) AvatarURL() string {
+    return ""
+}

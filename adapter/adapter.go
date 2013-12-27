@@ -61,6 +61,7 @@ type Room interface {
 type User interface {
 	Id() string
 	Name() string
+	AvatarURL() string
 }
 
 type Cacheable interface {

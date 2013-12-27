@@ -90,6 +90,10 @@ func (u User) Name() string {
 	return u.user.Name
 }
 
+func (u User) AvatarURL() string {
+    return u.user.AvatarURL
+}
+
 func itoa(i int) string {
 	return strconv.Itoa(i)
 }
