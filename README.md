@@ -38,6 +38,21 @@ bot.Respond("bye", func(m victor.Message) {
     m.Reply(fmt.Sprintf("Goodbye, %s", m.User().Name()))
 })
 
+// Play a sound
+bot.Respond("shipit", func(m victor.Message) {
+    m.Room().Sound("nyan")
+})
+
+// Send a paste
+bot.Respond("paste me", func(m victor.Message) {
+    m.Room().Paste("/* Very important comment. */")
+})
+
+// Send a tweet URL
+bot.Respond("gophers", func(m victor.Message) {
+    m.Room().Tweet("https://twitter.com/brettbuddin/status/415852805623402496")
+})
+
 // Capture Parameters on trigger
 bot.Respond("testsuite ([\\w-]+)/([\\w-]+):([\\w-]+)", func(m victor.Message) {
     params := m.Params()
@@ -45,7 +60,8 @@ bot.Respond("testsuite ([\\w-]+)/([\\w-]+):([\\w-]+)", func(m victor.Message) {
     repo   := params[1]
     branch := params[2]
 
-    fmt.Printf("user=%s repo=%s branch=%s\n", user, repo, branch)
+    log.Printf("Running testsuite for user=%s repo=%s branch=%s\n", user, repo, branch)
+    m.Reply("Running testsuite. Sit tight.")
 })
 
 bot.Run()
