@@ -17,6 +17,18 @@ There are two ways to trigger actions on the bot:
 - `Hear`: Trigger an action based on some criteria heard anywhere in the channel.
 - `Respond`: Respond to a direct statement at the bot (e.g. "virbot show not shipped")
 
+### Basic Usage
+
+Since we're gonna use the `campfire` adapter in the example below, we'll need to set some basic environment variables beforehand.
+
+```bash
+export VICTOR_CAMPFIRE_ACCOUNT="mycompany_name"
+export VICTOR_CAMPFIRE_TOKEN="super_secret_token"
+export VICTOR_CAMPFIRE_ROOMS="12345,67859"
+```
+
+Here's what a program using Victor would look like.
+
 ```go
 // Create the bot (with adapter and name)
 bot := victor.New("campfire", "ralph")
