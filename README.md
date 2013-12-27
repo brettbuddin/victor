@@ -27,7 +27,7 @@ export VICTOR_CAMPFIRE_TOKEN="super_secret_token"
 export VICTOR_CAMPFIRE_ROOMS="12345,67859"
 ```
 
-Here's what a program using Victor would look like.
+...and what a program using Victor would look like.
 
 ```go
 // Create the bot (with adapter and name)
