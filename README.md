@@ -18,7 +18,7 @@ There are two ways to trigger actions on the bot:
 - `Respond`: Respond to a direct statement at the bot (e.g. "virbot show not shipped")
 
 ```go
-// Create the bot (with driver and name)
+// Create the bot (with adapter and name)
 bot := victor.New("campfire", "ralph")
 
 // Trigger anytime it hears the word "alot".
