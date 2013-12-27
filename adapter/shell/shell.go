@@ -35,6 +35,7 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 	for {
 		select {
 		case <-a.stop:
+		    close(messages)
 			return nil
 		case line := <-lines:
 			messages <- &Message{
