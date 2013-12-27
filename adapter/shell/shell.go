@@ -9,25 +9,34 @@ import (
 
 func init() {
 	adapter.Register("shell", func(adapter.Brain) adapter.Adapter {
-		return adapter.AdapterFunc(Listen)
+		return &Adapter{
+		    stop: make(chan bool),
+		}
 	})
 }
 
-func Listen(messages chan adapter.Message) error {
+type Adapter struct {
+    stop chan bool
+}
+
+func (a *Adapter) Listen(messages chan adapter.Message) error {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Type your commands (type \"exit\" to exit):")
 
+    lines := make(chan string)
+	go func() {
+        for {
+            if line, _, err := reader.ReadLine(); err == nil {
+                lines <- string(line)
+            }
+        }
+    }()
+
 	for {
-		line, _, err := reader.ReadLine()
-
-		if err != nil {
-			continue
-		}
-
-		switch string(line) {
-		case "exit":
+		select {
+		case <-a.stop:
 			return nil
-		default:
+		case line := <-lines:
 			messages <- &Message{
 				body:   string(line),
 				params: []string{},
@@ -36,6 +45,9 @@ func Listen(messages chan adapter.Message) error {
 			}
 		}
 	}
+}
 
-	return nil
+func (a *Adapter) Stop() {
+    a.stop <- true
+    close(a.stop)
 }

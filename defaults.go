@@ -9,6 +9,10 @@ import (
 )
 
 func defaults(robot *Robot) {
+	robot.Respond("shutdown", func(m Message) {
+	    robot.Stop()
+	})
+
 	robot.Respond("ping", func(m Message) {
 		m.Reply("pong!")
 	})

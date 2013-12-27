@@ -1,6 +1,7 @@
 package campfire
 
 import (
+	"errors"
 	"github.com/brettbuddin/campfire"
 	"github.com/brettbuddin/victor/adapter"
 	"log"
@@ -10,61 +11,127 @@ import (
 	"sync"
 )
 
-var (
-	once    sync.Once
-	brain   adapter.Brain
-	client  *campfire.Client
-	roomIds = []int{}
-)
-
 func init() {
 	adapter.Register("campfire", func(b adapter.Brain) adapter.Adapter {
-		brain = b
-		return adapter.AdapterFunc(Listen)
+		return &Adapter{
+			brain: b,
+			once: sync.Once{},
+			stop: make(chan bool),
+			roomIds: []int{},
+		}
 	})
 }
 
-func configure() {
-	account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
-	token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
-	roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
-
-	if account == "" || token == "" || roomList == "" {
-		log.Println("The following environment variables are required:")
-		log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
-		os.Exit(1)
-	}
-
-	client = campfire.NewClient(account, token)
-	roomIdStrings := strings.Split(roomList, ",")
-
-	for _, id := range roomIdStrings {
-		j, err := strconv.Atoi(id)
-
-		if err != nil {
-			log.Fatalf("room is not numeric: %s\n", id)
-		}
-
-		roomIds = append(roomIds, j)
-	}
+type Adapter struct {
+	brain  adapter.Brain
+	client *campfire.Client
+	once   sync.Once
+	stop   chan bool
+	roomIds []int
 }
 
-func Listen(messages chan adapter.Message) (err error) {
-	once.Do(configure)
+func (a *Adapter) Listen(messages chan adapter.Message) error {
+	a.configure()
 
-	cache := brain.Cache()
-	me, err := client.Me()
-
+	rooms, err := a.bootstrap()
 	if err != nil {
-		log.Fatalf("CAMPFIRE: could not fetch info about self: %s", err)
+		return err
 	}
 
-	brain.SetIdentity(User{me})
+	streams := []*campfire.Stream{}
+	rawMessages := make(chan *campfire.Message)
 
+	for _, room := range rooms {
+        s := room.Stream(rawMessages)
+        go s.Connect()
+        streams = append(streams, s)
+	}
+
+	cache := a.brain.Cache()
+
+    for {
+        select {
+        case <-a.stop:
+            log.Println("Disconnecting from streams")
+            for _, s := range streams {
+                s.Disconnect()
+            }
+
+            log.Println("Leaving rooms")
+            for _, r := range rooms {
+                r.Leave()
+            }
+
+            close(messages)
+            return nil
+        case m := <-rawMessages:
+            roomId := itoa(m.RoomId)
+            userId := itoa(m.UserId)
+
+            if !cache.Exists(adapter.UserKey(userId)) {
+                user, err := a.client.UserForId(m.UserId)
+
+                if err != nil {
+                    break
+                }
+
+                cache.Add(User{user})
+            }
+
+            messages <- &Message{
+                message: m,
+                room:    cache.Get(adapter.RoomKey(roomId)).(Room),
+                user:    cache.Get(adapter.UserKey(userId)).(User),
+            }
+        }
+    }
+}
+
+func (a *Adapter) Stop() {
+    a.stop <- true
+    close(a.stop)
+}
+
+func (a *Adapter) configure() {
+    a.once.Do(func() {
+        account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
+        token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
+        roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
+
+        if account == "" || token == "" || roomList == "" {
+            log.Println("The following environment variables are required:")
+            log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
+            os.Exit(1)
+        }
+
+        a.client = campfire.NewClient(account, token)
+        roomIdStrings := strings.Split(roomList, ",")
+
+        for _, id := range roomIdStrings {
+            j, err := strconv.Atoi(id)
+
+            if err != nil {
+                log.Printf("Room is not numeric: %s\n", id)
+            }
+
+            a.roomIds = append(a.roomIds, j)
+        }
+	})
+}
+
+func (a *Adapter) bootstrap() ([]*campfire.Room, error) {
 	rooms := []*campfire.Room{}
+	cache := a.brain.Cache()
 
-	for _, id := range roomIds {
-		room, err := client.RoomForId(id)
+	me, err := a.client.Me()
+	if err != nil {
+		return nil, errors.New("Could not get information about self user")
+	}
+
+	a.brain.SetIdentity(User{me})
+
+	for _, id := range a.roomIds {
+		room, err := a.client.RoomForId(id)
 
 		if err != nil {
 			log.Printf("ROOM[%d]: unable to get info on room: %s\n", id, err)
@@ -88,38 +155,8 @@ func Listen(messages chan adapter.Message) (err error) {
 	}
 
 	if len(rooms) == 0 {
-		log.Fatal("CAMPFIRE: No rooms joined")
+		return nil, errors.New("No rooms joined")
 	}
 
-	rawMessages := make(chan *campfire.Message)
-
-	for _, room := range rooms {
-		go room.Stream(rawMessages).Connect()
-	}
-
-	for {
-		select {
-		case m := <-rawMessages:
-			roomId := itoa(m.RoomId)
-			userId := itoa(m.UserId)
-
-			if !cache.Exists(adapter.UserKey(userId)) {
-				user, err := client.UserForId(m.UserId)
-
-				if err != nil {
-					break
-				}
-
-				cache.Add(User{user})
-			}
-
-			messages <- &Message{
-				message: m,
-				room:    cache.Get(adapter.RoomKey(roomId)).(Room),
-				user:    cache.Get(adapter.UserKey(userId)).(User),
-			}
-		}
-	}
-
-	return nil
+	return rooms, nil
 }

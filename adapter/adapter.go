@@ -21,14 +21,10 @@ func Load(name string) (InitFunc, error) {
 }
 
 type InitFunc func(Brain) Adapter
-type AdapterFunc func(chan Message) error
-
-func (f AdapterFunc) Listen(m chan Message) error {
-	return f(m)
-}
 
 type Adapter interface {
 	Listen(chan Message) error
+	Stop()
 }
 
 type Brain interface {

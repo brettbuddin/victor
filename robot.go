@@ -1,6 +1,8 @@
 package victor
 
 import (
+    "log"
+    "time"
 	"github.com/brettbuddin/victor/adapter"
 	_ "github.com/brettbuddin/victor/adapter/campfire"
 	_ "github.com/brettbuddin/victor/adapter/shell"
@@ -9,6 +11,7 @@ import (
 type Robot struct {
 	adapter adapter.Adapter
 	brain   *Brain
+	stop    chan bool
 }
 
 type Message interface {
@@ -33,6 +36,7 @@ func New(adapterName, robotName string) (*Robot, error) {
 	bot := &Robot{
 		adapter: initFunc(brain),
 		brain:   brain,
+		stop:    make(chan bool),
 	}
 
 	defaults(bot)
@@ -62,18 +66,14 @@ func (r *Robot) Hear(exp string, f func(Message)) (err error) {
 // Run starts the robot.
 func (r *Robot) Run() error {
 	messages := make(chan adapter.Message)
-	done := make(chan bool)
-
-	go func() {
-		r.adapter.Listen(messages)
-		done <- true
-	}()
+	go r.adapter.Listen(messages)
 
 	for {
 		select {
-		case <-done:
-			close(done)
-			close(messages)
+		case <-r.stop:
+		    go r.adapter.Stop()
+		    log.Println("Cleaning up and stopping.")
+		    time.Sleep(5 * time.Second)
 			return nil
 		case m := <-messages:
 			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
@@ -81,6 +81,9 @@ func (r *Robot) Run() error {
 			}
 		}
 	}
+}
 
-	return nil
+func (r *Robot) Stop() {
+    r.stop <- true
+    close(r.stop)
 }
