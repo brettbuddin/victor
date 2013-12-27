@@ -39,7 +39,7 @@ bot.Respond("bye", func(m victor.Message) {
 })
 
 // Capture Parameters on trigger
-bot.Respond("testsuite ([\\w-]+)/([\\w-]+)(:([\\w-]+))", func(m victor.Message) {
+bot.Respond("testsuite ([\\w-]+)/([\\w-]+):([\\w-]+)", func(m victor.Message) {
     params := m.Params()
     user   := params[0]
     repo   := params[1]
