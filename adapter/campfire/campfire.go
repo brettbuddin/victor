@@ -9,6 +9,11 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+)
+
+const (
+	SHUTDOWN_DELAY = 5 * time.Second
 )
 
 func init() {
@@ -30,7 +35,7 @@ type Adapter struct {
 	roomIds []int
 }
 
-func (a *Adapter) Listen(messages chan adapter.Message) error {
+func (a *Adapter) Listen(outgoing chan adapter.Message) error {
 	a.configure()
 
 	rooms, err := a.bootstrap()
@@ -39,11 +44,23 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 	}
 
 	streams := []*campfire.Stream{}
-	rawMessages := make(chan *campfire.Message)
+	incoming := make(chan *campfire.Message)
 
 	for _, room := range rooms {
-		s := room.Stream(rawMessages)
+		s := room.Stream()
 		go s.Connect()
+		go func() {
+			for {
+				message, ok := <-s.Messages()
+
+				// Stop fan-in if channel is closed
+				if !ok {
+					break
+				}
+
+				incoming <- message
+			}
+		}()
 		streams = append(streams, s)
 	}
 
@@ -62,9 +79,9 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 				r.Leave()
 			}
 
-			close(messages)
+			close(incoming)
 			return nil
-		case m := <-rawMessages:
+		case m := <-incoming:
 			roomId := itoa(m.RoomId)
 			userId := itoa(m.UserId)
 
@@ -78,7 +95,7 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 				cache.Add(User{user})
 			}
 
-			messages <- &Message{
+			outgoing <- &Message{
 				message: m,
 				room:    cache.Get(adapter.RoomKey(roomId)).(Room),
 				user:    cache.Get(adapter.UserKey(userId)).(User),
@@ -90,6 +107,9 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 func (a *Adapter) Stop() {
 	a.stop <- true
 	close(a.stop)
+
+	log.Println("Delaying shutdown by", SHUTDOWN_DELAY, "(for cleanup)")
+	time.Sleep(SHUTDOWN_DELAY)
 }
 
 func (a *Adapter) configure() {

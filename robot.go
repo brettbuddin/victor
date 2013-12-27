@@ -5,13 +5,13 @@ import (
 	_ "github.com/brettbuddin/victor/adapter/campfire"
 	_ "github.com/brettbuddin/victor/adapter/shell"
 	"log"
-	"time"
 )
 
 type Robot struct {
-	adapter adapter.Adapter
-	brain   *Brain
-	stop    chan bool
+	adapter  adapter.Adapter
+	brain    *Brain
+	incoming chan adapter.Message
+	stop     chan bool
 }
 
 type Message interface {
@@ -34,9 +34,10 @@ func New(adapterName, robotName string) (*Robot, error) {
 
 	brain := NewBrain(robotName)
 	bot := &Robot{
-		adapter: initFunc(brain),
-		brain:   brain,
-		stop:    make(chan bool),
+		adapter:  initFunc(brain),
+		brain:    brain,
+		stop:     make(chan bool),
+		incoming: make(chan adapter.Message),
 	}
 
 	defaults(bot)
@@ -65,17 +66,15 @@ func (r *Robot) Hear(exp string, f func(Message)) (err error) {
 
 // Run starts the robot.
 func (r *Robot) Run() error {
-	messages := make(chan adapter.Message)
-	go r.adapter.Listen(messages)
+	go r.adapter.Listen(r.incoming)
 
 	for {
 		select {
 		case <-r.stop:
-			go r.adapter.Stop()
-			log.Println("Cleaning up and stopping.")
-			time.Sleep(5 * time.Second)
+			log.Println("Stopping")
+			r.adapter.Stop()
 			return nil
-		case m := <-messages:
+		case m := <-r.incoming:
 			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
 				go r.brain.Receive(m)
 			}
