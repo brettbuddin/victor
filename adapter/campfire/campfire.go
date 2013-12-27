@@ -14,19 +14,19 @@ import (
 func init() {
 	adapter.Register("campfire", func(b adapter.Brain) adapter.Adapter {
 		return &Adapter{
-			brain: b,
-			once: sync.Once{},
-			stop: make(chan bool),
+			brain:   b,
+			once:    sync.Once{},
+			stop:    make(chan bool),
 			roomIds: []int{},
 		}
 	})
 }
 
 type Adapter struct {
-	brain  adapter.Brain
-	client *campfire.Client
-	once   sync.Once
-	stop   chan bool
+	brain   adapter.Brain
+	client  *campfire.Client
+	once    sync.Once
+	stop    chan bool
 	roomIds []int
 }
 
@@ -42,80 +42,80 @@ func (a *Adapter) Listen(messages chan adapter.Message) error {
 	rawMessages := make(chan *campfire.Message)
 
 	for _, room := range rooms {
-        s := room.Stream(rawMessages)
-        go s.Connect()
-        streams = append(streams, s)
+		s := room.Stream(rawMessages)
+		go s.Connect()
+		streams = append(streams, s)
 	}
 
 	cache := a.brain.Cache()
 
-    for {
-        select {
-        case <-a.stop:
-            log.Println("Disconnecting from streams")
-            for _, s := range streams {
-                s.Disconnect()
-            }
+	for {
+		select {
+		case <-a.stop:
+			log.Println("Disconnecting from streams")
+			for _, s := range streams {
+				s.Disconnect()
+			}
 
-            log.Println("Leaving rooms")
-            for _, r := range rooms {
-                r.Leave()
-            }
+			log.Println("Leaving rooms")
+			for _, r := range rooms {
+				r.Leave()
+			}
 
-            close(messages)
-            return nil
-        case m := <-rawMessages:
-            roomId := itoa(m.RoomId)
-            userId := itoa(m.UserId)
+			close(messages)
+			return nil
+		case m := <-rawMessages:
+			roomId := itoa(m.RoomId)
+			userId := itoa(m.UserId)
 
-            if !cache.Exists(adapter.UserKey(userId)) {
-                user, err := a.client.UserForId(m.UserId)
+			if !cache.Exists(adapter.UserKey(userId)) {
+				user, err := a.client.UserForId(m.UserId)
 
-                if err != nil {
-                    break
-                }
+				if err != nil {
+					break
+				}
 
-                cache.Add(User{user})
-            }
+				cache.Add(User{user})
+			}
 
-            messages <- &Message{
-                message: m,
-                room:    cache.Get(adapter.RoomKey(roomId)).(Room),
-                user:    cache.Get(adapter.UserKey(userId)).(User),
-            }
-        }
-    }
+			messages <- &Message{
+				message: m,
+				room:    cache.Get(adapter.RoomKey(roomId)).(Room),
+				user:    cache.Get(adapter.UserKey(userId)).(User),
+			}
+		}
+	}
 }
 
 func (a *Adapter) Stop() {
-    a.stop <- true
-    close(a.stop)
+	a.stop <- true
+	close(a.stop)
 }
 
 func (a *Adapter) configure() {
-    a.once.Do(func() {
-        account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
-        token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
-        roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
+	a.once.Do(func() {
+		account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
+		token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
+		roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
 
-        if account == "" || token == "" || roomList == "" {
-            log.Println("The following environment variables are required:")
-            log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
-            os.Exit(1)
-        }
+		if account == "" || token == "" || roomList == "" {
+			log.Println("The following environment variables are required:")
+			log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
+			os.Exit(1)
+		}
 
-        a.client = campfire.NewClient(account, token)
-        roomIdStrings := strings.Split(roomList, ",")
+		a.client = campfire.NewClient(account, token)
+		roomIdStrings := strings.Split(roomList, ",")
 
-        for _, id := range roomIdStrings {
-            j, err := strconv.Atoi(id)
+		for _, id := range roomIdStrings {
+			j, err := strconv.Atoi(id)
 
-            if err != nil {
-                log.Printf("Room is not numeric: %s\n", id)
-            }
+			if err != nil {
+				log.Printf("Room is not numeric: %s\n", id)
+			}
 
-            a.roomIds = append(a.roomIds, j)
-        }
+			a.roomIds = append(a.roomIds, j)
+		}
 	})
 }
 

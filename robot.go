@@ -1,11 +1,11 @@
 package victor
 
 import (
-    "log"
-    "time"
 	"github.com/brettbuddin/victor/adapter"
 	_ "github.com/brettbuddin/victor/adapter/campfire"
 	_ "github.com/brettbuddin/victor/adapter/shell"
+	"log"
+	"time"
 )
 
 type Robot struct {
@@ -71,9 +71,9 @@ func (r *Robot) Run() error {
 	for {
 		select {
 		case <-r.stop:
-		    go r.adapter.Stop()
-		    log.Println("Cleaning up and stopping.")
-		    time.Sleep(5 * time.Second)
+			go r.adapter.Stop()
+			log.Println("Cleaning up and stopping.")
+			time.Sleep(5 * time.Second)
 			return nil
 		case m := <-messages:
 			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
@@ -84,6 +84,6 @@ func (r *Robot) Run() error {
 }
 
 func (r *Robot) Stop() {
-    r.stop <- true
-    close(r.stop)
+	r.stop <- true
+	close(r.stop)
 }
