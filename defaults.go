@@ -9,7 +9,7 @@ import (
 )
 
 func defaults(robot *Robot) {
-	robot.Respond("shutdown", func(m Message) {
+	robot.Respond("shutdown!", func(m Message) {
 	    robot.Stop()
 	})
 
