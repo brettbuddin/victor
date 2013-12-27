@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/brettbuddin/victor"
 	"os"
 	"os/signal"
-	"github.com/brettbuddin/victor"
 )
 
 func main() {
@@ -14,11 +14,12 @@ func main() {
 		fmt.Println(err)
 	}
 
-	bot.Respond("hello|hi|howdy", func(m victor.Message) {
-		m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
-	})
+	fmt.Println(bot.Respond("(?P<phrase>hello|hi|howdy)", func(m victor.Message) {
+		fmt.Println(m.Params())
+		//m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
+	}))
 
-    signals(bot).Run()
+	signals(bot).Run()
 }
 
 func signals(bot *victor.Robot) *victor.Robot {
@@ -26,8 +27,8 @@ func signals(bot *victor.Robot) *victor.Robot {
 	signal.Notify(sigs, os.Interrupt)
 
 	go func() {
-	    <-sigs
-	    bot.Stop()
+		<-sigs
+		bot.Stop()
 	}()
 
 	return bot
