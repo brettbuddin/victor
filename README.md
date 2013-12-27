@@ -8,7 +8,7 @@ We use Victor as the backbone of our bot, Virbot, within our team Campfire at Vi
 
 ### Making Him Your Own
 
-Victor is more of a framework for constructing your own bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses, but you might want him to do something specific to your team's needs. You can use the programs located in `examples/` as starting points to create your own executable.
+Victor is more of a framework for constructing your own bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses. You can use the programs located in `examples/` as starting points to create your own executable.
 
 ### Listening for Things
 
