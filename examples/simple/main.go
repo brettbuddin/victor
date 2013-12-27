@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"github.com/brettbuddin/victor"
 )
 
@@ -16,5 +18,17 @@ func main() {
 		m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
 	})
 
-	bot.Run()
+    signals(bot).Run()
+}
+
+func signals(bot *victor.Robot) *victor.Robot {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt)
+
+	go func() {
+	    <-sigs
+	    bot.Stop()
+	}()
+
+	return bot
 }
