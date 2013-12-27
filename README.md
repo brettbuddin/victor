@@ -6,6 +6,10 @@
 
 We use Victor as the backbone of our bot, Virbot, within our team Campfire at Virb (http://virb.com).
 
+### Supported Services
+
+Currently I only have an adapter written for [Campfire](https://campfirenow.com/), however more are to come. Writing an adapter for your favorite service is a good way to contribute to the project :wink:.
+
 ### Making Him Your Own
 
 Victor is more of a framework for constructing your own bot so he doesn't do a whole lot out-of-the-box. I'll be adding more default behavior to him as time progresses. You can use the programs located in `examples/` as starting points to create your own executable.
