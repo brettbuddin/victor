@@ -14,11 +14,6 @@ func TestRouting(t *testing.T) {
 	})
 	b.Respond("tell (him|me)", func(m adapter.Message) {
 		called++
-
-		params := m.Params()
-		if len(params) == 0 || (params[0] != "him" && params[0] != "me") {
-			t.Errorf("Message params contents correct: %v", params)
-		}
 	})
 	b.Hear("alot", func(m adapter.Message) {
 		called++
@@ -30,9 +25,6 @@ func TestRouting(t *testing.T) {
 	b.Receive(&msg{id: "123", body: "ralph tell me"})
 	b.Receive(&msg{id: "123", body: "/tell me"})
 	b.Receive(&msg{id: "123", body: "I heard alot of them."})
-
-	// Shouldn't trigger (doesn't increment "called")
-	b.Receive(&msg{id: "123", body: "Tell ralph howdy."})
 
 	if called != 5 {
 		t.Error("One or more register actions weren't triggered")
