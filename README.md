@@ -18,20 +18,34 @@ There are two ways to trigger actions on the bot:
 - `Respond`: Respond to a direct statement at the bot (e.g. "virbot show not shipped")
 
 ```go
+// Create the bot (with driver and name)
 bot := victor.New("campfire", "ralph")
 
-// Triggers anytime it hears the word "alot".
+// Trigger anytime it hears the word "alot".
 bot.Hear("alot", func(m victor.Message) {
     m.Room().Say("A LOT.")
 })
 
-// Triggers when someone talks directly to the bot: "ralph hi"
+// Trigger when someone talks directly to the bot in the following forms: 
+//   - "ralph hi"
+//   - "@ralph hi"
+//   - "/hi"
 bot.Respond("hi|hello|howdy", func(m victor.Message) {
     m.Reply(fmt.Sprintf("Hello, %s", m.User().Name()))
 })
 
 bot.Respond("bye", func(m victor.Message) {
     m.Reply(fmt.Sprintf("Goodbye, %s", m.User().Name()))
+})
+
+// Capture Parameters on trigger
+bot.Respond("testsuite ([\\w-]+)/([\\w-]+)(:([\\w-]+))", func(m victor.Message) {
+    params := m.Params()
+    user   := params[0]
+    repo   := params[1]
+    branch := params[2]
+
+    fmt.Printf("user=%s repo=%s branch=%s\n", user, repo, branch)
 })
 
 bot.Run()
