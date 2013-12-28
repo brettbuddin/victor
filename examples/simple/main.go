@@ -14,10 +14,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(bot.Respond("(?P<phrase>hello|hi|howdy)", func(m victor.Message) {
-		fmt.Println(m.Params())
-		//m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
-	}))
+	bot.Respond("hello|hi|howdy", func(m victor.Message) {
+		m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
+	})
 
 	signals(bot).Run()
 }
