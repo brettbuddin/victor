@@ -21,6 +21,7 @@ func New(dur time.Duration) *Cache {
 	return &Cache{&sync.RWMutex{}, map[string]CacheRecord{}, dur}
 }
 
+// Expired reports whether a key in the cache is expired or not
 func (c *Cache) Expired(key string) bool {
 	c.RLock()
 	defer c.RUnlock()
@@ -31,6 +32,7 @@ func (c *Cache) Expired(key string) bool {
 	return false
 }
 
+// Store sets a key/value pair in the cache
 func (c *Cache) Store(o adapter.CacheKeyer) {
 	c.Lock()
 	defer c.Unlock()
@@ -38,6 +40,7 @@ func (c *Cache) Store(o adapter.CacheKeyer) {
 	c.cache[o.CacheKey()] = record
 }
 
+// Get returns a particular key's value from the cache
 func (c *Cache) Get(key string) adapter.CacheKeyer {
 	c.RLock()
 	defer c.RUnlock()
@@ -47,6 +50,7 @@ func (c *Cache) Get(key string) adapter.CacheKeyer {
 	return nil
 }
 
+// Exists checks to see if a key is set in the cache
 func (c *Cache) Exists(key string) bool {
 	if record := c.Get(key); record == nil {
 		return false
@@ -54,6 +58,7 @@ func (c *Cache) Exists(key string) bool {
 	return true
 }
 
+// Delete removes a key/value pair from the cache
 func (c *Cache) Delete(key string) {
 	o := c.Get(key)
 

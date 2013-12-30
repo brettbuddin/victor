@@ -28,18 +28,22 @@ func New(name string) *Brain {
 		listeners: []ListenerFunc{},
 	}
 }
+
+// Name returns the name of the robot
 func (b *Brain) Name() string {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 	return b.name
 }
 
+// Identity returns the identity User of the robot
 func (b *Brain) Identity() adapter.User {
 	b.mutex.RLock()
 	defer b.mutex.RUnlock()
 	return b.identity
 }
 
+// SetIdentity sets the identity User of the robot
 func (b *Brain) SetIdentity(u adapter.User) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
