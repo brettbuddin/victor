@@ -31,7 +31,7 @@ type Brain interface {
 	Name() string
 	Identity() User
 	SetIdentity(User)
-    Cacher
+	Cacher
 }
 
 type Message interface {

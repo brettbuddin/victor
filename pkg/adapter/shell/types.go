@@ -90,5 +90,5 @@ func (u User) Name() string {
 }
 
 func (u User) AvatarURL() string {
-    return ""
+	return ""
 }

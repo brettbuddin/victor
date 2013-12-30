@@ -7,13 +7,13 @@ import (
 )
 
 type CacheRecord struct {
-    Object adapter.CacheKeyer
-    CachedAt time.Time
+	Object   adapter.CacheKeyer
+	CachedAt time.Time
 }
 
 type Cache struct {
 	*sync.RWMutex
-	cache map[string]CacheRecord
+	cache    map[string]CacheRecord
 	cacheFor time.Duration
 }
 
@@ -25,7 +25,7 @@ func (c *Cache) Expired(key string) bool {
 	c.RLock()
 	defer c.RUnlock()
 	if record, ok := c.cache[key]; ok {
-	    return record.CachedAt.Add(c.cacheFor).After(time.Now())
+		return record.CachedAt.Add(c.cacheFor).After(time.Now())
 	}
 
 	return false

@@ -2,9 +2,9 @@ package victor
 
 import (
 	"github.com/brettbuddin/victor/pkg/adapter"
-	"github.com/brettbuddin/victor/pkg/brain"
 	_ "github.com/brettbuddin/victor/pkg/adapter/campfire"
 	_ "github.com/brettbuddin/victor/pkg/adapter/shell"
+	"github.com/brettbuddin/victor/pkg/brain"
 	"log"
 )
 
@@ -16,7 +16,7 @@ type Robot struct {
 }
 
 type Message interface {
-    adapter.Message
+	adapter.Message
 }
 
 // New returns a Robot
@@ -62,13 +62,13 @@ func (r *Robot) Hear(exp string, f func(Message)) (err error) {
 // Run starts the robot.
 func (r *Robot) Run() error {
 	go func() {
-	    err := r.adapter.Listen(r.incoming)
+		err := r.adapter.Listen(r.incoming)
 
-	    if err != nil {
-            log.Println(err)
-	    }
+		if err != nil {
+			log.Println(err)
+		}
 
-        r.Stop()
+		r.Stop()
 	}()
 
 	for {

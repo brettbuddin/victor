@@ -6,14 +6,14 @@ import (
 	"log"
 	"regexp"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 type ListenerFunc func(adapter.Message)
 
 type Brain struct {
-    *cache.Cache
+	*cache.Cache
 	mutex     *sync.RWMutex
 	name      string
 	identity  adapter.User

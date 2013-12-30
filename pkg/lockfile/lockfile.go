@@ -1,9 +1,9 @@
 package lockfile
 
 import (
+	"io/ioutil"
 	"os"
 	"syscall"
-	"io/ioutil"
 )
 
 const (
@@ -25,7 +25,7 @@ func New(filepath string) (*LockFile, error) {
 }
 
 func NewTemp(dirPath string) (*LockFile, error) {
-    file, err := ioutil.TempFile(dirPath, "")
+	file, err := ioutil.TempFile(dirPath, "")
 	if err != nil {
 		return nil, err
 	}

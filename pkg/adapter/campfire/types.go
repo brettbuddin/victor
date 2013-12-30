@@ -91,7 +91,7 @@ func (u User) Name() string {
 }
 
 func (u User) AvatarURL() string {
-    return u.user.AvatarURL
+	return u.user.AvatarURL
 }
 
 func itoa(i int) string {
