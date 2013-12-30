@@ -2,7 +2,7 @@ package victor
 
 import (
 	"fmt"
-	"github.com/brettbuddin/victor/util/google"
+	"github.com/brettbuddin/victor/pkg/google"
 	"math/rand"
 	"strconv"
 	"time"

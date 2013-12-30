@@ -1,27 +1,22 @@
 package victor
 
 import (
-	"github.com/brettbuddin/victor/adapter"
-	_ "github.com/brettbuddin/victor/adapter/campfire"
-	_ "github.com/brettbuddin/victor/adapter/shell"
+	"github.com/brettbuddin/victor/pkg/adapter"
+	"github.com/brettbuddin/victor/pkg/brain"
+	_ "github.com/brettbuddin/victor/pkg/adapter/campfire"
+	_ "github.com/brettbuddin/victor/pkg/adapter/shell"
 	"log"
 )
 
 type Robot struct {
 	adapter  adapter.Adapter
-	brain    *Brain
+	brain    *brain.Brain
 	incoming chan adapter.Message
 	stop     chan bool
 }
 
 type Message interface {
-	adapter.Message
-}
-
-type ImmutableBrain interface {
-	Name() string
-	Identity() adapter.User
-	Cache() adapter.Cacher
+    adapter.Message
 }
 
 // New returns a Robot
@@ -32,20 +27,20 @@ func New(adapterName, robotName string) (*Robot, error) {
 		return nil, err
 	}
 
-	brain := NewBrain(robotName)
+	brain := brain.New(robotName)
 	bot := &Robot{
 		adapter:  initFunc(brain),
 		brain:    brain,
-		stop:     make(chan bool),
 		incoming: make(chan adapter.Message),
+		stop:     make(chan bool),
 	}
 
 	defaults(bot)
 	return bot, nil
 }
 
-func (r *Robot) Brain() ImmutableBrain {
-	return ImmutableBrain(r.brain)
+func (r *Robot) Brain() *brain.Brain {
+	return r.brain
 }
 
 // Respond proxies the registration of a respond
@@ -66,7 +61,15 @@ func (r *Robot) Hear(exp string, f func(Message)) (err error) {
 
 // Run starts the robot.
 func (r *Robot) Run() error {
-	go r.adapter.Listen(r.incoming)
+	go func() {
+	    err := r.adapter.Listen(r.incoming)
+
+	    if err != nil {
+            log.Println(err)
+	    }
+
+        r.Stop()
+	}()
 
 	for {
 		select {
@@ -83,6 +86,5 @@ func (r *Robot) Run() error {
 }
 
 func (r *Robot) Stop() {
-	r.stop <- true
 	close(r.stop)
 }

@@ -1,12 +1,12 @@
-package victor
+package brain
 
 import (
-	"github.com/brettbuddin/victor/adapter"
+	"github.com/brettbuddin/victor/pkg/adapter"
 	"testing"
 )
 
 func TestRouting(t *testing.T) {
-	b := NewBrain("ralph")
+	b := New("ralph")
 	called := 0
 
 	b.Respond("howdy", func(m adapter.Message) {
@@ -32,7 +32,7 @@ func TestRouting(t *testing.T) {
 }
 
 func TestParams(t *testing.T) {
-	b := NewBrain("ralph")
+	b := New("ralph")
 	called := 0
 
 	b.Respond("yodel (it)", func(m adapter.Message) {
@@ -51,7 +51,7 @@ func TestParams(t *testing.T) {
 }
 
 func TestNonFiringRoutes(t *testing.T) {
-	b := NewBrain("ralph")
+	b := New("ralph")
 	called := 0
 
 	b.Respond("howdy", func(m adapter.Message) {

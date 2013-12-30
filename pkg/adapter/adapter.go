@@ -31,27 +31,20 @@ type Brain interface {
 	Name() string
 	Identity() User
 	SetIdentity(User)
-	Cache() Cacher
+    Cacher
 }
 
 type Message interface {
-	Id() string
 	Body() string
 	Room() Room
 	User() User
-
-	// Sends
 	Reply(string) error
-
-	// Params
 	SetParams([]string)
 	Params() []string
 }
 
 type Room interface {
 	Id() string
-
-	// Sends
 	Say(string) error
 	Paste(string) error
 	Sound(string) error
@@ -64,14 +57,15 @@ type User interface {
 	AvatarURL() string
 }
 
-type Cacheable interface {
+type CacheKeyer interface {
 	CacheKey() string
 }
 
 type Cacher interface {
-	Add(Cacheable)
-	Get(string) Cacheable
+	Store(CacheKeyer)
+	Get(string) CacheKeyer
 	Exists(string) bool
+	Expired(string) bool
 	Delete(string)
 }
 

@@ -1,49 +1,48 @@
-package victor
+package brain
 
 import (
-	"github.com/brettbuddin/victor/adapter"
+	"github.com/brettbuddin/victor/pkg/adapter"
+	"github.com/brettbuddin/victor/pkg/cache"
 	"log"
 	"regexp"
 	"strings"
+	"time"
 	"sync"
 )
 
+type ListenerFunc func(adapter.Message)
+
 type Brain struct {
-	*sync.RWMutex
+    *cache.Cache
+	mutex     *sync.RWMutex
 	name      string
 	identity  adapter.User
 	listeners []ListenerFunc
-	cache     *Cache
 }
 
-func NewBrain(name string) *Brain {
+func New(name string) *Brain {
 	return &Brain{
-		RWMutex:   &sync.RWMutex{},
+		Cache:     cache.New(3 * time.Hour),
+		mutex:     &sync.RWMutex{},
 		name:      name,
 		listeners: []ListenerFunc{},
-		cache:     NewCache(),
 	}
 }
-
-func (b *Brain) Cache() adapter.Cacher {
-	return b.cache
-}
-
 func (b *Brain) Name() string {
-	b.RLock()
-	defer b.RUnlock()
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 	return b.name
 }
 
 func (b *Brain) Identity() adapter.User {
-	b.RLock()
-	defer b.RUnlock()
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 	return b.identity
 }
 
 func (b *Brain) SetIdentity(u adapter.User) {
-	b.Lock()
-	defer b.Unlock()
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 	b.identity = u
 }
 
@@ -71,37 +70,34 @@ func (b *Brain) Hear(exp string, f func(adapter.Message)) (err error) {
 		return err
 	}
 
-	log.Printf("LISTENER: %s\n", exp)
-	b.register(listenerFunc(pattern, f))
+	log.Printf("PATTERN: %s\n", exp)
+	b.register(b.listener(pattern, f))
 	return
 }
 
 func (b *Brain) register(l ListenerFunc) {
-	b.Lock()
-	defer b.Unlock()
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 	b.listeners = append(b.listeners, l)
 }
 
 // Receive accepts an incoming message and applies
 // it to all listeners.
 func (b *Brain) Receive(m adapter.Message) {
-	b.RLock()
-	defer b.RUnlock()
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 	for _, l := range b.listeners {
 		l(m)
 	}
 }
 
-type ListenerFunc func(adapter.Message)
-
-func listenerFunc(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
+func (b *Brain) listener(pattern *regexp.Regexp, f ListenerFunc) ListenerFunc {
 	return func(m adapter.Message) {
 		results := pattern.FindAllStringSubmatch(m.Body(), -1)
 
 		if len(results) > 0 {
 			m.SetParams(results[0][1:])
-			log.Printf("TRIGGER: %s\n", pattern)
-			log.Printf("PARAMS: %s\n", m.Params())
+			log.Printf("MATCH=%s PARAMS=%s\n", pattern, m.Params())
 			f(m)
 		}
 	}

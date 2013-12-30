@@ -3,7 +3,7 @@ package shell
 import (
 	"bufio"
 	"fmt"
-	"github.com/brettbuddin/victor/adapter"
+	"github.com/brettbuddin/victor/pkg/adapter"
 	"os"
 )
 

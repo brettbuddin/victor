@@ -1,25 +1,25 @@
-package campfire
+package shell
 
 import (
-	"fmt"
-	"github.com/brettbuddin/campfire"
-	"github.com/brettbuddin/victor/adapter"
+	"github.com/brettbuddin/victor/pkg/adapter"
+	"log"
 	"strconv"
 )
 
 type Message struct {
-	message *campfire.Message
-	user    adapter.User
-	room    adapter.Room
-	params  []string
+	id     int
+	body   string
+	user   adapter.User
+	room   adapter.Room
+	params []string
 }
 
 func (m *Message) Id() string {
-	return itoa(m.message.Id)
+	return strconv.Itoa(m.id)
 }
 
 func (m *Message) Body() string {
-	return m.message.Body
+	return m.body
 }
 
 func (m *Message) User() adapter.User {
@@ -31,7 +31,8 @@ func (m *Message) Room() adapter.Room {
 }
 
 func (m *Message) Reply(text string) error {
-	return m.Room().Say(fmt.Sprintf("%s: %s", m.User().Name(), text))
+	log.Printf("REPLYING: %s: %s", m.User().Name(), text)
+	return nil
 }
 
 func (m *Message) SetParams(v []string) {
@@ -43,57 +44,51 @@ func (m *Message) Params() []string {
 }
 
 type Room struct {
-	room *campfire.Room
+	id   int
+	name string
 }
 
 func (r Room) Id() string {
-	return itoa(r.room.Id)
-}
-
-func (r Room) CacheKey() string {
-	return adapter.RoomKey(r.Id())
+	return strconv.Itoa(r.id)
 }
 
 func (r Room) Name() string {
-	return r.room.Name
+	return r.name
 }
 
 func (r Room) Say(text string) error {
-	return r.room.SendText(text)
+	log.Println("SAYING:", text)
+	return nil
 }
 
 func (r Room) Paste(text string) error {
-	return r.room.SendPaste(text)
+	log.Println("PASTING:", text)
+	return nil
 }
 
 func (r Room) Sound(name string) error {
-	return r.room.SendSound(name)
+	log.Println("PLAYING:", name)
+	return nil
 }
 
 func (r Room) Tweet(url string) error {
-	return r.room.SendTweet(url)
+	log.Println("DISPLAYING:", url)
+	return nil
 }
 
 type User struct {
-	user *campfire.User
-}
-
-func (u User) CacheKey() string {
-	return adapter.UserKey(u.Id())
+	id   int
+	name string
 }
 
 func (u User) Id() string {
-	return itoa(u.user.Id)
+	return strconv.Itoa(u.id)
 }
 
 func (u User) Name() string {
-	return u.user.Name
+	return u.name
 }
 
 func (u User) AvatarURL() string {
-    return u.user.AvatarURL
-}
-
-func itoa(i int) string {
-	return strconv.Itoa(i)
+    return ""
 }

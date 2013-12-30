@@ -3,12 +3,11 @@ package campfire
 import (
 	"errors"
 	"github.com/brettbuddin/campfire"
-	"github.com/brettbuddin/victor/adapter"
+	"github.com/brettbuddin/victor/pkg/adapter"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -18,11 +17,35 @@ const (
 
 func init() {
 	adapter.Register("campfire", func(b adapter.Brain) adapter.Adapter {
+		account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
+		token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
+		roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
+
+		if account == "" || token == "" || roomList == "" {
+			log.Println("The following environment variables are required:")
+			log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
+			os.Exit(1)
+		}
+
+		client := campfire.NewClient(account, token)
+		roomIdStrings := strings.Split(roomList, ",")
+		roomIds := []int{}
+
+		for _, id := range roomIdStrings {
+			j, err := strconv.Atoi(id)
+
+			if err != nil {
+				log.Printf("Room is not numeric: %s\n", id)
+			}
+
+			roomIds = append(roomIds, j)
+		}
+
 		return &Adapter{
 			brain:   b,
-			once:    sync.Once{},
+			client:  client,
 			stop:    make(chan bool),
-			roomIds: []int{},
+			roomIds: roomIds,
 		}
 	})
 }
@@ -30,14 +53,11 @@ func init() {
 type Adapter struct {
 	brain   adapter.Brain
 	client  *campfire.Client
-	once    sync.Once
 	stop    chan bool
 	roomIds []int
 }
 
 func (a *Adapter) Listen(outgoing chan adapter.Message) error {
-	a.configure()
-
 	rooms, err := a.bootstrap()
 	if err != nil {
 		return err
@@ -52,8 +72,6 @@ func (a *Adapter) Listen(outgoing chan adapter.Message) error {
 		go func() {
 			for {
 				message, ok := <-s.Messages()
-
-				// Stop fan-in if channel is closed
 				if !ok {
 					break
 				}
@@ -63,8 +81,6 @@ func (a *Adapter) Listen(outgoing chan adapter.Message) error {
 		}()
 		streams = append(streams, s)
 	}
-
-	cache := a.brain.Cache()
 
 	for {
 		select {
@@ -85,63 +101,35 @@ func (a *Adapter) Listen(outgoing chan adapter.Message) error {
 			roomId := itoa(m.RoomId)
 			userId := itoa(m.UserId)
 
-			if !cache.Exists(adapter.UserKey(userId)) {
+			key := adapter.UserKey(userId)
+
+			if !a.brain.Exists(key) || a.brain.Expired(key) {
 				user, err := a.client.UserForId(m.UserId)
 
 				if err != nil {
 					break
 				}
 
-				cache.Add(User{user})
+				a.brain.Store(User{user})
 			}
 
 			outgoing <- &Message{
 				message: m,
-				room:    cache.Get(adapter.RoomKey(roomId)).(Room),
-				user:    cache.Get(adapter.UserKey(userId)).(User),
+				room:    a.brain.Get(adapter.RoomKey(roomId)).(Room),
+				user:    a.brain.Get(adapter.UserKey(userId)).(User),
 			}
 		}
 	}
 }
 
 func (a *Adapter) Stop() {
-	a.stop <- true
 	close(a.stop)
-
 	log.Println("Delaying shutdown by", SHUTDOWN_DELAY, "(for cleanup)")
 	time.Sleep(SHUTDOWN_DELAY)
 }
 
-func (a *Adapter) configure() {
-	a.once.Do(func() {
-		account := os.Getenv("VICTOR_CAMPFIRE_ACCOUNT")
-		token := os.Getenv("VICTOR_CAMPFIRE_TOKEN")
-		roomList := os.Getenv("VICTOR_CAMPFIRE_ROOMS")
-
-		if account == "" || token == "" || roomList == "" {
-			log.Println("The following environment variables are required:")
-			log.Println("VICTOR_CAMPFIRE_ACCOUNT, VICTOR_CAMPFIRE_TOKEN, VICTOR_CAMPFIRE_ROOMS")
-			os.Exit(1)
-		}
-
-		a.client = campfire.NewClient(account, token)
-		roomIdStrings := strings.Split(roomList, ",")
-
-		for _, id := range roomIdStrings {
-			j, err := strconv.Atoi(id)
-
-			if err != nil {
-				log.Printf("Room is not numeric: %s\n", id)
-			}
-
-			a.roomIds = append(a.roomIds, j)
-		}
-	})
-}
-
 func (a *Adapter) bootstrap() ([]*campfire.Room, error) {
 	rooms := []*campfire.Room{}
-	cache := a.brain.Cache()
 
 	me, err := a.client.Me()
 	if err != nil {
@@ -165,9 +153,9 @@ func (a *Adapter) bootstrap() ([]*campfire.Room, error) {
 			continue
 		}
 
-		cache.Add(Room{room})
+		a.brain.Store(Room{room})
 		for _, u := range room.Users {
-			cache.Add(User{u})
+			a.brain.Store(User{u})
 		}
 
 		log.Printf("ROOM[%d]: joined %s\n", id, room.Name)
