@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	bot := victor.New("shell", "victor", ":8000")
+	bot := victor.New("slack", "victor", ":8000")
 
 	bot.HandleFunc(bot.Direct("hello|hi|howdy"), func(s *victor.State) {
 		s.Chat().Send(s.Message().ChannelId(), fmt.Sprintf("Hello, %s", s.Message().UserName()))

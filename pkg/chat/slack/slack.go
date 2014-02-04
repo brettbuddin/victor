@@ -1,53 +1,77 @@
 package slack
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/brettbuddin/victor/pkg/chat"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
-	"regexp"
+	"net/url"
+	"os"
 )
 
 func init() {
 	chat.Register("slack", func(r chat.Robot) chat.Adapter {
-		return &slack{r}
+		return &slack{
+			robot: r,
+			team:  os.Getenv("VICTOR_SLACK_TEAM"),
+			token: os.Getenv("VICTOR_SLACK_TOKEN"),
+		}
 	})
 }
 
 type slack struct {
 	robot chat.Robot
+	team  string
+	token string
 }
 
 func (s *slack) Run() {
-	exp := regexp.MustCompile(fmt.Sprintf("\\A(?:@)?%s[:,]?\\s*", s.robot.Name))
-
 	router := mux.NewRouter()
 	router.HandleFunc("/slack/message", func(w http.ResponseWriter, r *http.Request) {
-		text := r.PostFormValue("text")
-		text = exp.ReplaceAllString(text, "")
-
 		s.robot.Receive(&message{
 			userId:      r.PostFormValue("user_id"),
 			userName:    r.PostFormValue("user_name"),
 			channelId:   r.PostFormValue("channel_id"),
 			channelName: r.PostFormValue("channel_name"),
-			text:        text,
+			text:        r.PostFormValue("text"),
 		})
 	}).Methods("POST")
 }
 
 func (s *slack) Send(channelId, msg string) {
+	body, err := json.Marshal(&outgoingMessage{
+		Channel:  channelId,
+		Username: s.robot.Name(),
+		Text:     msg,
+	})
+
+	if err != nil {
+		log.Println("error sending to chat:", err)
+	}
+
+	endpoint := fmt.Sprintf("https://%s.slack.com/services/hooks/incoming-webhook?token=%s", s.team, s.token)
+	log.Println(endpoint)
+	log.Println(string(body))
+	log.Println(http.PostForm(endpoint, url.Values{"payload": {string(body)}}))
 }
 
 func (s *slack) Stop() {
 }
 
+type outgoingMessage struct {
+	Channel  string `json:"channel"`
+	Username string `json:"username"`
+	Text     string `json:"text"`
+}
+
 type message struct {
-	userId      string `json:"user_id"`
-	userName    string `json:"user_name"`
-	channelId   string `json:"channel_id"`
-	channelName string `json:"channel_name"`
-	text        string `json:"text"`
+	userId      string
+	userName    string
+	channelId   string
+	channelName string
+	text        string
 }
 
 func (m *message) UserId() string {
