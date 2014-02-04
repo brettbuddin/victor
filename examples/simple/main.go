@@ -8,27 +8,17 @@ import (
 )
 
 func main() {
-	bot, err := victor.New("shell", "bot")
+	bot := victor.New("shell", "victor", ":8000")
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	bot.Respond("hello|hi|howdy", func(m victor.Message) {
-		m.Room().Say(fmt.Sprintf("Hello, %s", m.User().Name()))
+	bot.HandleFunc(bot.Direct("hello|hi|howdy"), func(s *victor.State) {
+		s.Chat().Send(s.Message().ChannelId(), fmt.Sprintf("Hello, %s", s.Message().UserName()))
 	})
 
-	signals(bot).Run()
-}
+	go bot.Run()
 
-func signals(bot *victor.Robot) *victor.Robot {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
+	<-sigs
 
-	go func() {
-		<-sigs
-		bot.Stop()
-	}()
-
-	return bot
+	bot.Stop()
 }

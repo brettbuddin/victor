@@ -1,90 +1,132 @@
 package victor
 
 import (
-	"github.com/brettbuddin/victor/pkg/adapter"
-	_ "github.com/brettbuddin/victor/pkg/adapter/campfire"
-	_ "github.com/brettbuddin/victor/pkg/adapter/shell"
-	"github.com/brettbuddin/victor/pkg/brain"
+	"github.com/brettbuddin/victor/pkg/chat"
+	_ "github.com/brettbuddin/victor/pkg/chat/shell"
+	_ "github.com/brettbuddin/victor/pkg/chat/slack"
+	"github.com/brettbuddin/victor/pkg/httpserver"
+	"github.com/brettbuddin/victor/pkg/store"
 	"log"
+	"os"
+	"strings"
+	"time"
 )
 
 type Robot struct {
-	adapter  adapter.Adapter
-	brain    *brain.Brain
-	incoming chan adapter.Message
+	*Dispatch
+	name     string
+	http     *httpserver.Server
+	httpAddr string
+	store    store.Store
+	adapter  chat.Adapter
+	incoming chan chat.Message
 	stop     chan bool
 }
 
-type Message interface {
-	adapter.Message
-}
-
 // New returns a Robot
-func New(adapterName, robotName string) (*Robot, error) {
-	initFunc, err := adapter.Load(adapterName)
+func New(adapterName, robotName, httpAddr string) *Robot {
+	initFunc, err := chat.Load(adapterName)
 
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		os.Exit(1)
 	}
 
-	brain := brain.New(robotName)
 	bot := &Robot{
-		adapter:  initFunc(brain),
-		brain:    brain,
-		incoming: make(chan adapter.Message),
+		name:     robotName,
+		http:     httpserver.New(),
+		store:    store.NewMemoryStore(),
+		incoming: make(chan chat.Message),
 		stop:     make(chan bool),
+		httpAddr: httpAddr,
 	}
+
+	bot.Dispatch = NewDispatch(bot)
+	bot.adapter = initFunc(bot)
 
 	defaults(bot)
-	return bot, nil
+	handlers(bot)
+	return bot
 }
 
-func (r *Robot) Brain() *brain.Brain {
-	return r.brain
+// Direct wraps a regexp pattern in the necessary pattern
+// for a direct command to the bot.
+func (r *Robot) Direct(exp string) string {
+	return strings.Join([]string{
+		"(?i)", // flags
+		"\\A",  // begin
+		"(?:(?:@)?" + r.name + "[:,]?\\s*|/)", // bot name
+		"(?:" + exp + ")",                     // expression
+		"\\z",                                 // end
+	}, "")
 }
 
-// Respond proxies the registration of a respond
-// command to the brain.
-func (r *Robot) Respond(exp string, f func(Message)) (err error) {
-	return r.brain.Respond(exp, func(m adapter.Message) {
-		f(m.(Message))
-	})
-}
-
-// Hear proxies the registration of a hear
-// command to the brain.
-func (r *Robot) Hear(exp string, f func(Message)) (err error) {
-	return r.brain.Hear(exp, func(m adapter.Message) {
-		f(m.(Message))
-	})
+func (r *Robot) Receive(m chat.Message) {
+	r.incoming <- m
 }
 
 // Run starts the robot.
 func (r *Robot) Run() error {
+	go r.adapter.Run()
 	go func() {
-		err := r.adapter.Listen(r.incoming)
-
-		if err != nil {
-			log.Println(err)
-		}
-
-		r.Stop()
-	}()
-
-	for {
-		select {
-		case <-r.stop:
-			log.Println("Stopping")
-			r.adapter.Stop()
-			return nil
-		case m := <-r.incoming:
-			if r.brain.Identity() == nil || m.User().Id() != r.brain.Identity().Id() {
-				go r.brain.Receive(m)
+		for {
+			select {
+			case <-r.stop:
+				r.adapter.Stop()
+				return
+			case m := <-r.incoming:
+				if m.UserName() != r.name {
+					go r.Process(m)
+				}
 			}
 		}
-	}
+	}()
+
+	return r.http.ListenAndServe(r.httpAddr)
 }
 
 func (r *Robot) Stop() {
+	log.Println("Stopping")
 	close(r.stop)
+	r.http.Stop()
+	time.Sleep(2 * time.Second)
+}
+
+func (r *Robot) Name() string {
+	return r.name
+}
+
+func (r *Robot) SetName(n string) {
+	r.name = n
+}
+
+func (r *Robot) Store() store.Store {
+	return r.store
+}
+
+func (r *Robot) SetStore(s store.Store) {
+	r.store = s
+}
+
+func (r *Robot) HTTP() *httpserver.Server {
+	return r.http
+}
+
+func (r *Robot) SetHTTP(s *httpserver.Server) {
+	r.http = s
+}
+
+func (r *Robot) Chat() chat.Adapter {
+	return r.adapter
+}
+
+func (r *Robot) SetChat(name string) error {
+	initFunc, err := chat.Load(name)
+
+	if err != nil {
+		return err
+	}
+
+	r.adapter = initFunc(r)
+	return nil
 }
