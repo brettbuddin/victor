@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/brettbuddin/victor/pkg/chat"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"net/url"
@@ -28,8 +27,7 @@ type slack struct {
 }
 
 func (s *slack) Run() {
-	router := mux.NewRouter()
-	router.HandleFunc("/hubot/slack-webhook", func(w http.ResponseWriter, r *http.Request) {
+	s.robot.HTTP().HandleFunc("/hubot/slack-webhook", func(w http.ResponseWriter, r *http.Request) {
 		s.robot.Receive(&message{
 			userId:      r.PostFormValue("user_id"),
 			userName:    r.PostFormValue("user_name"),
@@ -37,7 +35,7 @@ func (s *slack) Run() {
 			channelName: r.PostFormValue("channel_name"),
 			text:        r.PostFormValue("text"),
 		})
-	}).Methods("POST")
+	})
 }
 
 func (s *slack) Send(channelId, msg string) {
