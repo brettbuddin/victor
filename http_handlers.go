@@ -11,11 +11,6 @@ import (
 func handlers(bot *Robot) *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/action", func(w http.ResponseWriter, r *http.Request) {
-		text, _ := ioutil.ReadAll(r.Body)
-		bot.Receive(&textMessage{string(text)})
-	}).Methods("POST")
-
 	router.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, httpserver.Message("ok", bot.Store().All()))
