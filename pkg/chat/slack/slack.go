@@ -29,7 +29,7 @@ type slack struct {
 
 func (s *slack) Run() {
 	router := mux.NewRouter()
-	router.HandleFunc("/slack/message", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/hubot/slack-webhook", func(w http.ResponseWriter, r *http.Request) {
 		s.robot.Receive(&message{
 			userId:      r.PostFormValue("user_id"),
 			userName:    r.PostFormValue("user_name"),
