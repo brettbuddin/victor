@@ -6,6 +6,7 @@ import (
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
+	"github.com/gorilla/mux"
 	"log"
 	"os"
 	"strings"
@@ -17,6 +18,7 @@ type Robot struct {
 	name     string
 	http     *httpserver.Server
 	httpAddr string
+    router   *mux.Router
 	store    store.Store
 	adapter  chat.Adapter
 	incoming chan chat.Message
@@ -43,9 +45,9 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 
 	bot.Dispatch = NewDispatch(bot)
 	bot.adapter = initFunc(bot)
+    bot.router = handlers(bot)
 
 	defaults(bot)
-	handlers(bot)
 	return bot
 }
 
@@ -82,6 +84,7 @@ func (r *Robot) Run() error {
 		}
 	}()
 
+	r.http.Handle("/", r.router)
 	return r.http.ListenAndServe(r.httpAddr)
 }
 
@@ -108,12 +111,12 @@ func (r *Robot) SetStore(s store.Store) {
 	r.store = s
 }
 
-func (r *Robot) HTTP() *httpserver.Server {
-	return r.http
+func (r *Robot) HTTP() *mux.Router {
+	return r.router
 }
 
-func (r *Robot) SetHTTP(s *httpserver.Server) {
-	r.http = s
+func (r *Robot) SetHTTP(router *mux.Router) {
+	r.router = router
 }
 
 func (r *Robot) Chat() chat.Adapter {

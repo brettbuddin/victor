@@ -35,7 +35,7 @@ func (s *slack) Run() {
 			channelName: r.PostFormValue("channel_name"),
 			text:        r.PostFormValue("text"),
 		})
-	})
+	}).Methods("POST")
 }
 
 func (s *slack) Send(channelId, msg string) {

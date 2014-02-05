@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func handlers(bot *Robot) {
+func handlers(bot *Robot) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/action", func(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,7 @@ func handlers(bot *Robot) {
 		fmt.Fprintf(w, httpserver.Message("ok", "key deleted"))
 	}).Methods("DELETE")
 
-	bot.HTTP().Handle("/", router)
+    return router
 }
 
 type textMessage struct {

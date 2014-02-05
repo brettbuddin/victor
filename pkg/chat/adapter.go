@@ -2,8 +2,8 @@ package chat
 
 import (
 	"fmt"
-	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
+    "github.com/gorilla/mux"
 )
 
 var adapters = map[string]InitFunc{}
@@ -32,7 +32,7 @@ type Adapter interface {
 
 type Robot interface {
 	Name() string
-	HTTP() *httpserver.Server
+	HTTP() *mux.Router
 	Store() store.Store
 	Chat() Adapter
 	Receive(Message)
