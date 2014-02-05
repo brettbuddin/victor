@@ -50,9 +50,7 @@ func (s *slack) Send(channelId, msg string) {
 	}
 
 	endpoint := fmt.Sprintf("https://%s.slack.com/services/hooks/incoming-webhook?token=%s", s.team, s.token)
-	log.Println(endpoint)
-	log.Println(string(body))
-	log.Println(http.PostForm(endpoint, url.Values{"payload": {string(body)}}))
+	http.PostForm(endpoint, url.Values{"payload": {string(body)}})
 }
 
 func (s *slack) Stop() {
