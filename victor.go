@@ -4,6 +4,7 @@ import (
 	"github.com/brettbuddin/victor/pkg/chat"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
+	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
 	"github.com/gorilla/mux"
