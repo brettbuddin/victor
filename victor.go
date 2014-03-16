@@ -2,9 +2,9 @@ package victor
 
 import (
 	"github.com/brettbuddin/victor/pkg/chat"
+	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
-	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
 	"github.com/gorilla/mux"
@@ -18,7 +18,7 @@ type Robot struct {
 	name     string
 	http     *httpserver.Server
 	httpAddr string
-    router   *mux.Router
+	router   *mux.Router
 	store    store.Store
 	adapter  chat.Adapter
 	incoming chan chat.Message
@@ -43,7 +43,7 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 
 	bot.Dispatch = NewDispatch(bot)
 	bot.adapter = initFunc(bot)
-    bot.router = handlers(bot)
+	bot.router = handlers(bot)
 
 	defaults(bot)
 	return bot
@@ -72,7 +72,7 @@ func (r *Robot) Run() error {
 		for {
 			select {
 			case m := <-r.incoming:
-				if m.UserName() != r.name {
+				if strings.ToLower(m.UserName()) != r.name {
 					go r.Process(m)
 				}
 			}
