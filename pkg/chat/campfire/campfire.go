@@ -25,48 +25,44 @@ func init() {
 			os.Exit(1)
 		}
 
-		roomIdStrings := strings.Split(roomsList, ",")
-		rooms := []int{}
+		roomIDStrings := strings.Split(roomsList, ",")
+		roomIDs := []int{}
 
-		for _, id := range roomIdStrings {
+		for _, id := range roomIDStrings {
 			j, err := strconv.Atoi(id)
 
 			if err != nil {
 				fmt.Printf("Room is not numeric: %s\n", id)
 			}
 
-			rooms = append(rooms, j)
+			roomIDs = append(roomIDs, j)
 		}
 
 		return &adapter{
 			robot:   r,
-			account: account,
-			token:   token,
-			rooms:   rooms,
+			client:  campfire.NewClient(account, token),
+			roomIDs: roomIDs,
 			stop:    make(chan bool),
-			cache:   NewCache(),
 		}
 	})
 }
 
 type adapter struct {
-	robot          chat.Robot
-	account, token string
-	rooms          []int
-	stop           chan bool
-	cache          *cache
+	robot   chat.Robot
+	client  *campfire.Client
+	roomIDs []int
+	stop    chan bool
 }
 
 func (a *adapter) Run() {
-	client := campfire.NewClient(a.account, a.token)
-
 	run := func(id int) {
-		room, err := client.RoomForId(id)
+		room, err := a.client.RoomForID(id)
 		if err != nil {
 			log.Printf("Unable to fetch room %d: %v\n", id, err)
 			return
 		}
-		a.cache.SetRoom(strconv.Itoa(id), room)
+		roomID := strconv.Itoa(id)
+		a.setStoreKey("room.name."+roomID, room.Name)
 
 		err = room.Join()
 		if err != nil {
@@ -85,49 +81,52 @@ func (a *adapter) Run() {
 				room.Leave()
 				return
 			case msg := <-messages:
-				userId := strconv.Itoa(msg.UserId)
-				roomId := strconv.Itoa(msg.RoomId)
-				room := a.cache.Room(roomId)
+				userID := strconv.Itoa(msg.UserID)
 
-				var err error
+				roomName, ok := a.getStoreKey("room.name." + roomID)
+				if !ok {
+					log.Printf("Unable to retrieve room %d name from store: %v\n", msg.UserID, err)
+					continue
+				}
 
-				user := a.cache.User(userId)
-				if user == nil {
-					user, err = client.UserForId(msg.UserId)
+				userName, ok := a.getStoreKey("user.name." + userID)
+				if !ok {
+					user, err := a.client.UserForID(msg.UserID)
 					if err != nil {
-						log.Printf("Unable to fetch user %d: %v\n", msg.UserId, err)
+						log.Printf("Unable to fetch user %d: %v\n", msg.UserID, err)
 						continue
 					}
 
-					a.cache.SetUser(userId, user)
+					userName = user.Name
+					a.setStoreKey("user.name."+userID, user.Name)
 				}
 
 				a.robot.Receive(&message{
-					userId:   userId,
-					userName: user.Name,
-					roomId:   roomId,
-					roomName: room.Name,
+					userID:   userID,
+					userName: userName,
+					roomID:   roomID,
+					roomName: roomName,
 					text:     msg.Body,
 				})
 			}
 		}
 	}
 
-	for _, id := range a.rooms {
+	for _, id := range a.roomIDs {
 		go run(id)
 	}
 }
 
-func (a *adapter) Send(roomId, msg string) {
-	room := a.cache.Room(roomId)
-	if room == nil {
-		log.Printf("Room %d hasn't been cached yet, unable to send message\n", roomId)
-		return
+func (a *adapter) Send(roomID, msg string) {
+	id, _ := strconv.Atoi(roomID)
+	room := campfire.Room{
+		Connection: a.client.Connection,
+		ID:         id,
 	}
 
 	err := room.SendText(msg)
 	if err != nil {
-		log.Printf("Error sending to room %d: %v\n", roomId, err)
+		log.Printf("Error sending to room %d: %v\n", roomID, err)
 	}
 }
 
@@ -137,20 +136,28 @@ func (a *adapter) Stop() {
 	time.Sleep(SHUTDOWN_DELAY)
 }
 
-type message struct {
-	userId, userName, roomId, roomName, text string
+func (a *adapter) getStoreKey(key string) (string, bool) {
+	return a.robot.Store().Get("campfire." + key)
 }
 
-func (m *message) UserId() string {
-	return m.userId
+func (a *adapter) setStoreKey(key, val string) {
+	a.robot.Store().Set("campfire."+key, val)
+}
+
+type message struct {
+	userID, userName, roomID, roomName, text string
+}
+
+func (m *message) UserID() string {
+	return m.userID
 }
 
 func (m *message) UserName() string {
 	return m.userName
 }
 
-func (m *message) ChannelId() string {
-	return m.roomId
+func (m *message) ChannelID() string {
+	return m.roomID
 }
 
 func (m *message) ChannelName() string {
@@ -159,4 +166,8 @@ func (m *message) ChannelName() string {
 
 func (m *message) Text() string {
 	return m.text
+}
+
+func key(key string) string {
+	return "campfire." + key
 }

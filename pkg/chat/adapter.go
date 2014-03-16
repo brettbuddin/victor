@@ -39,9 +39,9 @@ type Robot interface {
 }
 
 type Message interface {
-	UserId() string
+	UserID() string
 	UserName() string
-	ChannelId() string
+	ChannelID() string
 	ChannelName() string
 	Text() string
 }

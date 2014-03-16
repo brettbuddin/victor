@@ -41,7 +41,7 @@ func (a *Adapter) Run() {
 	}
 }
 
-func (a *Adapter) Send(channelId, msg string) {
+func (a *Adapter) Send(channelID, msg string) {
 	fmt.Println("SEND:", msg)
 }
 
@@ -54,7 +54,7 @@ type message struct {
 	text string
 }
 
-func (m *message) UserId() string {
+func (m *message) UserID() string {
 	return "0"
 }
 
@@ -62,7 +62,7 @@ func (m *message) UserName() string {
 	return "Meathead"
 }
 
-func (m *message) ChannelId() string {
+func (m *message) ChannelID() string {
 	return "0"
 }
 

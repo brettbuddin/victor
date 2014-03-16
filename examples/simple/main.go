@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	bot := victor.New("slack", "victor", ":8000")
+	bot := victor.New("campfire", "victor", ":8000")
 
 	bot.HandleFunc(bot.Direct("hello|hi|howdy"), func(s *victor.State) {
-		s.Chat().Send(s.Message().ChannelId(), fmt.Sprintf("Hello, %s", s.Message().UserName()))
+		s.Chat().Send(s.Message().ChannelID(), fmt.Sprintf("Hello, %s", s.Message().UserName()))
 	})
 
 	go bot.Run()

@@ -9,7 +9,7 @@ import (
 
 func defaults(robot *Robot) {
 	robot.HandleFunc(robot.Direct("ping"), func(s *State) {
-		s.Chat().Send(s.Message().ChannelId(), "pong!")
+		s.Chat().Send(s.Message().ChannelID(), "pong!")
 	})
 
 	robot.HandleFunc(robot.Direct("roll(\\s(\\d+))?"), func(s *State) {
@@ -31,6 +31,6 @@ func defaults(robot *Robot) {
 		random := rand.Intn(bound)
 
 		msg := fmt.Sprintf("%s rolled a %d of %d", s.Message().UserName(), random, bound)
-		s.Chat().Send(s.Message().ChannelId(), msg)
+		s.Chat().Send(s.Message().ChannelID(), msg)
 	})
 }

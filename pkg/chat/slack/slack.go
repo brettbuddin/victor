@@ -37,18 +37,18 @@ type slack struct {
 func (s *slack) Run() {
 	s.robot.HTTP().HandleFunc("/hubot/slack-webhook", func(w http.ResponseWriter, r *http.Request) {
 		s.robot.Receive(&message{
-			userId:      r.PostFormValue("user_id"),
+			userID:      r.PostFormValue("user_id"),
 			userName:    r.PostFormValue("user_name"),
-			channelId:   r.PostFormValue("channel_id"),
+			channelID:   r.PostFormValue("channel_id"),
 			channelName: r.PostFormValue("channel_name"),
 			text:        r.PostFormValue("text"),
 		})
 	}).Methods("POST")
 }
 
-func (s *slack) Send(channelId, msg string) {
+func (s *slack) Send(channelID, msg string) {
 	body, err := json.Marshal(&outgoingMessage{
-		Channel:  channelId,
+		Channel:  channelID,
 		Username: s.robot.Name(),
 		Text:     msg,
 	})
@@ -71,19 +71,19 @@ type outgoingMessage struct {
 }
 
 type message struct {
-	userId, userName, channelId, channelName, text string
+	userID, userName, channelID, channelName, text string
 }
 
-func (m *message) UserId() string {
-	return m.userId
+func (m *message) UserID() string {
+	return m.userID
 }
 
 func (m *message) UserName() string {
 	return m.userName
 }
 
-func (m *message) ChannelId() string {
-	return m.channelId
+func (m *message) ChannelID() string {
+	return m.channelID
 }
 
 func (m *message) ChannelName() string {
