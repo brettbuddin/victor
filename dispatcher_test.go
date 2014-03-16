@@ -71,23 +71,23 @@ func TestNonFiringRoutes(t *testing.T) {
 }
 
 type msg struct {
-	userId      string
+	userID      string
 	userName    string
-	channelId   string
+	channelID   string
 	channelName string
 	text        string
 }
 
-func (m *msg) UserId() string {
-	return m.userId
+func (m *msg) UserID() string {
+	return m.userID
 }
 
 func (m *msg) UserName() string {
 	return m.userName
 }
 
-func (m *msg) ChannelId() string {
-	return m.channelId
+func (m *msg) ChannelID() string {
+	return m.channelID
 }
 
 func (m *msg) ChannelName() string {
