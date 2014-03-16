@@ -41,7 +41,7 @@ func handlers(bot *Robot) *mux.Router {
 		fmt.Fprintf(w, httpserver.Message("ok", "key deleted"))
 	}).Methods("DELETE")
 
-    return router
+	return router
 }
 
 type textMessage struct {

@@ -3,7 +3,7 @@ package chat
 import (
 	"fmt"
 	"github.com/brettbuddin/victor/pkg/store"
-    "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 var adapters = map[string]InitFunc{}
