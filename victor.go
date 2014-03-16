@@ -88,9 +88,9 @@ func (r *Robot) Run() error {
 }
 
 func (r *Robot) Stop() {
+	r.adapter.Stop()
 	r.stop <- struct{}{}
 	close(r.incoming)
-	r.adapter.Stop()
 	r.http.Stop()
 }
 
