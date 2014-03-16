@@ -12,18 +12,26 @@ import (
 
 func init() {
 	chat.Register("slack", func(r chat.Robot) chat.Adapter {
+		team := os.Getenv("VICTOR_SLACK_TEAM")
+		token := os.Getenv("VICTOR_SLACK_TOKEN")
+
+		if team == "" || token == "" {
+			log.Println("The following environment variables are required:")
+			log.Println("VICTOR_SLACK_TEAM, VICTOR_CAMPFIRE_TOKEN")
+			os.Exit(1)
+		}
+
 		return &slack{
 			robot: r,
-			team:  os.Getenv("VICTOR_SLACK_TEAM"),
-			token: os.Getenv("VICTOR_SLACK_TOKEN"),
+			team:  team,
+			token: token,
 		}
 	})
 }
 
 type slack struct {
-	robot chat.Robot
-	team  string
-	token string
+	robot       chat.Robot
+	team, token string
 }
 
 func (s *slack) Run() {
@@ -63,11 +71,7 @@ type outgoingMessage struct {
 }
 
 type message struct {
-	userId      string
-	userName    string
-	channelId   string
-	channelName string
-	text        string
+	userId, userName, channelId, channelName, text string
 }
 
 func (m *message) UserId() string {
