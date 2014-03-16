@@ -22,6 +22,7 @@ type Robot struct {
 	store    store.Store
 	adapter  chat.Adapter
 	incoming chan chat.Message
+	stop     chan struct{}
 }
 
 // New returns a Robot
@@ -39,6 +40,7 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 		store:    store.NewMemoryStore(),
 		incoming: make(chan chat.Message),
 		httpAddr: httpAddr,
+		stop:     make(chan struct{}),
 	}
 
 	bot.Dispatch = NewDispatch(bot)
@@ -71,6 +73,8 @@ func (r *Robot) Run() error {
 	go func() {
 		for {
 			select {
+			case <-r.stop:
+				return
 			case m := <-r.incoming:
 				if strings.ToLower(m.UserName()) != r.name {
 					go r.Process(m)
@@ -84,6 +88,8 @@ func (r *Robot) Run() error {
 }
 
 func (r *Robot) Stop() {
+	r.stop <- struct{}{}
+	close(r.incoming)
 	r.adapter.Stop()
 	r.http.Stop()
 }

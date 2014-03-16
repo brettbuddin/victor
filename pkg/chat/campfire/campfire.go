@@ -42,7 +42,7 @@ func init() {
 			robot:   r,
 			client:  campfire.NewClient(account, token),
 			roomIDs: roomIDs,
-			stop:    make(chan bool),
+			stop:    make(chan struct{}),
 		}
 	})
 }
@@ -51,7 +51,7 @@ type adapter struct {
 	robot   chat.Robot
 	client  *campfire.Client
 	roomIDs []int
-	stop    chan bool
+	stop    chan struct{}
 }
 
 func (a *adapter) Run() {
