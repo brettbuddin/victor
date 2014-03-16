@@ -1,7 +1,6 @@
 package victor
 
 import (
-	"fmt"
 	"github.com/brettbuddin/victor/pkg/chat"
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
@@ -73,7 +72,6 @@ func (r *Robot) Run() error {
 		for {
 			select {
 			case m := <-r.incoming:
-				fmt.Println(strings.ToLower(m.UserName()), r.name)
 				if strings.ToLower(m.UserName()) != r.name {
 					go r.Process(m)
 				}
