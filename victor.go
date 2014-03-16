@@ -2,6 +2,7 @@ package victor
 
 import (
 	"github.com/brettbuddin/victor/pkg/chat"
+	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
 	"github.com/brettbuddin/victor/pkg/httpserver"
@@ -10,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 type Robot struct {
@@ -18,11 +18,10 @@ type Robot struct {
 	name     string
 	http     *httpserver.Server
 	httpAddr string
-    router   *mux.Router
+	router   *mux.Router
 	store    store.Store
 	adapter  chat.Adapter
 	incoming chan chat.Message
-	stop     chan bool
 }
 
 // New returns a Robot
@@ -39,13 +38,12 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 		http:     httpserver.New(),
 		store:    store.NewMemoryStore(),
 		incoming: make(chan chat.Message),
-		stop:     make(chan bool),
 		httpAddr: httpAddr,
 	}
 
 	bot.Dispatch = NewDispatch(bot)
 	bot.adapter = initFunc(bot)
-    bot.router = handlers(bot)
+	bot.router = handlers(bot)
 
 	defaults(bot)
 	return bot
@@ -73,11 +71,8 @@ func (r *Robot) Run() error {
 	go func() {
 		for {
 			select {
-			case <-r.stop:
-				r.adapter.Stop()
-				return
 			case m := <-r.incoming:
-				if m.UserName() != r.name {
+				if strings.ToLower(m.UserName()) != r.name {
 					go r.Process(m)
 				}
 			}
@@ -89,10 +84,8 @@ func (r *Robot) Run() error {
 }
 
 func (r *Robot) Stop() {
-	log.Println("Stopping")
-	close(r.stop)
+	r.adapter.Stop()
 	r.http.Stop()
-	time.Sleep(2 * time.Second)
 }
 
 func (r *Robot) Name() string {
