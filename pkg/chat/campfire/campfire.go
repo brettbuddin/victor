@@ -56,15 +56,12 @@ type adapter struct {
 
 func (a *adapter) Run() {
 	run := func(id int) {
-		room, err := a.client.RoomForID(id)
-		if err != nil {
-			log.Printf("Unable to fetch room %d: %v\n", id, err)
-			return
+		room := campfire.Room{
+			Connection: a.client.Connection,
+			ID:         id,
 		}
-		roomID := strconv.Itoa(id)
-		a.setStoreKey("room.name."+roomID, room.Name)
 
-		err = room.Join()
+		err := room.Join()
 		if err != nil {
 			log.Printf("Unable to join room %d: %v\n", id, err)
 			return
@@ -82,11 +79,18 @@ func (a *adapter) Run() {
 				return
 			case msg := <-messages:
 				userID := strconv.Itoa(msg.UserID)
+				roomID := strconv.Itoa(msg.RoomID)
 
 				roomName, ok := a.getStoreKey("room.name." + roomID)
 				if !ok {
-					log.Printf("Unable to retrieve room %d name from store: %v\n", msg.UserID, err)
-					continue
+					room, err := a.client.RoomForID(id)
+					if err != nil {
+						log.Printf("Unable to fetch room %d: %v\n", id, err)
+						return
+					}
+
+					roomName = room.Name
+					a.setStoreKey("room.name."+roomID, room.Name)
 				}
 
 				userName, ok := a.getStoreKey("user.name." + userID)
