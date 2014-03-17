@@ -1,6 +1,7 @@
 package victor
 
 import (
+	"fmt"
 	"github.com/brettbuddin/victor/pkg/chat"
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
@@ -131,4 +132,18 @@ func (r *Robot) SetChat(name string) error {
 
 	r.adapter = initFunc(r)
 	return nil
+}
+
+func OnlyAllow(userNames []string, action func(s *State)) func(*State) {
+	return func(s *State) {
+		actual := s.Message().UserName()
+		for _, name := range userNames {
+			if name == actual {
+				action(s)
+				return
+			}
+		}
+
+		s.Chat().Send(s.Message().ChannelID(), fmt.Sprintf("Sorry, %s. I can't let you do that.", actual))
+	}
 }
