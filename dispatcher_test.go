@@ -6,7 +6,7 @@ import (
 
 func TestRouting(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := NewDispatch(robot)
+	dispatch := newDispatch(robot)
 
 	called := 0
 
@@ -34,7 +34,7 @@ func TestRouting(t *testing.T) {
 
 func TestParams(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := NewDispatch(robot)
+	dispatch := newDispatch(robot)
 
 	called := 0
 
@@ -55,7 +55,7 @@ func TestParams(t *testing.T) {
 
 func TestNonFiringRoutes(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := NewDispatch(robot)
+	dispatch := newDispatch(robot)
 
 	called := 0
 

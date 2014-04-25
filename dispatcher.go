@@ -5,27 +5,27 @@ import (
 	"regexp"
 )
 
-type Dispatch struct {
+type dispatch struct {
 	robot    Robot
 	handlers map[*regexp.Regexp]Handler
 }
 
-func NewDispatch(bot Robot) *Dispatch {
-	return &Dispatch{
+func newDispatch(bot Robot) *dispatch {
+	return &dispatch{
 		robot:    bot,
 		handlers: make(map[*regexp.Regexp]Handler),
 	}
 }
 
-func (d *Dispatch) Handle(exp string, h Handler) {
+func (d *dispatch) Handle(exp string, h Handler) {
 	d.handlers[regexp.MustCompile(exp)] = h
 }
 
-func (d *Dispatch) HandleFunc(exp string, f HandlerFunc) {
+func (d *dispatch) HandleFunc(exp string, f HandlerFunc) {
 	d.Handle(exp, f)
 }
 
-func (d *Dispatch) ProcessMessage(m chat.Message) {
+func (d *dispatch) ProcessMessage(m chat.Message) {
 	for exp, handler := range d.handlers {
 		matches := exp.FindAllStringSubmatch(m.Text(), -1)
 

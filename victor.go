@@ -41,7 +41,7 @@ type Robot interface {
 }
 
 type robot struct {
-	*Dispatch
+	*dispatch
 	name     string
 	http     *httpserver.Server
 	httpAddr string
@@ -70,7 +70,7 @@ func New(adapterName, robotName, httpAddr string) *robot {
 		stop:     make(chan struct{}),
 	}
 
-	bot.Dispatch = NewDispatch(bot)
+	bot.dispatch = newDispatch(bot)
 	bot.adapter = initFunc(bot)
 	bot.router = handlers(bot)
 
