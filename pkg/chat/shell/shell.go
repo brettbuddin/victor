@@ -20,7 +20,6 @@ type Adapter struct {
 
 func (a *Adapter) Run() {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Type your commands (type \"exit\" to exit):")
 
 	lines := make(chan string)
 	go func() {
