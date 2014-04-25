@@ -10,13 +10,13 @@ func TestRouting(t *testing.T) {
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("howdy"), func(s *State) {
+	dispatch.HandleFunc(robot.Direct("howdy"), func(s State) {
 		called++
 	})
-	dispatch.HandleFunc(robot.Direct("tell (him|me)"), func(s *State) {
+	dispatch.HandleFunc(robot.Direct("tell (him|me)"), func(s State) {
 		called++
 	})
-	dispatch.HandleFunc("alot", func(s *State) {
+	dispatch.HandleFunc("alot", func(s State) {
 		called++
 	})
 
@@ -38,7 +38,7 @@ func TestParams(t *testing.T) {
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("yodel (it)"), func(s *State) {
+	dispatch.HandleFunc(robot.Direct("yodel (it)"), func(s State) {
 		called++
 		params := s.Params()
 		if len(params) == 0 || params[0] != "it" {
@@ -59,7 +59,7 @@ func TestNonFiringRoutes(t *testing.T) {
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("howdy"), func(s *State) {
+	dispatch.HandleFunc(robot.Direct("howdy"), func(s State) {
 		called++
 	})
 

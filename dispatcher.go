@@ -31,7 +31,7 @@ func (d *Dispatch) ProcessMessage(m chat.Message) {
 
 		if len(matches) > 0 {
 			params := matches[0][1:]
-			handler.Handle(&State{
+			handler.Handle(&state{
 				robot:   d.robot,
 				message: m,
 				params:  params,

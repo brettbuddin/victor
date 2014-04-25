@@ -8,11 +8,11 @@ import (
 )
 
 func defaults(robot Robot) {
-	robot.HandleFunc(robot.Direct("ping"), func(s *State) {
+	robot.HandleFunc(robot.Direct("ping"), func(s State) {
 		s.Chat().Send(s.Message().ChannelID(), "pong!")
 	})
 
-	robot.HandleFunc(robot.Direct("roll(\\s(\\d+))?"), func(s *State) {
+	robot.HandleFunc(robot.Direct("roll(\\s(\\d+))?"), func(s State) {
 		defer recover()
 
 		bound := 100

@@ -143,8 +143,8 @@ func (r *robot) SetChat(name string) error {
 	return nil
 }
 
-func OnlyAllow(userNames []string, action func(s *State)) func(*State) {
-	return func(s *State) {
+func OnlyAllow(userNames []string, action func(s State)) func(State) {
+	return func(s State) {
 		actual := s.Message().UserName()
 		for _, name := range userNames {
 			if name == actual {

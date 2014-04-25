@@ -5,33 +5,40 @@ import (
 )
 
 type Handler interface {
-	Handle(*State)
+	Handle(State)
 }
 
-type HandlerFunc func(*State)
+type HandlerFunc func(State)
 
-func (f HandlerFunc) Handle(s *State) {
+func (f HandlerFunc) Handle(s State) {
 	f(s)
 }
 
-type State struct {
+type State interface {
+    Robot() Robot
+    Chat() chat.Adapter
+    Message() chat.Message
+    Params() []string
+}
+
+type state struct {
 	robot   Robot
 	message chat.Message
 	params  []string
 }
 
-func (s *State) Robot() Robot {
+func (s *state) Robot() Robot {
 	return s.robot
 }
 
-func (s *State) Chat() chat.Adapter {
+func (s *state) Chat() chat.Adapter {
 	return s.robot.Chat()
 }
 
-func (s *State) Message() chat.Message {
+func (s *state) Message() chat.Message {
 	return s.message
 }
 
-func (s *State) Params() []string {
+func (s *state) Params() []string {
 	return s.params
 }
