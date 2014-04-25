@@ -15,12 +15,12 @@ import (
 )
 
 type Runner interface {
-    Run() error
-    Stop()
+	Run() error
+	Stop()
 }
 
 type Chatter interface {
-    Name() string
+	Name() string
 	HandleFunc(string, HandlerFunc)
 	Handle(string, Handler)
 	Direct(string) string
@@ -33,11 +33,11 @@ type Persister interface {
 }
 
 type Robot interface {
-    Runner
-    Chatter
-    Persister
+	Runner
+	Chatter
+	Persister
 
-    HTTP() *mux.Router
+	HTTP() *mux.Router
 }
 
 type robot struct {
