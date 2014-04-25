@@ -14,13 +14,30 @@ import (
 	"strings"
 )
 
-type Robot interface {
+type Runner interface {
+    Run() error
+    Stop()
+}
+
+type Chatter interface {
+    Name() string
 	HandleFunc(string, HandlerFunc)
 	Handle(string, Handler)
 	Direct(string) string
 	Receive(chat.Message)
 	Chat() chat.Adapter
+}
+
+type Persister interface {
 	Store() store.Store
+}
+
+type Robot interface {
+    Runner
+    Chatter
+    Persister
+
+    HTTP() *mux.Router
 }
 
 type robot struct {
@@ -108,39 +125,16 @@ func (r *robot) Name() string {
 	return r.name
 }
 
-func (r *robot) SetName(n string) {
-	r.name = n
-}
-
 func (r *robot) Store() store.Store {
 	return r.store
-}
-
-func (r *robot) SetStore(s store.Store) {
-	r.store = s
 }
 
 func (r *robot) HTTP() *mux.Router {
 	return r.router
 }
 
-func (r *robot) SetHTTP(router *mux.Router) {
-	r.router = router
-}
-
 func (r *robot) Chat() chat.Adapter {
 	return r.adapter
-}
-
-func (r *robot) SetChat(name string) error {
-	initFunc, err := chat.Load(name)
-
-	if err != nil {
-		return err
-	}
-
-	r.adapter = initFunc(r)
-	return nil
 }
 
 func OnlyAllow(userNames []string, action func(s State)) func(State) {
