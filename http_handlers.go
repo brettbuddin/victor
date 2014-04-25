@@ -43,27 +43,3 @@ func handlers(bot Robot) *mux.Router {
 
 	return router
 }
-
-type textMessage struct {
-	text string
-}
-
-func (m *textMessage) UserId() string {
-	return ""
-}
-
-func (m *textMessage) UserName() string {
-	return ""
-}
-
-func (m *textMessage) ChannelId() string {
-	return ""
-}
-
-func (m *textMessage) ChannelName() string {
-	return ""
-}
-
-func (m *textMessage) Text() string {
-	return m.text
-}
