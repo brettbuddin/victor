@@ -41,10 +41,10 @@ type Robot interface {
 }
 
 type Config struct {
-	Name         string
-	ChatAdapter  string
-	StoreAdapter string
-	HTTPAddr     string
+	Name,
+	ChatAdapter,
+	StoreAdapter,
+	HTTPAddr string
 }
 
 type robot struct {
@@ -109,6 +109,7 @@ func (r *robot) Direct(exp string) string {
 	}, "")
 }
 
+// Accepts messages for processing
 func (r *robot) Receive(m chat.Message) {
 	r.incoming <- m
 }
@@ -133,6 +134,7 @@ func (r *robot) Run() error {
 	return r.http.ListenAndServe(r.httpAddr)
 }
 
+// Stops the robot
 func (r *robot) Stop() {
 	r.chat.Stop()
 	r.stop <- struct{}{}
@@ -140,18 +142,22 @@ func (r *robot) Stop() {
 	r.http.Stop()
 }
 
+// Returns the name of the robot
 func (r *robot) Name() string {
 	return r.name
 }
 
+// Returns the data store adapter
 func (r *robot) Store() store.Adapter {
 	return r.store
 }
 
+// Returns the HTTP router
 func (r *robot) HTTP() *mux.Router {
 	return r.router
 }
 
+// Returns the chat adapter
 func (r *robot) Chat() chat.Adapter {
 	return r.chat
 }

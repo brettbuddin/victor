@@ -5,11 +5,11 @@ import (
 )
 
 func init() {
-    Register("memory", func() Adapter {
-        return &MemoryStore{
-		    data: make(map[string]string),
-	    }
-    })
+	Register("memory", func() Adapter {
+		return &MemoryStore{
+			data: make(map[string]string),
+		}
+	})
 }
 
 type MemoryStore struct {

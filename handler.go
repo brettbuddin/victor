@@ -27,18 +27,22 @@ type state struct {
 	params  []string
 }
 
+// Returns the Robot
 func (s *state) Robot() Robot {
 	return s.robot
 }
 
+// Returns the Chat adapter
 func (s *state) Chat() chat.Adapter {
 	return s.robot.Chat()
 }
 
+// Returns the Message
 func (s *state) Message() chat.Message {
 	return s.message
 }
 
+// Returns the params parsed from the Message
 func (s *state) Params() []string {
 	return s.params
 }

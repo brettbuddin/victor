@@ -1,7 +1,7 @@
 package store
 
 import (
-    "fmt"
+	"fmt"
 )
 
 var adapters = map[string]InitFunc{}
