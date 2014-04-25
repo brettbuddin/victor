@@ -4,22 +4,17 @@ import (
 	"sync"
 )
 
-type Store interface {
-	Get(string) (string, bool)
-	Set(string, string)
-	Delete(string)
-	All() map[string]string
+func init() {
+    Register("memory", func() Adapter {
+        return &MemoryStore{
+		    data: make(map[string]string),
+	    }
+    })
 }
 
 type MemoryStore struct {
 	sync.RWMutex
 	data map[string]string
-}
-
-func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{
-		data: make(map[string]string),
-	}
 }
 
 func (s *MemoryStore) Get(key string) (string, bool) {

@@ -33,7 +33,7 @@ type Adapter interface {
 type Robot interface {
 	Name() string
 	HTTP() *mux.Router
-	Store() store.Store
+	Store() store.Adapter
 	Chat() Adapter
 	Receive(Message)
 }

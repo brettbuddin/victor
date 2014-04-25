@@ -8,7 +8,12 @@ import (
 )
 
 func main() {
-	bot := victor.New("shell", "victor", ":8000")
+	bot := victor.New(victor.Config{
+		Name:         "victor",
+		ChatAdapter:  "shell",
+		StoreAdapter: "memory",
+		HTTPAddr:     ":8000",
+	})
 
 	bot.HandleFunc(bot.Direct("hello|hi|howdy"), func(s victor.State) {
 		s.Chat().Send(s.Message().ChannelID(), fmt.Sprintf("Hello, %s", s.Message().UserName()))

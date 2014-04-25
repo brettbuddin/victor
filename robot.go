@@ -29,7 +29,7 @@ type Chatter interface {
 }
 
 type Persister interface {
-	Store() store.Store
+	Store() store.Adapter
 }
 
 type Robot interface {
@@ -40,21 +40,40 @@ type Robot interface {
 	HTTP() *mux.Router
 }
 
+type Config struct {
+	Name         string
+	ChatAdapter  string
+	StoreAdapter string
+	HTTPAddr     string
+}
+
 type robot struct {
 	*dispatch
 	name     string
 	http     *httpserver.Server
 	httpAddr string
 	router   *mux.Router
-	store    store.Store
-	adapter  chat.Adapter
+	store    store.Adapter
+	chat     chat.Adapter
 	incoming chan chat.Message
 	stop     chan struct{}
 }
 
 // New returns a robot
-func New(adapterName, robotName, httpAddr string) *robot {
-	initFunc, err := chat.Load(adapterName)
+func New(config Config) *robot {
+	chatInitFunc, err := chat.Load(config.ChatAdapter)
+
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	storeAdapter := config.StoreAdapter
+	if storeAdapter == "" {
+		storeAdapter = "memory"
+	}
+
+	storeInitFunc, err := store.Load(storeAdapter)
 
 	if err != nil {
 		log.Println(err)
@@ -62,16 +81,16 @@ func New(adapterName, robotName, httpAddr string) *robot {
 	}
 
 	bot := &robot{
-		name:     robotName,
+		name:     config.Name,
 		http:     httpserver.New(),
-		store:    store.NewMemoryStore(),
+		httpAddr: config.HTTPAddr,
 		incoming: make(chan chat.Message),
-		httpAddr: httpAddr,
+		store:    storeInitFunc(),
 		stop:     make(chan struct{}),
 	}
 
 	bot.dispatch = newDispatch(bot)
-	bot.adapter = initFunc(bot)
+	bot.chat = chatInitFunc(bot)
 	bot.router = handlers(bot)
 
 	defaults(bot)
@@ -96,7 +115,7 @@ func (r *robot) Receive(m chat.Message) {
 
 // Run starts the robot.
 func (r *robot) Run() error {
-	go r.adapter.Run()
+	go r.chat.Run()
 	go func() {
 		for {
 			select {
@@ -115,7 +134,7 @@ func (r *robot) Run() error {
 }
 
 func (r *robot) Stop() {
-	r.adapter.Stop()
+	r.chat.Stop()
 	r.stop <- struct{}{}
 	close(r.incoming)
 	r.http.Stop()
@@ -125,7 +144,7 @@ func (r *robot) Name() string {
 	return r.name
 }
 
-func (r *robot) Store() store.Store {
+func (r *robot) Store() store.Adapter {
 	return r.store
 }
 
@@ -134,7 +153,7 @@ func (r *robot) HTTP() *mux.Router {
 }
 
 func (r *robot) Chat() chat.Adapter {
-	return r.adapter
+	return r.chat
 }
 
 func OnlyAllow(userNames []string, action func(s State)) func(State) {
