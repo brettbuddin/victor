@@ -15,10 +15,10 @@ func (f HandlerFunc) Handle(s State) {
 }
 
 type State interface {
-    Robot() Robot
-    Chat() chat.Adapter
-    Message() chat.Message
-    Params() []string
+	Robot() Robot
+	Chat() chat.Adapter
+	Message() chat.Message
+	Params() []string
 }
 
 type state struct {

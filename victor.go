@@ -15,12 +15,12 @@ import (
 )
 
 type Robot interface {
-    HandleFunc(string, HandlerFunc)
-    Handle(string, Handler)
-    Direct(string) string
-    Receive(chat.Message)
-    Chat() chat.Adapter
-    Store() store.Store
+	HandleFunc(string, HandlerFunc)
+	Handle(string, Handler)
+	Direct(string) string
+	Receive(chat.Message)
+	Chat() chat.Adapter
+	Store() store.Store
 }
 
 type robot struct {
