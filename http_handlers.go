@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func handlers(bot *Robot) *mux.Router {
+func handlers(bot Robot) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {

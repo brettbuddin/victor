@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func defaults(robot *Robot) {
+func defaults(robot Robot) {
 	robot.HandleFunc(robot.Direct("ping"), func(s *State) {
 		s.Chat().Send(s.Message().ChannelID(), "pong!")
 	})

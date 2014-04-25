@@ -15,12 +15,12 @@ func (f HandlerFunc) Handle(s *State) {
 }
 
 type State struct {
-	robot   *Robot
+	robot   Robot
 	message chat.Message
 	params  []string
 }
 
-func (s *State) Robot() *Robot {
+func (s *State) Robot() Robot {
 	return s.robot
 }
 

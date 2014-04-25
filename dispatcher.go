@@ -6,11 +6,11 @@ import (
 )
 
 type Dispatch struct {
-	robot    *Robot
+	robot    Robot
 	handlers map[*regexp.Regexp]Handler
 }
 
-func NewDispatch(bot *Robot) *Dispatch {
+func NewDispatch(bot Robot) *Dispatch {
 	return &Dispatch{
 		robot:    bot,
 		handlers: make(map[*regexp.Regexp]Handler),
@@ -21,11 +21,11 @@ func (d *Dispatch) Handle(exp string, h Handler) {
 	d.handlers[regexp.MustCompile(exp)] = h
 }
 
-func (d *Dispatch) HandleFunc(exp string, f func(*State)) {
-	d.Handle(exp, HandlerFunc(f))
+func (d *Dispatch) HandleFunc(exp string, f HandlerFunc) {
+	d.Handle(exp, f)
 }
 
-func (d *Dispatch) Process(m chat.Message) {
+func (d *Dispatch) ProcessMessage(m chat.Message) {
 	for exp, handler := range d.handlers {
 		matches := exp.FindAllStringSubmatch(m.Text(), -1)
 

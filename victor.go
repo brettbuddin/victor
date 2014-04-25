@@ -14,7 +14,16 @@ import (
 	"strings"
 )
 
-type Robot struct {
+type Robot interface {
+    HandleFunc(string, HandlerFunc)
+    Handle(string, Handler)
+    Direct(string) string
+    Receive(chat.Message)
+    Chat() chat.Adapter
+    Store() store.Store
+}
+
+type robot struct {
 	*Dispatch
 	name     string
 	http     *httpserver.Server
@@ -26,8 +35,8 @@ type Robot struct {
 	stop     chan struct{}
 }
 
-// New returns a Robot
-func New(adapterName, robotName, httpAddr string) *Robot {
+// New returns a robot
+func New(adapterName, robotName, httpAddr string) *robot {
 	initFunc, err := chat.Load(adapterName)
 
 	if err != nil {
@@ -35,7 +44,7 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 		os.Exit(1)
 	}
 
-	bot := &Robot{
+	bot := &robot{
 		name:     robotName,
 		http:     httpserver.New(),
 		store:    store.NewMemoryStore(),
@@ -54,7 +63,7 @@ func New(adapterName, robotName, httpAddr string) *Robot {
 
 // Direct wraps a regexp pattern in the necessary pattern
 // for a direct command to the bot.
-func (r *Robot) Direct(exp string) string {
+func (r *robot) Direct(exp string) string {
 	return strings.Join([]string{
 		"(?i)", // flags
 		"\\A",  // begin
@@ -64,12 +73,12 @@ func (r *Robot) Direct(exp string) string {
 	}, "")
 }
 
-func (r *Robot) Receive(m chat.Message) {
+func (r *robot) Receive(m chat.Message) {
 	r.incoming <- m
 }
 
 // Run starts the robot.
-func (r *Robot) Run() error {
+func (r *robot) Run() error {
 	go r.adapter.Run()
 	go func() {
 		for {
@@ -78,7 +87,7 @@ func (r *Robot) Run() error {
 				return
 			case m := <-r.incoming:
 				if strings.ToLower(m.UserName()) != r.name {
-					go r.Process(m)
+					go r.ProcessMessage(m)
 				}
 			}
 		}
@@ -88,42 +97,42 @@ func (r *Robot) Run() error {
 	return r.http.ListenAndServe(r.httpAddr)
 }
 
-func (r *Robot) Stop() {
+func (r *robot) Stop() {
 	r.adapter.Stop()
 	r.stop <- struct{}{}
 	close(r.incoming)
 	r.http.Stop()
 }
 
-func (r *Robot) Name() string {
+func (r *robot) Name() string {
 	return r.name
 }
 
-func (r *Robot) SetName(n string) {
+func (r *robot) SetName(n string) {
 	r.name = n
 }
 
-func (r *Robot) Store() store.Store {
+func (r *robot) Store() store.Store {
 	return r.store
 }
 
-func (r *Robot) SetStore(s store.Store) {
+func (r *robot) SetStore(s store.Store) {
 	r.store = s
 }
 
-func (r *Robot) HTTP() *mux.Router {
+func (r *robot) HTTP() *mux.Router {
 	return r.router
 }
 
-func (r *Robot) SetHTTP(router *mux.Router) {
+func (r *robot) SetHTTP(router *mux.Router) {
 	r.router = router
 }
 
-func (r *Robot) Chat() chat.Adapter {
+func (r *robot) Chat() chat.Adapter {
 	return r.adapter
 }
 
-func (r *Robot) SetChat(name string) error {
+func (r *robot) SetChat(name string) error {
 	initFunc, err := chat.Load(name)
 
 	if err != nil {

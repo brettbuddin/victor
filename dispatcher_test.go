@@ -5,7 +5,7 @@ import (
 )
 
 func TestRouting(t *testing.T) {
-	robot := &Robot{name: "ralph"}
+	robot := &robot{name: "ralph"}
 	dispatch := NewDispatch(robot)
 
 	called := 0
@@ -21,11 +21,11 @@ func TestRouting(t *testing.T) {
 	})
 
 	// Should trigger
-	dispatch.Process(&msg{text: "ralph howdy"})
-	dispatch.Process(&msg{text: "ralph tell him"})
-	dispatch.Process(&msg{text: "ralph tell me"})
-	dispatch.Process(&msg{text: "/tell me"})
-	dispatch.Process(&msg{text: "I heard alot of them."})
+	dispatch.ProcessMessage(&msg{text: "ralph howdy"})
+	dispatch.ProcessMessage(&msg{text: "ralph tell him"})
+	dispatch.ProcessMessage(&msg{text: "ralph tell me"})
+	dispatch.ProcessMessage(&msg{text: "/tell me"})
+	dispatch.ProcessMessage(&msg{text: "I heard alot of them."})
 
 	if called != 5 {
 		t.Errorf("One or more register actions weren't triggered")
@@ -33,7 +33,7 @@ func TestRouting(t *testing.T) {
 }
 
 func TestParams(t *testing.T) {
-	robot := &Robot{name: "ralph"}
+	robot := &robot{name: "ralph"}
 	dispatch := NewDispatch(robot)
 
 	called := 0
@@ -46,7 +46,7 @@ func TestParams(t *testing.T) {
 		}
 	})
 
-	dispatch.Process(&msg{text: "ralph yodel it"})
+	dispatch.ProcessMessage(&msg{text: "ralph yodel it"})
 
 	if called != 1 {
 		t.Error("Registered action was never triggered")
@@ -54,7 +54,7 @@ func TestParams(t *testing.T) {
 }
 
 func TestNonFiringRoutes(t *testing.T) {
-	robot := &Robot{name: "ralph"}
+	robot := &robot{name: "ralph"}
 	dispatch := NewDispatch(robot)
 
 	called := 0
@@ -63,7 +63,7 @@ func TestNonFiringRoutes(t *testing.T) {
 		called++
 	})
 
-	dispatch.Process(&msg{text: "Tell ralph howdy."})
+	dispatch.ProcessMessage(&msg{text: "Tell ralph howdy."})
 
 	if called > 0 {
 		t.Error("Registered action was triggered when it shouldn't have been")
