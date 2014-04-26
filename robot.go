@@ -36,14 +36,14 @@ type Config struct {
 
 type robot struct {
 	*dispatch
-	name     string
-	http     *httpserver.Server
-	httpAddr string
-	router   *mux.Router
-	store    store.Adapter
-	chat     chat.Adapter
-	incoming chan chat.Message
-	stop     chan struct{}
+	name       string
+	http       *httpserver.Server
+	httpAddr   string
+	httpRouter *mux.Router
+	store      store.Adapter
+	chat       chat.Adapter
+	incoming   chan chat.Message
+	stop       chan struct{}
 }
 
 // New returns a robot
@@ -93,7 +93,7 @@ func New(config Config) *robot {
 
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
-	bot.router = handlers(bot)
+	bot.httpRouter = handlers(bot)
 
 	defaults(bot)
 	return bot
@@ -111,7 +111,7 @@ func (r *robot) Run() {
 		for {
 			select {
 			case <-r.stop:
-	            close(r.incoming)
+				close(r.incoming)
 				return
 			case m := <-r.incoming:
 				if strings.ToLower(m.UserName()) != r.name {
@@ -121,7 +121,7 @@ func (r *robot) Run() {
 		}
 	}()
 
-	r.http.Handle("/", r.router)
+	r.http.Handle("/", r.httpRouter)
 	r.http.ListenAndServe(r.httpAddr)
 }
 
@@ -144,7 +144,7 @@ func (r *robot) Store() store.Adapter {
 
 // HTTP returns the HTTP router
 func (r *robot) HTTP() *mux.Router {
-	return r.router
+	return r.httpRouter
 }
 
 // Chat returns the chat adapter
