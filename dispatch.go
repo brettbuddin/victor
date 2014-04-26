@@ -40,6 +40,7 @@ func (r *robot) Direct(exp string) string {
 	}, "")
 }
 
+// ProcessMessage finds a match for a message and runs its Handler
 func (d *dispatch) ProcessMessage(m chat.Message) {
 	for exp, handler := range d.handlers {
 		matches := exp.FindAllStringSubmatch(m.Text(), -1)
