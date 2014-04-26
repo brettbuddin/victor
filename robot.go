@@ -14,29 +14,16 @@ import (
 	"strings"
 )
 
-type Runner interface {
-	Run() error
+type Robot interface {
+	Run()
 	Stop()
-}
-
-type Chatter interface {
 	Name() string
 	HandleFunc(string, HandlerFunc)
 	Handle(string, Handler)
 	Direct(string) string
 	Receive(chat.Message)
 	Chat() chat.Adapter
-}
-
-type Persister interface {
 	Store() store.Adapter
-}
-
-type Robot interface {
-	Runner
-	Chatter
-	Persister
-
 	HTTP() *mux.Router
 }
 
@@ -61,6 +48,11 @@ type robot struct {
 
 // New returns a robot
 func New(config Config) *robot {
+	chatAdapter := config.ChatAdapter
+	if chatAdapter == "" {
+		chatAdapter = "shell"
+	}
+
 	chatInitFunc, err := chat.Load(config.ChatAdapter)
 
 	if err != nil {
@@ -80,10 +72,20 @@ func New(config Config) *robot {
 		os.Exit(1)
 	}
 
+	botName := config.Name
+	if botName == "" {
+		botName = "victor"
+	}
+
+	httpAddr := config.HTTPAddr
+	if httpAddr == "" {
+		httpAddr = ":9000"
+	}
+
 	bot := &robot{
-		name:     config.Name,
+		name:     botName,
 		http:     httpserver.New(),
-		httpAddr: config.HTTPAddr,
+		httpAddr: httpAddr,
 		incoming: make(chan chat.Message),
 		store:    storeInitFunc(),
 		stop:     make(chan struct{}),
@@ -97,30 +99,19 @@ func New(config Config) *robot {
 	return bot
 }
 
-// Direct wraps a regexp pattern in the necessary pattern
-// for a direct command to the bot.
-func (r *robot) Direct(exp string) string {
-	return strings.Join([]string{
-		"(?i)", // flags
-		"\\A",  // begin
-		"(?:(?:@)?" + r.name + "[:,]?\\s*|/)", // bot name
-		"(?:" + exp + ")",                     // expression
-		"\\z",                                 // end
-	}, "")
-}
-
-// Accepts messages for processing
+// Receive accepts messages for processing
 func (r *robot) Receive(m chat.Message) {
 	r.incoming <- m
 }
 
 // Run starts the robot.
-func (r *robot) Run() error {
+func (r *robot) Run() {
 	go r.chat.Run()
 	go func() {
 		for {
 			select {
 			case <-r.stop:
+	            close(r.incoming)
 				return
 			case m := <-r.incoming:
 				if strings.ToLower(m.UserName()) != r.name {
@@ -131,37 +122,38 @@ func (r *robot) Run() error {
 	}()
 
 	r.http.Handle("/", r.router)
-	return r.http.ListenAndServe(r.httpAddr)
+	r.http.ListenAndServe(r.httpAddr)
 }
 
-// Stops the robot
+// Stop shuts down the bot
 func (r *robot) Stop() {
 	r.chat.Stop()
-	r.stop <- struct{}{}
-	close(r.incoming)
+	close(r.stop)
 	r.http.Stop()
 }
 
-// Returns the name of the robot
+// Name returns the name of the bot
 func (r *robot) Name() string {
 	return r.name
 }
 
-// Returns the data store adapter
+// Store returns the data store adapter
 func (r *robot) Store() store.Adapter {
 	return r.store
 }
 
-// Returns the HTTP router
+// HTTP returns the HTTP router
 func (r *robot) HTTP() *mux.Router {
 	return r.router
 }
 
-// Returns the chat adapter
+// Chat returns the chat adapter
 func (r *robot) Chat() chat.Adapter {
 	return r.chat
 }
 
+// OnlyAllow provides a way of permitting specific users
+// to execute a handler registered with the bot
 func OnlyAllow(userNames []string, action func(s State)) func(State) {
 	return func(s State) {
 		actual := s.Message().UserName()
