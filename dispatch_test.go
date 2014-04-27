@@ -101,6 +101,14 @@ func TestStatePassing(t *testing.T) {
         if s.Params()[0] != "matches" {
             t.Errorf("Params not injected into handler state.")
         }
+
+        if s.Robot() == nil || s.Chat() == nil {
+            t.Errorf("Robot not injected into handler state.")
+        }
+
+        if s.Message() == nil {
+            t.Errorf("Message not injected into handler state.")
+        }
     })
 
     robot.Receive(&msg{text: "some matches"})
