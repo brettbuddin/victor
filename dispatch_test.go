@@ -55,6 +55,57 @@ func TestHandlers(t *testing.T) {
     }
 }
 
+func TestDataStore(t *testing.T) {
+    robot := New(Config{
+        Name: "ralph",
+        ChatAdapter: "test",
+        HTTPAddr: httpAddr,
+    })
+
+    go robot.Run()
+    defer robot.Stop()
+
+    key := "hello"
+    expected := "world"
+
+    robot.Store().Set(key, expected)
+    result, ok := robot.Store().Get(key)
+    if !ok {
+        t.Errorf("Key storage failed.")
+        return
+    }
+
+    if result != expected {
+        t.Errorf("Key retreival resulted in incorrect value: expected=%s got=%s", expected, result)
+        return
+    }
+
+    robot.Store().Delete(key)
+    _, ok = robot.Store().Get(key)
+    if ok {
+        t.Errorf("Key should have been deleted, but wasn't.")
+    }
+}
+
+func TestStatePassing(t *testing.T) {
+    robot := New(Config{
+        Name: "ralph",
+        ChatAdapter: "test",
+        HTTPAddr: httpAddr,
+    })
+
+    go robot.Run()
+    defer robot.Stop()
+
+    robot.HandleFunc("some (matches)", func(s State) {
+        if s.Params()[0] != "matches" {
+            t.Errorf("Params not injected into handler state.")
+        }
+    })
+
+    robot.Receive(&msg{text: "some matches"})
+}
+
 type msg struct {
 	userID      string
 	userName    string
