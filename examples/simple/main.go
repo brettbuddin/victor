@@ -15,7 +15,7 @@ func main() {
 		HTTPAddr:     ":8000",
 	})
 
-	bot.HandleFunc(bot.Direct("hello|hi|howdy"), func(s victor.State) {
+	bot.HandleCommandFunc("hello|hi|howdy", func(s victor.State) {
 		s.Chat().Send(s.Message().ChannelID(), fmt.Sprintf("Hello, %s", s.Message().UserName()))
 	})
 

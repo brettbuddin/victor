@@ -18,25 +18,39 @@ func newDispatch(bot Robot) *dispatch {
 	}
 }
 
+// HandleCommand registers a Handler for matching statements directed at the bot
+func (d *dispatch) HandleCommand(exp string, h Handler) {
+	d.handle(d.Direct(exp), h)
+}
+
+// HandleCommandFunc registers a Handler for matching statements directed at the bot
+func (d *dispatch) HandleCommandFunc(exp string, f HandlerFunc) {
+	d.handle(d.Direct(exp), f)
+}
+
 // Handle registers a Handler for matching
 func (d *dispatch) Handle(exp string, h Handler) {
-	d.handlers[regexp.MustCompile(exp)] = h
+	d.handle(exp, h)
 }
 
 // HandleFunc registers a HandlerFunc for matching
 func (d *dispatch) HandleFunc(exp string, f HandlerFunc) {
-	d.Handle(exp, f)
+	d.handle(exp, f)
+}
+
+func (d *dispatch) handle(exp string, h Handler) {
+	d.handlers[regexp.MustCompile(exp)] = h
 }
 
 // Direct wraps a regexp pattern in the necessary pattern
 // for a direct command to the bot.
-func (r *robot) Direct(exp string) string {
+func (d *dispatch) Direct(exp string) string {
 	return strings.Join([]string{
 		"(?i)", // flags
 		"\\A",  // begin
-		"(?:(?:@)?" + r.name + "[:,]?\\s*|/)", // bot name
-		"(?:" + exp + ")",                     // expression
-		"\\z",                                 // end
+		"(?:(?:@)?" + d.robot.Name() + "[:,]?\\s*|/)", // bot name
+		"(?:" + exp + ")",                             // expression
+		"\\z",                                         // end
 	}, "")
 }
 

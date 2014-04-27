@@ -6,26 +6,26 @@ import (
 
 func TestRouting(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := newDispatch(robot)
+	robot.dispatch = newDispatch(robot)
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("howdy"), func(s State) {
+	robot.HandleCommandFunc("howdy", func(s State) {
 		called++
 	})
-	dispatch.HandleFunc(robot.Direct("tell (him|me)"), func(s State) {
+	robot.HandleCommandFunc("tell (him|me)", func(s State) {
 		called++
 	})
-	dispatch.HandleFunc("alot", func(s State) {
+	robot.HandleFunc("alot", func(s State) {
 		called++
 	})
 
 	// Should trigger
-	dispatch.ProcessMessage(&msg{text: "ralph howdy"})
-	dispatch.ProcessMessage(&msg{text: "ralph tell him"})
-	dispatch.ProcessMessage(&msg{text: "ralph tell me"})
-	dispatch.ProcessMessage(&msg{text: "/tell me"})
-	dispatch.ProcessMessage(&msg{text: "I heard alot of them."})
+	robot.ProcessMessage(&msg{text: "ralph howdy"})
+	robot.ProcessMessage(&msg{text: "ralph tell him"})
+	robot.ProcessMessage(&msg{text: "ralph tell me"})
+	robot.ProcessMessage(&msg{text: "/tell me"})
+	robot.ProcessMessage(&msg{text: "I heard alot of them."})
 
 	if called != 5 {
 		t.Errorf("One or more register actions weren't triggered")
@@ -34,11 +34,11 @@ func TestRouting(t *testing.T) {
 
 func TestParams(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := newDispatch(robot)
+	robot.dispatch = newDispatch(robot)
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("yodel (it)"), func(s State) {
+	robot.HandleCommandFunc("yodel (it)", func(s State) {
 		called++
 		params := s.Params()
 		if len(params) == 0 || params[0] != "it" {
@@ -46,7 +46,7 @@ func TestParams(t *testing.T) {
 		}
 	})
 
-	dispatch.ProcessMessage(&msg{text: "ralph yodel it"})
+	robot.ProcessMessage(&msg{text: "ralph yodel it"})
 
 	if called != 1 {
 		t.Error("Registered action was never triggered")
@@ -55,15 +55,15 @@ func TestParams(t *testing.T) {
 
 func TestNonFiringRoutes(t *testing.T) {
 	robot := &robot{name: "ralph"}
-	dispatch := newDispatch(robot)
+	robot.dispatch = newDispatch(robot)
 
 	called := 0
 
-	dispatch.HandleFunc(robot.Direct("howdy"), func(s State) {
+	robot.HandleCommandFunc("howdy", func(s State) {
 		called++
 	})
 
-	dispatch.ProcessMessage(&msg{text: "Tell ralph howdy."})
+	robot.ProcessMessage(&msg{text: "Tell ralph howdy."})
 
 	if called > 0 {
 		t.Error("Registered action was triggered when it shouldn't have been")
