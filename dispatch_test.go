@@ -2,72 +2,57 @@ package victor
 
 import (
 	"testing"
+    "github.com/brettbuddin/victor/pkg/chat"
+    "reflect"
 )
 
-func TestRouting(t *testing.T) {
-	robot := &robot{name: "ralph"}
-	robot.dispatch = newDispatch(robot)
+var httpAddr = ":8000"
 
-	called := 0
-
-	robot.HandleCommandFunc("howdy", func(s State) {
-		called++
-	})
-	robot.HandleCommandFunc("tell (him|me)", func(s State) {
-		called++
-	})
-	robot.HandleFunc("alot", func(s State) {
-		called++
-	})
-
-	// Should trigger
-	robot.ProcessMessage(&msg{text: "ralph howdy"})
-	robot.ProcessMessage(&msg{text: "ralph tell him"})
-	robot.ProcessMessage(&msg{text: "ralph tell me"})
-	robot.ProcessMessage(&msg{text: "/tell me"})
-	robot.ProcessMessage(&msg{text: "I heard alot of them."})
-
-	if called != 5 {
-		t.Errorf("One or more register actions weren't triggered")
-	}
+func init() {
+    chat.Register("test", func(chat.Robot) chat.Adapter {
+        return &testAdapter{}
+    })
 }
 
-func TestParams(t *testing.T) {
-	robot := &robot{name: "ralph"}
-	robot.dispatch = newDispatch(robot)
-
-	called := 0
-
-	robot.HandleCommandFunc("yodel (it)", func(s State) {
-		called++
-		params := s.Params()
-		if len(params) == 0 || params[0] != "it" {
-			t.Errorf("Incorrect message params expected=%v got=%v", []string{"it"}, params)
-		}
-	})
-
-	robot.ProcessMessage(&msg{text: "ralph yodel it"})
-
-	if called != 1 {
-		t.Error("Registered action was never triggered")
-	}
+var routingTests = []struct{
+    typ, pattern, text string
+    matches []string
+}{
+    {"direct", "howdy", "ralph howdy", []string{}},
+    {"direct", "tell (him|me)", "ralph tell him", []string{"him"}},
+    {"direct", "build ([\\w-]+)/([\\w-]+):([\\w-]+)", "ralph build brettbuddin/victor:master", []string{"brettbuddin", "victor", "master"}},
+    {"direct", "tell", "/tell", []string{}},
+    {"indirect", "alot", "alot", []string{}},
 }
 
-func TestNonFiringRoutes(t *testing.T) {
-	robot := &robot{name: "ralph"}
-	robot.dispatch = newDispatch(robot)
+func TestHandlers(t *testing.T) {
+    robot := New(Config{
+        Name: "ralph",
+        ChatAdapter: "test",
+        HTTPAddr: httpAddr,
+    })
 
-	called := 0
+    go robot.Run()
+    defer robot.Stop()
 
-	robot.HandleCommandFunc("howdy", func(s State) {
-		called++
-	})
+    for _, rt := range routingTests {
+        if rt.typ == "direct" {
+	        robot.HandleCommandFunc(rt.pattern, func(s State) {})
+        } else {
+	        robot.HandleFunc(rt.pattern, func(s State) {})
+        }
 
-	robot.ProcessMessage(&msg{text: "Tell ralph howdy."})
+	    handler, matches := robot.handler(&msg{text: rt.text})
 
-	if called > 0 {
-		t.Error("Registered action was triggered when it shouldn't have been")
-	}
+        if handler == nil {
+		    t.Errorf("No handler found for pattern=\"%s\": text=%s matches=%s", rt.pattern, rt.text, rt.matches)
+            continue
+        }
+
+        if !reflect.DeepEqual(matches, rt.matches) {
+		    t.Errorf("Incorrect matches for pattern=\"%s\": expected=%v got=%v", rt.pattern, rt.matches, matches)
+        }
+    }
 }
 
 type msg struct {
@@ -97,3 +82,8 @@ func (m *msg) ChannelName() string {
 func (m *msg) Text() string {
 	return m.text
 }
+
+type testAdapter struct{}
+func (a *testAdapter) Run() {}
+func (a *testAdapter) Stop() {}
+func (a *testAdapter) Send(channelID, msg string) {}

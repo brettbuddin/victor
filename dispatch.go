@@ -54,19 +54,27 @@ func (d *dispatch) Direct(exp string) string {
 	}, "")
 }
 
-// ProcessMessage finds a match for a message and runs its Handler
-func (d *dispatch) ProcessMessage(m chat.Message) {
+func (d *dispatch) handler(m chat.Message) (Handler, []string) {
 	for exp, handler := range d.handlers {
 		matches := exp.FindAllStringSubmatch(m.Text(), -1)
 
 		if len(matches) > 0 {
-			params := matches[0][1:]
-			handler.Handle(&state{
-				robot:   d.robot,
-				message: m,
-				params:  params,
-			})
-			return
-		}
-	}
+            return handler, matches[0][1:]
+        }
+    }
+
+    return nil, nil
+}
+
+// ProcessMessage finds a match for a message and runs its Handler
+func (d *dispatch) ProcessMessage(m chat.Message) {
+    handler, params := d.handler(m)
+
+    if handler != nil {
+	    handler.Handle(&state{
+		    robot:   d.robot,
+		    message: m,
+		    params:  params,
+	    })
+    }
 }

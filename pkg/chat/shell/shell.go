@@ -9,13 +9,13 @@ import (
 
 func init() {
 	chat.Register("shell", func(r chat.Robot) chat.Adapter {
-		return &Adapter{r, make(chan bool)}
+		return &Adapter{r, make(chan struct{})}
 	})
 }
 
 type Adapter struct {
 	robot chat.Robot
-	stop  chan bool
+	stop  chan struct{}
 }
 
 func (a *Adapter) Run() {
@@ -45,7 +45,6 @@ func (a *Adapter) Send(channelID, msg string) {
 }
 
 func (a *Adapter) Stop() {
-	a.stop <- true
 	close(a.stop)
 }
 

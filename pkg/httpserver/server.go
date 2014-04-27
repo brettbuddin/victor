@@ -106,5 +106,7 @@ func (s *Server) ListenAndServe(addr string) error {
 func (s *Server) Stop() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	s.listener.Close()
+    if s.listener != nil {
+	    s.listener.Close()
+    }
 }
