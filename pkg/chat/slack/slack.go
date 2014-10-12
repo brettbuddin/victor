@@ -17,7 +17,7 @@ func init() {
 
 		if team == "" || token == "" {
 			log.Println("The following environment variables are required:")
-			log.Println("VICTOR_SLACK_TEAM, VICTOR_CAMPFIRE_TOKEN")
+			log.Println("VICTOR_SLACK_TEAM, VICTOR_SLACK_TOKEN")
 			os.Exit(1)
 		}
 
