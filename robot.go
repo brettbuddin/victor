@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/brettbuddin/victor/pkg/chat"
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
+	_ "github.com/brettbuddin/victor/pkg/chat/hipchat"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
 	"github.com/brettbuddin/victor/pkg/httpserver"
