@@ -109,6 +109,7 @@ func (h *adapter) Run() {
 	}).Methods("POST")
 }
 
+// additional option with Hipchat adapter since Hipchat allows specifying HTML
 func (h *adapter) SendHtml(channelID, msg string) {
 	resp, err := h.client.Room.Notification(channelID, &hipchat.NotificationRequest{
 		Message:       msg,
@@ -116,9 +117,7 @@ func (h *adapter) SendHtml(channelID, msg string) {
 		MessageFormat: "html",
 	})
 
-	if err != nil {
-		log.Println("[hipchat adapter SendHtml] error sending to chat:", err, resp.Body)
-	}
+	handleRequestError(resp, err)
 }
 
 func (h *adapter) Send(channelID, msg string) {
@@ -128,9 +127,7 @@ func (h *adapter) Send(channelID, msg string) {
 		MessageFormat: "text",
 	})
 
-	if err != nil {
-		log.Println("[hipchat adapter Send] error sending to chat:", err, resp.Body)
-	}
+	handleRequestError(resp, err)
 }
 
 func (s *adapter) Stop() {
