@@ -57,7 +57,7 @@ func (s *slack) Send(channelID, msg string) {
 		log.Println("error sending to chat:", err)
 	}
 
-	endpoint := fmt.Sprintf("https://%s.slack.com/services/hooks/incoming-webhook?token=%s", s.team, s.token)
+	endpoint := fmt.Sprintf("https://%s.slack.com/services/hooks/hubot?token=%s", s.team, s.token)
 	http.PostForm(endpoint, url.Values{"payload": {string(body)}})
 }
 
