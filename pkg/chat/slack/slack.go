@@ -31,6 +31,8 @@ func init() {
 	})
 }
 
+var HttpClient *http.Client
+
 type slack struct {
 	robot               chat.Robot
 	incomingWebhookUri  string
@@ -39,6 +41,10 @@ type slack struct {
 }
 
 func (s *slack) Run() {
+	if nil == HttpClient {
+		HttpClient = http.DefaultClient
+	}
+
 	s.robot.HTTP().HandleFunc(s.outgoingWebhookPath, func(w http.ResponseWriter, r *http.Request) {
 		s.robot.Receive(&message{
 			userID:      r.PostFormValue("user_id"),
