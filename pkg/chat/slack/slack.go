@@ -14,6 +14,7 @@ func init() {
 	chat.Register("slack", func(r chat.Robot) chat.Adapter {
 		slackOutgoingWebhookPath := os.Getenv("SLACK_OUTGOING_WEBHOOK")
 		slackIncomingWebhookUri := os.Getenv("SLACK_INCOMING_WEBHOOK_URI")
+		emoji := os.Getenv("SLACK_EMOJI")
 
 		if slackOutgoingWebhookPath == "" || slackIncomingWebhookUri == "" {
 			log.Println("The following environment variable is required:")
@@ -25,6 +26,7 @@ func init() {
 			robot:               r,
 			outgoingWebhookPath: slackOutgoingWebhookPath,
 			incomingWebhookUri:  slackIncomingWebhookUri,
+			emoji:               emoji,
 		}
 	})
 }
@@ -33,6 +35,7 @@ type slack struct {
 	robot               chat.Robot
 	incomingWebhookUri  string
 	outgoingWebhookPath string
+	emoji               string
 }
 
 func (s *slack) Run() {
@@ -52,6 +55,7 @@ func (s *slack) Send(channelID, msg string) {
 		Channel:  channelID,
 		Username: s.robot.Name(),
 		Text:     msg,
+		Emoji:    s.emoji,
 	})
 
 	if err != nil {
@@ -72,6 +76,7 @@ type outgoingMessage struct {
 	Channel  string `json:"channel"`
 	Username string `json:"username"`
 	Text     string `json:"text"`
+	Emoji    string `json:"icon_emoji,omitempty"`
 }
 
 type message struct {
