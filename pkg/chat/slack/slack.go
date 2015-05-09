@@ -2,40 +2,50 @@ package slack
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/brettbuddin/victor/pkg/chat"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/brettbuddin/victor/pkg/chat"
 )
 
 func init() {
 	chat.Register("slack", func(r chat.Robot) chat.Adapter {
-		team := os.Getenv("VICTOR_SLACK_TEAM")
-		token := os.Getenv("VICTOR_SLACK_TOKEN")
+		slackOutgoingWebhookPath := os.Getenv("SLACK_OUTGOING_WEBHOOK")
+		slackIncomingWebhookUri := os.Getenv("SLACK_INCOMING_WEBHOOK_URI")
+		emoji := os.Getenv("SLACK_EMOJI")
 
-		if team == "" || token == "" {
-			log.Println("The following environment variables are required:")
-			log.Println("VICTOR_SLACK_TEAM, VICTOR_SLACK_TOKEN")
+		if slackOutgoingWebhookPath == "" || slackIncomingWebhookUri == "" {
+			log.Println("The following environment variable is required:")
+			log.Println("SLACK_INCOMING_WEBHOOK_URI, SLACK_OUTGOING_WEBHOOK")
 			os.Exit(1)
 		}
 
 		return &slack{
-			robot: r,
-			team:  team,
-			token: token,
+			robot:               r,
+			outgoingWebhookPath: slackOutgoingWebhookPath,
+			incomingWebhookUri:  slackIncomingWebhookUri,
+			emoji:               emoji,
 		}
 	})
 }
 
+var HttpClient *http.Client
+
 type slack struct {
-	robot       chat.Robot
-	team, token string
+	robot               chat.Robot
+	incomingWebhookUri  string
+	outgoingWebhookPath string
+	emoji               string
 }
 
 func (s *slack) Run() {
-	s.robot.HTTP().HandleFunc("/hubot/slack-webhook", func(w http.ResponseWriter, r *http.Request) {
+	if nil == HttpClient {
+		HttpClient = http.DefaultClient
+	}
+
+	s.robot.HTTP().HandleFunc(s.outgoingWebhookPath, func(w http.ResponseWriter, r *http.Request) {
 		s.robot.Receive(&message{
 			userID:      r.PostFormValue("user_id"),
 			userName:    r.PostFormValue("user_name"),
@@ -51,14 +61,18 @@ func (s *slack) Send(channelID, msg string) {
 		Channel:  channelID,
 		Username: s.robot.Name(),
 		Text:     msg,
+		Emoji:    s.emoji,
 	})
 
 	if err != nil {
 		log.Println("error sending to chat:", err)
 	}
 
-	endpoint := fmt.Sprintf("https://%s.slack.com/services/hooks/incoming-webhook?token=%s", s.team, s.token)
-	http.PostForm(endpoint, url.Values{"payload": {string(body)}})
+	if resp, err := HttpClient.PostForm(s.incomingWebhookUri, url.Values{"payload": {string(body)}}); err != nil {
+		log.Printf("Slack API call failed: %s", err)
+	} else if resp.StatusCode != 200 {
+		log.Printf("Slack API returned HTTP status code %d", resp.StatusCode)
+	}
 }
 
 func (s *slack) Stop() {
@@ -68,6 +82,7 @@ type outgoingMessage struct {
 	Channel  string `json:"channel"`
 	Username string `json:"username"`
 	Text     string `json:"text"`
+	Emoji    string `json:"icon_emoji,omitempty"`
 }
 
 type message struct {
