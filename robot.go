@@ -2,6 +2,10 @@ package victor
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"strings"
+
 	"github.com/brettbuddin/victor/pkg/chat"
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/hipchat"
@@ -10,9 +14,6 @@ import (
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
 	"github.com/gorilla/mux"
-	"log"
-	"os"
-	"strings"
 )
 
 type Robot interface {
@@ -26,6 +27,7 @@ type Robot interface {
 	Chat() chat.Adapter
 	Store() store.Adapter
 	HTTP() *mux.Router
+	Config() (interface{}, bool)
 }
 
 type Config struct {
@@ -33,18 +35,20 @@ type Config struct {
 	ChatAdapter,
 	StoreAdapter,
 	HTTPAddr string
+	AdapterConfig interface{}
 }
 
 type robot struct {
 	*dispatch
-	name       string
-	http       *httpserver.Server
-	httpAddr   string
-	httpRouter *mux.Router
-	store      store.Adapter
-	chat       chat.Adapter
-	incoming   chan chat.Message
-	stop       chan struct{}
+	name          string
+	http          *httpserver.Server
+	httpAddr      string
+	httpRouter    *mux.Router
+	store         store.Adapter
+	chat          chat.Adapter
+	incoming      chan chat.Message
+	stop          chan struct{}
+	adapterConfig interface{}
 }
 
 // New returns a robot
@@ -92,6 +96,7 @@ func New(config Config) *robot {
 		stop:     make(chan struct{}),
 	}
 
+	bot.adapterConfig = config.AdapterConfig
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
 	bot.httpRouter = handlers(bot)
@@ -151,6 +156,10 @@ func (r *robot) HTTP() *mux.Router {
 // Chat returns the chat adapter
 func (r *robot) Chat() chat.Adapter {
 	return r.chat
+}
+
+func (r *robot) Config() (interface{}, bool) {
+	return r.adapterConfig, r.adapterConfig != nil
 }
 
 // OnlyAllow provides a way of permitting specific users
