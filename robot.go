@@ -13,6 +13,8 @@ import (
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
+	_ "github.com/brettbuddin/victor/pkg/store/boltstore"
+	_ "github.com/brettbuddin/victor/pkg/store/memory"
 	"github.com/gorilla/mux"
 )
 
@@ -27,7 +29,8 @@ type Robot interface {
 	Chat() chat.Adapter
 	Store() store.Adapter
 	HTTP() *mux.Router
-	Config() (interface{}, bool)
+	AdapterConfig() (interface{}, bool)
+	StoreConfig() (interface{}, bool)
 }
 
 type Config struct {
@@ -35,20 +38,22 @@ type Config struct {
 	ChatAdapter,
 	StoreAdapter,
 	HTTPAddr string
-	AdapterConfig interface{}
+	AdapterConfig,
+	StoreConfig interface{}
 }
 
 type robot struct {
 	*dispatch
-	name          string
-	http          *httpserver.Server
-	httpAddr      string
-	httpRouter    *mux.Router
-	store         store.Adapter
-	chat          chat.Adapter
-	incoming      chan chat.Message
-	stop          chan struct{}
-	adapterConfig interface{}
+	name       string
+	http       *httpserver.Server
+	httpAddr   string
+	httpRouter *mux.Router
+	store      store.Adapter
+	chat       chat.Adapter
+	incoming   chan chat.Message
+	stop       chan struct{}
+	adapterConfig,
+	storeConfig interface{}
 }
 
 // New returns a robot
@@ -92,10 +97,10 @@ func New(config Config) *robot {
 		http:     httpserver.New(),
 		httpAddr: httpAddr,
 		incoming: make(chan chat.Message),
-		store:    storeInitFunc(),
 		stop:     make(chan struct{}),
 	}
 
+	bot.store = storeInitFunc(bot)
 	bot.adapterConfig = config.AdapterConfig
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
@@ -158,8 +163,12 @@ func (r *robot) Chat() chat.Adapter {
 	return r.chat
 }
 
-func (r *robot) Config() (interface{}, bool) {
+func (r *robot) AdapterConfig() (interface{}, bool) {
 	return r.adapterConfig, r.adapterConfig != nil
+}
+
+func (r *robot) StoreConfig() (interface{}, bool) {
+	return r.storeConfig, r.storeConfig != nil
 }
 
 // OnlyAllow provides a way of permitting specific users

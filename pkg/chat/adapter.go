@@ -37,7 +37,7 @@ type Robot interface {
 	Store() store.Adapter
 	Chat() Adapter
 	Receive(Message)
-	Config() (interface{}, bool)
+	AdapterConfig() (interface{}, bool)
 }
 
 type Message interface {
