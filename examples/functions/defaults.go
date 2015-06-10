@@ -5,14 +5,16 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/brettbuddin/victor"
 )
 
-func defaults(robot Robot) {
-	robot.HandleFunc(robot.Direct("ping"), func(s State) {
+func Defaults(robot victor.Robot) {
+	robot.HandleFunc(robot.Direct("ping"), func(s victor.State) {
 		s.Chat().Send(s.Message().ChannelID(), "pong!")
 	})
 
-	robot.HandleFunc(robot.Direct("roll(\\s(\\d+))?"), func(s State) {
+	robot.HandleFunc(robot.Direct("roll(\\s(\\d+))?"), func(s victor.State) {
 		defer recover()
 
 		bound := 100
