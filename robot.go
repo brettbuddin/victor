@@ -104,8 +104,6 @@ func New(config Config) *robot {
 	bot.adapterConfig = config.AdapterConfig
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
-
-	defaults(bot)
 	return bot
 }
 

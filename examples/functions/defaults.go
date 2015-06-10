@@ -1,4 +1,4 @@
-package victor
+package functions
 
 import (
 	"fmt"
