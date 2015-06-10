@@ -94,7 +94,6 @@ func New(config Config) *robot {
 
 	bot := &robot{
 		name:     botName,
-		http:     httpserver.New(),
 		httpAddr: httpAddr,
 		incoming: make(chan chat.Message),
 		stop:     make(chan struct{}),
@@ -104,7 +103,6 @@ func New(config Config) *robot {
 	bot.adapterConfig = config.AdapterConfig
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
-	bot.httpRouter = handlers(bot)
 
 	defaults(bot)
 	return bot
@@ -131,9 +129,6 @@ func (r *robot) Run() {
 			}
 		}
 	}()
-
-	r.http.Handle("/", r.httpRouter)
-	r.http.ListenAndServe(r.httpAddr)
 }
 
 // Stop shuts down the bot
@@ -153,8 +148,19 @@ func (r *robot) Store() store.Adapter {
 	return r.store
 }
 
-// HTTP returns the HTTP router
+// HTTP returns the HTTP router.
+// The HTTP router is disabled (uninitialized) by default but is created upon
+// the first call to HTTP().
+//
+// TODO consider having one explicitly enable the storage access endpoints
+// (defined in http_handlers.go) since, as far as I can tell, a chat/storage
+// adapter might want to use the included http router without enabling access
+// to the entire store via those endpoints. At the moment these are coupled
+// together.
 func (r *robot) HTTP() *mux.Router {
+	if r.httpRouter == nil {
+		r.initHTTP()
+	}
 	return r.httpRouter
 }
 
@@ -169,6 +175,14 @@ func (r *robot) AdapterConfig() (interface{}, bool) {
 
 func (r *robot) StoreConfig() (interface{}, bool) {
 	return r.storeConfig, r.storeConfig != nil
+}
+
+func (r *robot) initHTTP() {
+	log.Println("Initializing victor's HTTP server.")
+	r.http = httpserver.New()
+	r.httpRouter = handlers(r)
+	r.http.Handle("/", r.httpRouter)
+	r.http.ListenAndServe(r.httpAddr)
 }
 
 // OnlyAllow provides a way of permitting specific users
