@@ -11,6 +11,7 @@ import (
 	_ "github.com/brettbuddin/victor/pkg/chat/hipchat"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
+	_ "github.com/brettbuddin/victor/pkg/chat/slackRealtime"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
 	_ "github.com/brettbuddin/victor/pkg/store/boltstore"
