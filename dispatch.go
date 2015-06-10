@@ -7,6 +7,9 @@ import (
 	"github.com/brettbuddin/victor/pkg/chat"
 )
 
+// HandlerPair provides an interface for a handler as well as the regular
+// expression which a message should match in order to pass control onto the
+// handler
 type HandlerPair interface {
 	Exp() *regexp.Regexp
 	Handler() Handler

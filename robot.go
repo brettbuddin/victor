@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/brettbuddin/victor/pkg/chat"
+	// Blank import used init adapters which registers them with victor
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/hipchat"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
@@ -14,11 +15,13 @@ import (
 	_ "github.com/brettbuddin/victor/pkg/chat/slackRealtime"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
+	// Blank import used init adapters which registers them with victor
 	_ "github.com/brettbuddin/victor/pkg/store/boltstore"
 	_ "github.com/brettbuddin/victor/pkg/store/memory"
 	"github.com/gorilla/mux"
 )
 
+// Robot provides an interface for a victor chat robot.
 type Robot interface {
 	Run()
 	Stop()
@@ -34,6 +37,9 @@ type Robot interface {
 	StoreConfig() (interface{}, bool)
 }
 
+// Config provides all of the configuration parameters needed in order to
+// initialize a robot. It also allows for optional configuration structs for
+// both the chat and storage adapters which they may or may not require.
 type Config struct {
 	Name,
 	ChatAdapter,

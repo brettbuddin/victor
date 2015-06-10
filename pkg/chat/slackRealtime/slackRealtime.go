@@ -26,7 +26,7 @@ func init() {
 			log.Println("A configuration struct implementing the SlackConfig interface must be set.")
 			os.Exit(1)
 		}
-		sConfig, ok := config.(SlackConfig)
+		sConfig, ok := config.(Config)
 		if !ok {
 			log.Println("The bot's config must implement the SlackConfig interface.")
 			os.Exit(1)
@@ -40,21 +40,25 @@ func init() {
 	})
 }
 
-// Config provides the slack adapter with the necessary information to open a
-// websocket connection with the slack Real time API.
-type SlackConfig interface {
+// Config provides the slack adapter with the necessary
+// information to open a websocket connection with the slack Real time API.
+type Config interface {
 	Token() string
 }
 
-type Config struct {
+// Config implements the SlackRealtimeConfig interface to provide a slack
+// adapter with the information it needs to authenticate with slack.
+type configImpl struct {
 	token string
 }
 
-func NewConfig(token string) Config {
-	return Config{token: token}
+// NewConfig returns a new slack configuration instance using the given token.
+func NewConfig(token string) configImpl {
+	return configImpl{token: token}
 }
 
-func (c Config) Token() string {
+// Token returns the slack token.
+func (c configImpl) Token() string {
 	return c.token
 }
 
@@ -74,7 +78,7 @@ type SlackAdapter struct {
 func (adapter *SlackAdapter) Run() {
 	adapter.instance = slack.New(adapter.token)
 	adapter.instance.SetDebug(false)
-	// TODO need to look up what these values actually mean
+	// TODO need to look up what these values actually mean...
 	var err error
 	adapter.wsAPI, err = adapter.instance.StartRTM("", "http://example.com")
 	if err != nil {
@@ -84,24 +88,12 @@ func (adapter *SlackAdapter) Run() {
 	// sets up the monitoring code for sending/receiving messages from slack
 	go adapter.wsAPI.HandleIncomingEvents(adapter.chReceiver)
 	go adapter.wsAPI.Keepalive(20 * time.Second)
-	go adapter.sendMessages()
 	adapter.monitorEvents()
-
 }
 
 // Stop stops the adapter.
 // TODO implement
 func (adapter *SlackAdapter) Stop() {
-}
-
-func (adapter *SlackAdapter) sendMessages() {
-	for {
-		msg, ok := <-adapter.chSender
-		if !ok {
-			break
-		}
-		adapter.wsAPI.SendMessage(msg)
-	}
 }
 
 func (adapter *SlackAdapter) getUser(userID string) (*slack.User, error) {
@@ -168,6 +160,8 @@ func getEncodedUserID(userID string) string {
 	return fmt.Sprintf("<@%s>", userID)
 }
 
+// monitorEvents handles incoming events and filters them to only worry about
+// incoming messages.
 func (adapter *SlackAdapter) monitorEvents() {
 	for {
 		msg := <-adapter.chReceiver
@@ -180,17 +174,21 @@ func (adapter *SlackAdapter) monitorEvents() {
 
 // Send sends a message to the given slack channel.
 func (adapter *SlackAdapter) Send(channelID, msg string) {
-	adapter.chSender <- adapter.wsAPI.NewOutgoingMessage(msg, channelID)
+	msgObj := adapter.wsAPI.NewOutgoingMessage(msg, channelID)
+	adapter.wsAPI.SendMessage(msgObj)
 }
 
+// getStoreKey is a helper method to access the robot's store.
 func (adapter *SlackAdapter) getStoreKey(key string) (string, bool) {
 	return adapter.robot.Store().Get(userInfoPrefix + key)
 }
 
+// setStoreKey is a helper method to access the robot's store.
 func (adapter *SlackAdapter) setStoreKey(key, val string) {
 	adapter.robot.Store().Set(userInfoPrefix+key, val)
 }
 
+// slackMessage is an internal struct implementing victor's message interface.
 type slackMessage struct {
 	user        *slack.User
 	text        string
