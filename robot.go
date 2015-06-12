@@ -2,19 +2,26 @@ package victor
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"strings"
+
 	"github.com/brettbuddin/victor/pkg/chat"
+	// Blank import used init adapters which registers them with victor
 	_ "github.com/brettbuddin/victor/pkg/chat/campfire"
 	_ "github.com/brettbuddin/victor/pkg/chat/hipchat"
 	_ "github.com/brettbuddin/victor/pkg/chat/shell"
 	_ "github.com/brettbuddin/victor/pkg/chat/slack"
+	_ "github.com/brettbuddin/victor/pkg/chat/slackRealtime"
 	"github.com/brettbuddin/victor/pkg/httpserver"
 	"github.com/brettbuddin/victor/pkg/store"
+	// Blank import used init adapters which registers them with victor
+	_ "github.com/brettbuddin/victor/pkg/store/boltstore"
+	_ "github.com/brettbuddin/victor/pkg/store/memory"
 	"github.com/gorilla/mux"
-	"log"
-	"os"
-	"strings"
 )
 
+// Robot provides an interface for a victor chat robot.
 type Robot interface {
 	Run()
 	Stop()
@@ -26,13 +33,20 @@ type Robot interface {
 	Chat() chat.Adapter
 	Store() store.Adapter
 	HTTP() *mux.Router
+	AdapterConfig() (interface{}, bool)
+	StoreConfig() (interface{}, bool)
 }
 
+// Config provides all of the configuration parameters needed in order to
+// initialize a robot. It also allows for optional configuration structs for
+// both the chat and storage adapters which they may or may not require.
 type Config struct {
 	Name,
 	ChatAdapter,
 	StoreAdapter,
 	HTTPAddr string
+	AdapterConfig,
+	StoreConfig interface{}
 }
 
 type robot struct {
@@ -45,6 +59,8 @@ type robot struct {
 	chat       chat.Adapter
 	incoming   chan chat.Message
 	stop       chan struct{}
+	adapterConfig,
+	storeConfig interface{}
 }
 
 // New returns a robot
@@ -85,18 +101,15 @@ func New(config Config) *robot {
 
 	bot := &robot{
 		name:     botName,
-		http:     httpserver.New(),
 		httpAddr: httpAddr,
 		incoming: make(chan chat.Message),
-		store:    storeInitFunc(),
 		stop:     make(chan struct{}),
 	}
 
+	bot.store = storeInitFunc(bot)
+	bot.adapterConfig = config.AdapterConfig
 	bot.dispatch = newDispatch(bot)
 	bot.chat = chatInitFunc(bot)
-	bot.httpRouter = handlers(bot)
-
-	defaults(bot)
 	return bot
 }
 
@@ -121,16 +134,15 @@ func (r *robot) Run() {
 			}
 		}
 	}()
-
-	r.http.Handle("/", r.httpRouter)
-	r.http.ListenAndServe(r.httpAddr)
 }
 
 // Stop shuts down the bot
 func (r *robot) Stop() {
 	r.chat.Stop()
 	close(r.stop)
-	r.http.Stop()
+	if r.http != nil {
+		r.http.Stop()
+	}
 }
 
 // Name returns the name of the bot
@@ -143,14 +155,41 @@ func (r *robot) Store() store.Adapter {
 	return r.store
 }
 
-// HTTP returns the HTTP router
+// HTTP returns the HTTP router.
+// The HTTP router is disabled (uninitialized) by default but is created upon
+// the first call to HTTP().
+//
+// TODO consider having one explicitly enable the storage access endpoints
+// (defined in http_handlers.go) since, as far as I can tell, a chat/storage
+// adapter might want to use the included http router without enabling access
+// to the entire store via those endpoints. At the moment these are coupled
+// together.
 func (r *robot) HTTP() *mux.Router {
+	if r.httpRouter == nil {
+		r.initHTTP()
+	}
 	return r.httpRouter
 }
 
 // Chat returns the chat adapter
 func (r *robot) Chat() chat.Adapter {
 	return r.chat
+}
+
+func (r *robot) AdapterConfig() (interface{}, bool) {
+	return r.adapterConfig, r.adapterConfig != nil
+}
+
+func (r *robot) StoreConfig() (interface{}, bool) {
+	return r.storeConfig, r.storeConfig != nil
+}
+
+func (r *robot) initHTTP() {
+	log.Println("Initializing victor's HTTP server.")
+	r.http = httpserver.New()
+	r.httpRouter = handlers(r)
+	r.http.Handle("/", r.httpRouter)
+	r.http.ListenAndServe(r.httpAddr)
 }
 
 // OnlyAllow provides a way of permitting specific users

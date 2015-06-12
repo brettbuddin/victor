@@ -1,4 +1,4 @@
-package store
+package boltstore
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/boltdb/bolt"
+	"github.com/brettbuddin/victor/pkg/store"
 )
 
 var _ = fmt.Println
@@ -16,7 +17,7 @@ const (
 
 func init() {
 	// type InitFunc func() Adapter
-	Register("bolt", func() Adapter {
+	store.Register("bolt", func(r store.Robot) store.Adapter {
 		return newBoltStore()
 	})
 }
