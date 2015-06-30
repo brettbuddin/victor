@@ -1,11 +1,13 @@
-package store
+package memory
 
 import (
 	"sync"
+
+	"github.com/brettbuddin/victor/pkg/store"
 )
 
 func init() {
-	Register("memory", func() Adapter {
+	store.Register("memory", func(r store.Robot) store.Adapter {
 		return &MemoryStore{
 			data: make(map[string]string),
 		}
