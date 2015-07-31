@@ -67,7 +67,7 @@ type SlackAdapter struct {
 	robot      chat.Robot
 	token      string
 	instance   *slack.Slack
-	wsAPI      *slack.SlackWS
+	wsAPI      *slack.WS
 	chSender   chan *slack.OutgoingMessage
 	chReceiver chan slack.SlackEvent
 }
@@ -127,19 +127,19 @@ func (adapter *SlackAdapter) getUser(userID string) (*slack.User, error) {
 }
 
 func (adapter *SlackAdapter) handleMessage(event *slack.MessageEvent) {
-	user, _ := adapter.getUser(event.UserId)
+	user, _ := adapter.getUser(event.User)
 	// TODO use error
 	if user != nil {
 		// ignore any messages that are sent by us
-		if user.Id == adapter.instance.GetInfo().User.Id {
+		if user.ID == adapter.instance.GetInfo().User.ID {
 			return
 		}
 		msg := slackMessage{
 			user:      user,
 			text:      adapter.unescapeMessage(event.Text),
-			channelID: event.ChannelId,
+			channelID: event.Channel,
 			// TODO change or not needed?
-			channelName: event.ChannelId,
+			channelName: event.Channel,
 		}
 		adapter.robot.Receive(&msg)
 		log.Println(msg.Text())
@@ -151,7 +151,7 @@ func (adapter *SlackAdapter) handleMessage(event *slack.MessageEvent) {
 // TODO might want to update this to replace all matches of <@USER_ID> with
 // the user's name.
 func (adapter *SlackAdapter) unescapeMessage(msg string) string {
-	userID := adapter.instance.GetInfo().User.Id
+	userID := adapter.instance.GetInfo().User.ID
 	return strings.Replace(msg, getEncodedUserID(userID), adapter.robot.Name(), -1)
 }
 
@@ -201,7 +201,7 @@ func (m *slackMessage) User() *slack.User {
 }
 
 func (m *slackMessage) UserID() string {
-	return m.user.Id
+	return m.user.ID
 }
 
 func (m *slackMessage) UserName() string {
